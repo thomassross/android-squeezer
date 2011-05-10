@@ -12,9 +12,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,6 +28,7 @@ import com.danga.squeezer.R;
 import com.danga.squeezer.SqueezerActivity;
 import com.danga.squeezer.Util;
 import com.danga.squeezer.VolumePanel;
+import com.danga.squeezer.framework.SqueezerAlbumOpenHelper;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.itemlists.IServiceArtistListCallback;
 import com.danga.squeezer.itemlists.IServiceGenreListCallback;
@@ -75,6 +78,7 @@ public class SqueezeService extends Service {
 	final AtomicReference<IServicePlaylistMaintenanceCallback> playlistMaintenanceCallback = new AtomicReference<IServicePlaylistMaintenanceCallback>();
 
     SqueezerConnectionState connectionState = new SqueezerConnectionState();
+    SqueezerServerState serverState = new SqueezerServerState();
     SqueezerPlayerState playerState = new SqueezerPlayerState();
     SqueezerCLIImpl cli = new SqueezerCLIImpl(this);
     
@@ -136,6 +140,10 @@ public class SqueezeService extends Service {
     	public void handle(List<String> tokens);
     }
 
+    /**
+     * Map responses we see from the server (that are server specific) to code
+     * to run in reply.
+     */
 	private Map<String, SqueezerCmdHandler> initializeGlobalHandlers() {
 		Map<String, SqueezerCmdHandler> handlers = new HashMap<String, SqueezerCmdHandler>();
 
@@ -146,6 +154,13 @@ public class SqueezeService extends Service {
 				}
 			});
 		}
+		
+		handlers.put("serverstatus", new SqueezerCmdHandler() {
+			public void handle(List<String> tokens) {
+				parseServerStatusLine(tokens);
+			}
+		});
+		
 		handlers.put("playlists", new SqueezerCmdHandler() {
 			public void handle(List<String> tokens) {
 				if ("delete".equals(tokens.get(1)))
@@ -200,7 +215,12 @@ public class SqueezeService extends Service {
 
 		return handlers;
 	}
+
 	
+	/**
+	 * Map responses we see from the server that are player specific to code to
+	 * run in reply.
+	 */
 	private Map<String, SqueezerCmdHandler> initializePlayerSpecificHandlers() {
 		Map<String, SqueezerCmdHandler> handlers = new HashMap<String, SqueezerCmdHandler>();
 
@@ -251,7 +271,7 @@ public class SqueezeService extends Service {
     private Map<String,SqueezerCmdHandler> playerSpecificHandlers = initializePlayerSpecificHandlers();
 	
     void onLineReceived(String serverLine) {
-        if (debugLogging) Log.v(TAG, "LINE: " + serverLine);
+        //if (debugLogging) Log.v(TAG, "LINE: " + serverLine);
         List<String> tokens = Arrays.asList(serverLine.split(" "));
         if (tokens.size() < 2) return;
         
@@ -351,6 +371,97 @@ public class SqueezeService extends Service {
         return tokenMap;
     }
 	
+    /**
+     * Populate serverState with new information from the server.
+     * 
+     * @param tokens
+     */
+    private void parseServerStatusLine(List<String> tokens) {
+    	HashMap<String, String> tokenMap = parseTokens(tokens);
+
+    	SqueezerServerState oldServerState = serverState;
+    	serverState.setRescan(tokenMap.get("rescan") == "1");
+    	serverState.setLastScan(Integer.valueOf(tokenMap.get("lastscan")));
+    	serverState.setVersion(tokenMap.get("version"));
+    	serverState.setUuid(tokenMap.get("uuid"));
+    	serverState.setTotalAlbums(Integer.valueOf(tokenMap.get("info total albums")));
+    	serverState.setTotalArtists(Integer.valueOf(tokenMap.get("info total artists")));
+    	serverState.setTotalGenres(Integer.valueOf(tokenMap.get("info total genres")));
+    	serverState.setTotalSongs(Integer.valueOf(tokenMap.get("info total songs")));
+    	serverState.setPlayerCount(Integer.valueOf(tokenMap.get("player count")));
+    	serverState.setSeenPlayerCount(Integer.valueOf(tokenMap.get("sn player count")));
+    	serverState.setOtherPlayerCount(Integer.valueOf(tokenMap.get("other player count")));
+
+    	onServerStateChanged(oldServerState);
+    }
+    
+    /**
+     * Called when the server state has changed and the changes have been parsed.
+     * 
+     * @param oldServerState The previous state of the server.
+     */
+    private void onServerStateChanged(SqueezerServerState oldServerState) {
+    	// Fetch the previous lastscan time, compare against the current.  If
+    	// the scan time has changed then invalidate and rebuild the cache
+    	final String lastScanKey = serverState.getUuid() + ":lastscan";
+    	Integer oldLastScan = preferences.getInt(lastScanKey, 0);
+    	
+    	// Always update while debugging
+    	//if(oldLastScan != serverState.getLastScan()) {
+    		executor.execute(new Runnable() {
+    			public void run() {
+    				Log.v(TAG, "Rebuilding album cache...");
+    				buildAlbumCache(serverState.getUuid());
+    				Log.v(TAG, "... album cache rebuilt");
+    				final SharedPreferences preferences = getSharedPreferences(Preferences.NAME, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt(lastScanKey, serverState.getLastScan());
+                    editor.commit();
+    			}
+    		});
+    	//}
+    }
+    
+    private void buildAlbumCache(String uuid) {
+    	SqueezerAlbumOpenHelper h = new SqueezerAlbumOpenHelper(this.getApplicationContext());
+    	SQLiteDatabase db = h.getWritableDatabase();
+    	
+    	// TODO: Force database recreation while testing, remove this in production
+    	// code (maybe -- we'd delete everything from the cache table anyway, and
+    	// this is probably the simplest way to do that).
+    	h.onUpgrade(db, 0, 0);
+    	
+    	// Pre-fill it with dummy data up to the right number of rows.
+    	ContentValues cv = new ContentValues();
+    	cv.put(AlbumCache.Db.COL_NAME, "Loading..."); // TODO: Localise
+    	cv.put(AlbumCache.Db.COL_ALBUMID, "");
+       	cv.put(AlbumCache.Db.COL_ARTIST, "");
+    	cv.put(AlbumCache.Db.COL_YEAR, "");
+    	cv.put(AlbumCache.Db.COL_ARTWORK, "");
+    	
+    	db.beginTransaction();
+    	try {
+    		Integer totalAlbums = serverState.getTotalAlbums();
+
+    		for (int i = 0; i < totalAlbums; i++) {
+    			cv.put("serverorder", i);
+    			db.insert("album", null, cv);
+    		}
+    		db.setTransactionSuccessful();
+    	} finally {
+    		db.endTransaction();
+    	}
+    	
+    	// TODO: At this point anything that depends on the cache can start
+    	// using it.  Need to flip a boolean at this point to indicate that.
+    	// ...
+    	
+    	// Fetch album information from the server and update the database.
+    	
+    	
+    	db.close();
+    }
+    
     private void parseStatusLine(List<String> tokens) {
 		HashMap<String, String> tokenMap = parseTokens(tokens);
         
@@ -444,7 +555,8 @@ public class SqueezeService extends Service {
         cli.sendCommand("listen 1",
                 "players 0 1",   // initiate an async player fetch
                 "can randomplay ?",   // learn random play function functionality
-                "pref httpport ?"  // learn the HTTP port (needed for images)
+                "pref httpport ?",  // learn the HTTP port (needed for images)
+                "serverstatus 0 1 subscribe:0" // Realtime status updates
         );
     }
 	
@@ -523,7 +635,7 @@ public class SqueezeService extends Service {
         	sendBroadcast(i);
         }
     }
-
+    
     private void sendMusicChangedCallback() {
         if (connectionState.getCallback() == null) {
             return;
