@@ -3,6 +3,7 @@ package com.danga.squeezer.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -25,6 +26,7 @@ import android.util.Log;
 import com.danga.squeezer.IServiceCallback;
 import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
+import com.danga.squeezer.Squeezer;
 import com.danga.squeezer.SqueezerActivity;
 import com.danga.squeezer.Util;
 import com.danga.squeezer.VolumePanel;
@@ -455,13 +457,73 @@ public class SqueezeService extends Service {
     	// TODO: At this point anything that depends on the cache can start
     	// using it.  Need to flip a boolean at this point to indicate that.
     	// ...
+
+    	db.close();
     	
     	// Fetch album information from the server and update the database.
-    	
-    	
-    	db.close();
+    	albumListCallback.set(albumCacheCallback);
+    	        
+		try {
+			albums(0, "album");
+		} catch (RemoteException e){
+			// TODO: Handle this
+		}
+    }
+
+    /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
+	private boolean albums(int start, String sortOrder) throws RemoteException {
+        if (!connectionState.isConnected()) return false;
+        List<String> parameters = new ArrayList<String>();
+        parameters.add("tags:" + ALBUMTAGS);
+ 		parameters.add("sort:" + sortOrder);
+        cli.requestItems("albums", start, parameters);
+        return true;
     }
     
+	private IServiceAlbumListCallback albumCacheCallback = new IServiceAlbumListCallback.Stub() {
+		/**
+		 * Update the affected rows in the cache.
+		 * 
+		 * @param count Number of items as reported by squeezeserver.
+		 * @param start The start position of items in this update.
+		 * @param items New items to update in the cache
+		 */
+		public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items) throws RemoteException {
+	    	SqueezerAlbumOpenHelper h = new SqueezerAlbumOpenHelper(Squeezer.getContext());
+	    	SQLiteDatabase db = h.getWritableDatabase();
+
+	    	ContentValues cv = new ContentValues();
+	    	int serverorder = start;
+	    	SqueezerAlbum thisAlbum;
+	    	
+	    	db.beginTransaction();
+	    	try {
+	    		Iterator<SqueezerAlbum> it = items.iterator();
+	    		while (it.hasNext()) {
+	    			thisAlbum = it.next();
+	    			cv.put(AlbumCache.Db.COL_NAME, thisAlbum.getName());
+	    	    	cv.put(AlbumCache.Db.COL_ALBUMID, thisAlbum.getId());
+	    	       	cv.put(AlbumCache.Db.COL_ARTIST, thisAlbum.getArtist());
+	    	    	cv.put(AlbumCache.Db.COL_YEAR, thisAlbum.getYear());
+	    	    	cv.put(AlbumCache.Db.COL_ARTWORK, thisAlbum.getArtwork_track_id());
+	    	    	//cv.put(AlbumCache.Db.COL_SERVERORDER, serverorder++);
+	    	    	
+	    	    	db.update(AlbumCache.Db.TABLE_NAME, cv,
+	    	    			AlbumCache.Db.COL_SERVERORDER + "=?",
+	    	    			new String[] {Integer.toString(serverorder)});
+	    	    	
+	    	    	serverorder++;
+				}
+	    		
+	    		db.setTransactionSuccessful();
+	    	} finally {
+	    		db.endTransaction();
+	    	}
+	    	
+	    	db.close();
+		}
+	};
+
     private void parseStatusLine(List<String> tokens) {
 		HashMap<String, String> tokenMap = parseTokens(tokens);
         
@@ -913,6 +975,7 @@ public class SqueezeService extends Service {
             return true;
         }
         
+		// TODO: Obsoleting as part of the cache effort, should be removed.
 		public void registerAlbumListCallback(IServiceAlbumListCallback callback) throws RemoteException {
             Log.v(TAG, "AlbumListCallback attached.");
 	    	SqueezeService.this.albumListCallback.set(callback);

@@ -71,7 +71,7 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
 
 	@Override
 	protected void registerCallback() throws RemoteException {
-		getService().registerAlbumListCallback(albumListCallback);
+		//getService().registerAlbumListCallback(albumListCallback);
 		if (genreSpinner != null) genreSpinner.registerCallback();
 		if (yearSpinner != null) yearSpinner.registerCallback();
 	}
