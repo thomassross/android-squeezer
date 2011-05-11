@@ -1,5 +1,6 @@
 package com.danga.squeezer.service;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,7 +13,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.provider.LiveFolders;
+import android.text.TextUtils;
 
 import com.danga.squeezer.model.SqueezerAlbum;
 
@@ -21,6 +25,16 @@ public class AlbumCacheProvider extends ContentProvider {
 	private static final String DATABASE_NAME = "album_cache.db";
 	private static final int DATABASE_VERSION = 1;
 	
+    /**
+     * A projection map used to select columns from the database
+     */
+    private static HashMap<String, String> sAlbumsProjectionMap;
+
+    /**
+     * A projection map used to select columns from the database
+     */
+    private static HashMap<String, String> sLiveFolderProjectionMap;
+    
     /*
      * Constants used by the Uri matcher to choose an action based on the pattern
      * of the incoming URI
@@ -54,7 +68,36 @@ public class AlbumCacheProvider extends ContentProvider {
         // Add a pattern that routes URIs terminated with live_folders/albums to a
         // live folder operation
         sUriMatcher.addURI(AlbumCache.AUTHORITY, "live_folders/albums", LIVE_FOLDER_ALBUMS);
-		
+
+        /*
+         * Creates and initializes a projection map that returns all columns
+         */
+
+        // Creates a new projection map instance. The map returns a column name
+        // given a string. The two are usually equal.
+        sAlbumsProjectionMap = new HashMap<String, String>();
+
+        sAlbumsProjectionMap.put(AlbumCache.Albums._ID, AlbumCache.Albums._ID);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_SERVERORDER, AlbumCache.Albums.COL_SERVERORDER);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ALBUMID, AlbumCache.Albums.COL_ALBUMID);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_NAME, AlbumCache.Albums.COL_NAME);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTIST, AlbumCache.Albums.COL_ARTIST);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_YEAR, AlbumCache.Albums.COL_YEAR);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTWORK, AlbumCache.Albums.COL_ARTWORK);
+        
+        /*
+         * Creates an initializes a projection map for handling Live Folders
+         */
+
+        // Creates a new projection map instance
+        sLiveFolderProjectionMap = new HashMap<String, String>();
+
+        // Maps "_ID" to "_ID AS _ID" for a live folder
+        sLiveFolderProjectionMap.put(LiveFolders._ID, AlbumCache.Albums._ID + " AS " + LiveFolders._ID);
+
+        // Maps "NAME" to "title AS NAME"
+        sLiveFolderProjectionMap.put(LiveFolders.NAME, AlbumCache.Albums.COL_NAME + " AS " +
+            LiveFolders.NAME);
 	}
 	
 	static class DatabaseHelper extends SQLiteOpenHelper {
@@ -82,6 +125,11 @@ public class AlbumCacheProvider extends ContentProvider {
 		}
 	}
 	
+	public void reset() {
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		db.execSQL("DELETE FROM " + AlbumCache.Albums.TABLE_NAME + ";");
+	}
+	
 	@Override
 	public boolean onCreate() {
 		mOpenHelper = new DatabaseHelper(getContext());
@@ -89,11 +137,77 @@ public class AlbumCacheProvider extends ContentProvider {
 	}
 	
 	@Override
-	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+			String sortOrder) {
+	
+	// Constructs a new query builder and sets its table name
+	SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+	qb.setTables(AlbumCache.Albums.TABLE_NAME);
+	
+    /**
+     * Choose the projection and adjust the "where" clause based on URI pattern-matching.
+     */
+    switch (sUriMatcher.match(uri)) {
+        // If the incoming URI is for notes, chooses the Notes projection
+        case ALBUMS:
+            qb.setProjectionMap(sAlbumsProjectionMap);
+            break;
+	
+        /* If the incoming URI is for a single note identified by its ID, chooses the
+         * note ID projection, and appends "_ID = <noteID>" to the where clause, so that
+         * it selects that single note
+         */
+        case ALBUM_ID:
+            qb.setProjectionMap(sAlbumsProjectionMap);
+            qb.appendWhere(
+                AlbumCache.Albums._ID +    // the name of the ID column
+                "=" +
+                // the position of the note ID itself in the incoming URI
+                uri.getPathSegments().get(AlbumCache.Albums.ALBUM_ID_PATH_POSITION));
+            break;
+	
+        case LIVE_FOLDER_ALBUMS:
+            // If the incoming URI is from a live folder, chooses the live folder projection.
+            qb.setProjectionMap(sLiveFolderProjectionMap);
+            break;
+	
+        default:
+            // If the URI doesn't match any of the known patterns, throw an exception.
+            throw new IllegalArgumentException("Unknown URI " + uri);
+    }
+	
+	
+    String orderBy;
+    // If no sort order is specified, uses the default
+    if (TextUtils.isEmpty(sortOrder)) {
+        orderBy = AlbumCache.Albums.DEFAULT_SORT_ORDER;
+    } else {
+        // otherwise, uses the incoming sort order
+        orderBy = sortOrder;
+    }
+	
+    // Opens the database object in "read" mode, since no writes need to be done.
+    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+	
+    /*
+     * Performs the query. If no problems occur trying to read the database, then a Cursor
+     * object is returned; otherwise, the cursor variable contains null. If no records were
+     * selected, then the Cursor object is empty, and Cursor.getCount() returns 0.
+     */
+    Cursor c = qb.query(
+        db,            // The database to query
+        projection,    // The columns to return from the query
+        selection,     // The columns for the where clause
+        selectionArgs, // The values for the where clause
+        null,          // don't group the rows
+        null,          // don't filter by row groups
+        orderBy        // The sort order
+    );
+	
+    // Tells the Cursor what URI to watch, so it knows when its source data changes
+    c.setNotificationUri(getContext().getContentResolver(), uri);
+    return c;
+}
 
 	@Override
 	public int delete(Uri arg0, String arg1, String[] arg2) {

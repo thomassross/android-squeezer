@@ -52,7 +52,12 @@ public final class AlbumCache {
          */
         public static final Uri CONTENT_ID_URI_BASE
             = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUM_ID);
-		
+
+        /**
+         * The default sort order for this table
+         */
+        public static final String DEFAULT_SORT_ORDER = "serverorder ASC";
+        
 		public static final String COL_ID = android.provider.BaseColumns._ID;
 		public static final String COL_SERVERORDER = "serverorder";
 		public static final String COL_ALBUMID = "albumid";

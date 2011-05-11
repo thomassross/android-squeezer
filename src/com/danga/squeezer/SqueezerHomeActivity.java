@@ -20,7 +20,7 @@ public class SqueezerHomeActivity extends ListActivity {
 	private void setHomeMenu() {
 		int[] icons = new int[] { R.drawable.icon_nowplaying,
 				R.drawable.icon_mymusic, R.drawable.icon_internet_radio,
-				R.drawable.icon_favorites };
+				R.drawable.icon_favorites, R.drawable.icon_ml_albums };
 		setListAdapter(new IconRowAdapter(this, getResources().getStringArray(R.array.home_items), icons));
 		getListView().setOnItemClickListener(onHomeItemClick);
 	}
@@ -30,7 +30,9 @@ public class SqueezerHomeActivity extends ListActivity {
 		private static final int MUSIC = 1;
 		private static final int INTERNET_RADIO = 2;
 		private static final int FAVORITES = 3;
+		private static final int TEST_ALBUMS = 4;
 
+		// 
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			switch (position) {
 			case NOW_PLAYING:
@@ -42,6 +44,9 @@ public class SqueezerHomeActivity extends ListActivity {
 			case INTERNET_RADIO:
 				break;
 			case FAVORITES:
+				break;
+			case TEST_ALBUMS:
+				AlbumListActivity.show(SqueezerHomeActivity.this);
 				break;
 			}
 		}

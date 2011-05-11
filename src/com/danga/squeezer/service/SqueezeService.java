@@ -13,6 +13,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -423,14 +424,18 @@ public class SqueezeService extends Service {
     }
     
     private void buildAlbumCache(String uuid) {
+    	ContentResolver cr = getContentResolver();
+
     	// TODO: Force database recreation while testing, remove this in production
     	// code (maybe -- we'd delete everything from the cache table anyway, and
     	// this is probably the simplest way to do that).
     	
     	// TODO: Fix this.  How?  Force upgrade through the provider?
 //    	h.onUpgrade(db, 0, 0);
-
-    	ContentResolver cr = getContentResolver();
+    	ContentProviderClient client = cr.acquireContentProviderClient(AlbumCache.Albums.CONTENT_URI);
+    	AlbumCacheProvider p = (AlbumCacheProvider) client.getLocalContentProvider();
+    	p.reset();
+    	
     	int totalAlbums = serverState.getTotalAlbums();
     	ContentValues[] values = new ContentValues[totalAlbums];
     	
@@ -447,7 +452,8 @@ public class SqueezeService extends Service {
     	}
     	
     	cr.bulkInsert(AlbumCache.Albums.CONTENT_URI, values);
-    	    	
+    	client.release();
+    	
     	// TODO: At this point anything that depends on the cache can start
     	// using it.  Need to flip a boolean at this point to indicate that.
     	// ...
