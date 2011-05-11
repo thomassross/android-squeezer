@@ -1,5 +1,6 @@
 package com.danga.squeezer.service;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -7,15 +8,50 @@ import android.provider.BaseColumns;
  *
  */
 public final class AlbumCache {
+    public static final String AUTHORITY = "com.danga.squeezer.service.AlbumCache";
+
 	private AlbumCache() {}
 
-	public static final class Db implements BaseColumns {
-		private Db() {}
-		
-		public static final int DATABASE_VERSION = 1;
-		public static final String DATABASE_NAME = "album_cache";
+	public static final class Albums implements BaseColumns {
+		private Albums() {}
 		
 		public static final String TABLE_NAME = "album";
+		
+		/*
+		 * URI definitions
+		 */
+		
+        /**
+         * The scheme part for this provider's URI
+         */
+        private static final String SCHEME = "content://";
+
+        /**
+         * Path part for the Albums URI
+         */
+        private static final String PATH_ALBUMS = "/albums";
+        
+        /**
+         * Path part for the Album ID URI
+         */
+        private static final String PATH_ALBUM_ID = "/albums/";
+        
+        /**
+         * 0-relative position of an album ID segment in the path part of a album ID URI
+         */
+        public static final int ALBUM_ID_PATH_POSITION = 1;
+        
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI =  Uri.parse(SCHEME + AUTHORITY + PATH_ALBUMS);
+        
+        /**
+         * The content URI base for a single album. Callers must
+         * append a numeric album id to this Uri to retrieve an album.
+         */
+        public static final Uri CONTENT_ID_URI_BASE
+            = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUM_ID);
 		
 		public static final String COL_ID = android.provider.BaseColumns._ID;
 		public static final String COL_SERVERORDER = "serverorder";

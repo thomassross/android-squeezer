@@ -41,6 +41,10 @@
                 android:name=".service.SqueezeService">
         </service>
         
+        <provider
+            android:name="com.danga.squeezer.service.AlbumCacheProvider"
+            android:authorities="com.danga.squeezer.service.AlbumCache"/>
+        
     </application>
     
 </manifest> 

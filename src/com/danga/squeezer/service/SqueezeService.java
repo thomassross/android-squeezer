@@ -13,11 +13,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,11 +26,9 @@ import android.util.Log;
 import com.danga.squeezer.IServiceCallback;
 import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
-import com.danga.squeezer.Squeezer;
 import com.danga.squeezer.SqueezerActivity;
 import com.danga.squeezer.Util;
 import com.danga.squeezer.VolumePanel;
-import com.danga.squeezer.framework.SqueezerAlbumOpenHelper;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.itemlists.IServiceArtistListCallback;
 import com.danga.squeezer.itemlists.IServiceGenreListCallback;
@@ -425,40 +423,35 @@ public class SqueezeService extends Service {
     }
     
     private void buildAlbumCache(String uuid) {
-    	SqueezerAlbumOpenHelper h = new SqueezerAlbumOpenHelper(this.getApplicationContext());
-    	SQLiteDatabase db = h.getWritableDatabase();
-    	
     	// TODO: Force database recreation while testing, remove this in production
     	// code (maybe -- we'd delete everything from the cache table anyway, and
     	// this is probably the simplest way to do that).
-    	h.onUpgrade(db, 0, 0);
     	
-    	// Pre-fill it with dummy data up to the right number of rows.
-    	ContentValues cv = new ContentValues();
-    	cv.put(AlbumCache.Db.COL_NAME, "Loading..."); // TODO: Localise
-    	cv.put(AlbumCache.Db.COL_ALBUMID, "");
-       	cv.put(AlbumCache.Db.COL_ARTIST, "");
-    	cv.put(AlbumCache.Db.COL_YEAR, "");
-    	cv.put(AlbumCache.Db.COL_ARTWORK, "");
+    	// TODO: Fix this.  How?  Force upgrade through the provider?
+//    	h.onUpgrade(db, 0, 0);
+
+    	ContentResolver cr = getContentResolver();
+    	int totalAlbums = serverState.getTotalAlbums();
+    	ContentValues[] values = new ContentValues[totalAlbums];
     	
-    	db.beginTransaction();
-		Integer totalAlbums = serverState.getTotalAlbums();
-    	try {
-    		for (int i = 0; i < totalAlbums; i++) {
-    			cv.put("serverorder", i);
-    			db.insert("album", null, cv);
-    		}
-    		db.setTransactionSuccessful();
-    	} finally {
-    		db.endTransaction();
+    	ContentValues cv;
+    	for (int i = 0; i < totalAlbums; i++) {
+    		cv = new ContentValues();
+        	cv.put(AlbumCache.Albums.COL_NAME, "Loading..."); // TODO: Localise
+        	cv.put(AlbumCache.Albums.COL_ALBUMID, "");
+           	cv.put(AlbumCache.Albums.COL_ARTIST, "");
+        	cv.put(AlbumCache.Albums.COL_YEAR, "");
+        	cv.put(AlbumCache.Albums.COL_ARTWORK, "");
+    		cv.put(AlbumCache.Albums.COL_SERVERORDER, i);
+    		values[i] = cv;
     	}
     	
+    	cr.bulkInsert(AlbumCache.Albums.CONTENT_URI, values);
+    	    	
     	// TODO: At this point anything that depends on the cache can start
     	// using it.  Need to flip a boolean at this point to indicate that.
     	// ...
 
-    	db.close();
-    	
     	// Fetch album information from the server and update the database.
     	albumListCallback.set(albumCacheCallback);
     	
@@ -491,38 +484,27 @@ public class SqueezeService extends Service {
 		 * @param items New items to update in the cache
 		 */
 		public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items) throws RemoteException {
-	    	SqueezerAlbumOpenHelper h = new SqueezerAlbumOpenHelper(Squeezer.getContext());
-	    	SQLiteDatabase db = h.getWritableDatabase();
+			ContentResolver cr = getContentResolver();
 
 	    	ContentValues cv = new ContentValues();
 	    	int serverorder = start;
 	    	SqueezerAlbum thisAlbum;
 	    	
-	    	db.beginTransaction();
-	    	try {
-	    		Iterator<SqueezerAlbum> it = items.iterator();
-	    		while (it.hasNext()) {
-	    			thisAlbum = it.next();
-	    			cv.put(AlbumCache.Db.COL_NAME, thisAlbum.getName());
-	    	    	cv.put(AlbumCache.Db.COL_ALBUMID, thisAlbum.getId());
-	    	       	cv.put(AlbumCache.Db.COL_ARTIST, thisAlbum.getArtist());
-	    	    	cv.put(AlbumCache.Db.COL_YEAR, thisAlbum.getYear());
-	    	    	cv.put(AlbumCache.Db.COL_ARTWORK, thisAlbum.getArtwork_track_id());
-	    	    	//cv.put(AlbumCache.Db.COL_SERVERORDER, serverorder++);
+    		Iterator<SqueezerAlbum> it = items.iterator();
+    		while (it.hasNext()) {
+    			thisAlbum = it.next();
+    			cv.put(AlbumCache.Albums.COL_NAME, thisAlbum.getName());
+    	    	cv.put(AlbumCache.Albums.COL_ALBUMID, thisAlbum.getId());
+    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
+    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
+    	    	cv.put(AlbumCache.Albums.COL_ARTWORK, thisAlbum.getArtwork_track_id());
+
+    	    	cr.update(AlbumCache.Albums.CONTENT_URI, cv,
+    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
+    	    			new String[] {Integer.toString(serverorder)});
 	    	    	
-	    	    	db.update(AlbumCache.Db.TABLE_NAME, cv,
-	    	    			AlbumCache.Db.COL_SERVERORDER + "=?",
-	    	    			new String[] {Integer.toString(serverorder)});
-	    	    	
-	    	    	serverorder++;
-				}
-	    		
-	    		db.setTransactionSuccessful();
-	    	} finally {
-	    		db.endTransaction();
-	    	}
-	    	
-	    	db.close();
+	    	    serverorder++;
+			}
 		}
 	};
 
