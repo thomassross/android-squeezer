@@ -442,9 +442,8 @@ public class SqueezeService extends Service {
     	cv.put(AlbumCache.Db.COL_ARTWORK, "");
     	
     	db.beginTransaction();
+		Integer totalAlbums = serverState.getTotalAlbums();
     	try {
-    		Integer totalAlbums = serverState.getTotalAlbums();
-
     		for (int i = 0; i < totalAlbums; i++) {
     			cv.put("serverorder", i);
     			db.insert("album", null, cv);
@@ -462,12 +461,15 @@ public class SqueezeService extends Service {
     	
     	// Fetch album information from the server and update the database.
     	albumListCallback.set(albumCacheCallback);
-    	        
-		try {
-			albums(0, "album");
-		} catch (RemoteException e){
-			// TODO: Handle this
-		}
+    	
+    	int pageSize = getResources().getInteger(R.integer.PageSize);
+    	for (int i = 0; i < totalAlbums; i += pageSize) {
+    		try {
+    			albums(i, "album");
+    		} catch (RemoteException e){
+    			// TODO: Handle this
+    		}
+    	}
     }
 
     /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
