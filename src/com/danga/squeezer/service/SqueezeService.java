@@ -459,16 +459,16 @@ public class SqueezeService extends Service {
     	// ...
 
     	// Fetch album information from the server and update the database.
-    	albumListCallback.set(albumCacheCallback);
+//    	albumListCallback.set(albumCacheCallback);
     	
-    	int pageSize = getResources().getInteger(R.integer.PageSize);
-    	for (int i = 0; i < totalAlbums; i += pageSize) {
-    		try {
-    			albums(i, "album");
-    		} catch (RemoteException e){
-    			// TODO: Handle this
-    		}
-    	}
+//    	int pageSize = getResources().getInteger(R.integer.PageSize);
+//    	for (int i = 0; i < totalAlbums; i += pageSize) {
+//    		try {
+//    			albums(i, "album");
+//    		} catch (RemoteException e){
+//    			// TODO: Handle this
+//    		}
+//    	}
     }
 
     /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
