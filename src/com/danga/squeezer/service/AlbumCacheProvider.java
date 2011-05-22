@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.DatabaseUtils.InsertHelper;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -85,7 +86,7 @@ public class AlbumCacheProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
 	
 	private DatabaseHelper mOpenHelper;
-	
+
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		
@@ -156,9 +157,21 @@ public class AlbumCacheProvider extends ContentProvider {
 		}
 	}
 	
-	public void reset() {
+	public void reset(int totalAlbums) {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		db.execSQL("DELETE FROM " + AlbumCache.Albums.TABLE_NAME + ";");
+
+		InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
+		final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
+		
+		for (int i = 0; i < totalAlbums; i++) {
+			if (i % 50 == 0) {
+				Log.v("reset", "Created " + i);
+			}
+			ih.prepareForInsert();
+			ih.bind(serverOrderColumn, i);
+			ih.execute();
+		}
 	}
 	
 	@Override
@@ -418,6 +431,7 @@ public class AlbumCacheProvider extends ContentProvider {
 		 * @param start The start position of items in this update.
 		 * @param items New items to update in the cache
 		 */
+		// TODO: Use the same insert method as in reset().
 		public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items) throws RemoteException {
 	    	ContentValues cv = new ContentValues();
 	    	int serverorder = start;

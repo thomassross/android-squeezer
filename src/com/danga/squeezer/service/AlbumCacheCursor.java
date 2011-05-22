@@ -1,5 +1,6 @@
 package com.danga.squeezer.service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,26 +29,41 @@ public class AlbumCacheCursor extends CursorWrapper {
 	private Set<Integer> mOrderedPages = new HashSet<Integer>();
 
     private int mPageSize = Squeezer.getContext().getResources().getInteger(R.integer.PageSize);
-	private int mColIndex = 0;
+	
+	/**
+	 * Map column names to default values for those columns.
+	 */
+	private static HashMap<String, String> defaults = new HashMap<String, String>();
+	{
+		defaults.put(AlbumCache.Albums.COL_NAME, "Loading... (name)");
+		defaults.put(AlbumCache.Albums.COL_ARTIST, "Loading... (artist)");
+		defaults.put(AlbumCache.Albums.COL_YEAR, "Loading... (year)");
+		defaults.put(AlbumCache.Albums.COL_ARTWORK, "Loading... (artwork)");
+	}
 	
 	public AlbumCacheCursor(Cursor cursor, AlbumCacheProvider provider) {
 		super(cursor);
 		
 		mCursor = cursor;
 		mProvider= provider;
-		
-		mColIndex = super.getColumnIndex(AlbumCache.Albums.COL_ALBUMID);
 	}
-
+	
 	@Override
 	public String getString(int columnIndex) {
-		// TODO: Should be mColIndex, not the hardcoded constant here, but the 
-		// call to getColumnIndex() in the constructor returns -1 for unknown
-		// reasons.
-		String albumId = mCursor.getString(2);
-		if (albumId.equals("") && mLiveUpdate) {
+		// TODO: Assumes there's two columns, and ID is always first
+		
+		String testVal = mCursor.getString(1);
+		if (testVal == null && mLiveUpdate) {
 			int position = getPosition();
 			requestPageAtPosition(position);
+			
+			// TODO: Zeroth column is always ID, autoincrements, so has valid
+			// data which can be returned immediately
+			if (columnIndex == 0)
+				return super.getString(columnIndex);
+			
+			String thisColumn = getColumnName(columnIndex);
+			return defaults.get(thisColumn);			
 		}
 			
 		return super.getString(columnIndex);

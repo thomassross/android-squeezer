@@ -434,24 +434,7 @@ public class SqueezeService extends Service {
 //    	h.onUpgrade(db, 0, 0);
     	ContentProviderClient client = cr.acquireContentProviderClient(AlbumCache.Albums.CONTENT_URI);
     	AlbumCacheProvider p = (AlbumCacheProvider) client.getLocalContentProvider();
-    	p.reset();
-    	
-    	int totalAlbums = serverState.getTotalAlbums();
-    	ContentValues[] values = new ContentValues[totalAlbums];
-    	
-    	ContentValues cv;
-    	for (int i = 0; i < totalAlbums; i++) {
-    		cv = new ContentValues();
-        	cv.put(AlbumCache.Albums.COL_NAME, "Loading..."); // TODO: Localise
-        	cv.put(AlbumCache.Albums.COL_ALBUMID, "");
-           	cv.put(AlbumCache.Albums.COL_ARTIST, "");
-        	cv.put(AlbumCache.Albums.COL_YEAR, "");
-        	cv.put(AlbumCache.Albums.COL_ARTWORK, "");
-    		cv.put(AlbumCache.Albums.COL_SERVERORDER, i);
-    		values[i] = cv;
-    	}
-    	
-    	cr.bulkInsert(AlbumCache.Albums.CONTENT_URI, values);
+    	p.reset(serverState.getTotalAlbums());
     	client.release();
     	
     	// TODO: At this point anything that depends on the cache can start
@@ -459,60 +442,7 @@ public class SqueezeService extends Service {
     	// ...
 
     	// Fetch album information from the server and update the database.
-//    	albumListCallback.set(albumCacheCallback);
-    	
-//    	int pageSize = getResources().getInteger(R.integer.PageSize);
-//    	for (int i = 0; i < totalAlbums; i += pageSize) {
-//    		try {
-//    			albums(i, "album");
-//    		} catch (RemoteException e){
-//    			// TODO: Handle this
-//    		}
-//    	}
     }
-
-    /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
-	private boolean albums(int start, String sortOrder) throws RemoteException {
-        if (!connectionState.isConnected()) return false;
-        List<String> parameters = new ArrayList<String>();
-        parameters.add("tags:" + ALBUMTAGS);
- 		parameters.add("sort:" + sortOrder);
-        cli.requestItems("albums", start, parameters);
-        return true;
-    }
-    
-	private IServiceAlbumListCallback albumCacheCallback = new IServiceAlbumListCallback.Stub() {
-		/**
-		 * Update the affected rows in the cache.
-		 * 
-		 * @param count Number of items as reported by squeezeserver.
-		 * @param start The start position of items in this update.
-		 * @param items New items to update in the cache
-		 */
-		public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items) throws RemoteException {
-			ContentResolver cr = getContentResolver();
-
-	    	ContentValues cv = new ContentValues();
-	    	int serverorder = start;
-	    	SqueezerAlbum thisAlbum;
-	    	
-    		Iterator<SqueezerAlbum> it = items.iterator();
-    		while (it.hasNext()) {
-    			thisAlbum = it.next();
-    			cv.put(AlbumCache.Albums.COL_NAME, thisAlbum.getName());
-    	    	cv.put(AlbumCache.Albums.COL_ALBUMID, thisAlbum.getId());
-    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
-    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
-    	    	cv.put(AlbumCache.Albums.COL_ARTWORK, thisAlbum.getArtwork_track_id());
-
-    	    	cr.update(AlbumCache.Albums.CONTENT_URI, cv,
-    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
-    	    			new String[] {Integer.toString(serverorder)});
-	    	    	
-	    	    serverorder++;
-			}
-		}
-	};
 
     private void parseStatusLine(List<String> tokens) {
 		HashMap<String, String> tokenMap = parseTokens(tokens);
