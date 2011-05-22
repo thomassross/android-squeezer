@@ -163,15 +163,22 @@ public class AlbumCacheProvider extends ContentProvider {
 
 		InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
 		final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
-		
-		for (int i = 0; i < totalAlbums; i++) {
-			if (i % 50 == 0) {
-				Log.v("reset", "Created " + i);
+	
+		db.beginTransaction();
+		try {
+			for (int i = 0; i < totalAlbums; i++) {
+				if (i % 50 == 0) {
+					Log.v("reset", "Created " + i);
+				}
+				ih.prepareForInsert();
+				ih.bind(serverOrderColumn, i);
+				ih.execute();	
 			}
-			ih.prepareForInsert();
-			ih.bind(serverOrderColumn, i);
-			ih.execute();
-		}
+			
+			db.setTransactionSuccessful();
+		} finally {
+			db.endTransaction();
+		}			
 	}
 	
 	@Override
