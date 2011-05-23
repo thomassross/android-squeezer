@@ -438,27 +438,37 @@ public class AlbumCacheProvider extends ContentProvider {
 		 * @param start The start position of items in this update.
 		 * @param items New items to update in the cache
 		 */
-		// TODO: Use the same insert method as in reset().
 		public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items) throws RemoteException {
+	    	SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+
 	    	ContentValues cv = new ContentValues();
-	    	int serverorder = start;
+	    	int serverOrder = start;
 	    	SqueezerAlbum thisAlbum;
 	    	
-    		Iterator<SqueezerAlbum> it = items.iterator();
-    		while (it.hasNext()) {
-    			thisAlbum = it.next();
-    			cv.put(AlbumCache.Albums.COL_NAME, thisAlbum.getName());
-    	    	cv.put(AlbumCache.Albums.COL_ALBUMID, thisAlbum.getId());
-    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
-    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
-    	    	cv.put(AlbumCache.Albums.COL_ARTWORK, thisAlbum.getArtwork_track_id());
-
-    	    	getContext().getContentResolver().update(AlbumCache.Albums.CONTENT_URI, cv,
-    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
-    	    			new String[] {Integer.toString(serverorder)});
+	    	db.beginTransaction();
+	    	try {
+	    		Iterator<SqueezerAlbum> it = items.iterator();
+	    		while (it.hasNext()) {
+	    			thisAlbum = it.next();
+	    			cv.put(AlbumCache.Albums.COL_NAME, thisAlbum.getName());
+	    	    	cv.put(AlbumCache.Albums.COL_ALBUMID, thisAlbum.getId());
+	    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
+	    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
+	    	    	cv.put(AlbumCache.Albums.COL_ARTWORK, thisAlbum.getArtwork_track_id());
 	    	    	
-	    	    serverorder++;
-			}
+	    	    	db.update(AlbumCache.Albums.TABLE_NAME, cv,
+	    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
+	    	    			new String[] {Integer.toString(serverOrder)});
+	    	    	
+	    	    	serverOrder++;
+				}
+	    		
+	    		db.setTransactionSuccessful();
+	    	} finally {
+	    		db.endTransaction();
+	    	}
+	    	
+	        getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);	    	
 		}
 	};
 }
