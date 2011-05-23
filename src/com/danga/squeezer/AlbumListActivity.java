@@ -33,7 +33,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 
 		// Columns to bind
 		String[] from= new String[] { Albums.COL_NAME, Albums.COL_ARTIST };
-		int[] to = new int[] { R.id.album_name, R.id.album_artist };
+		int[] to = new int[] { R.id.text1, R.id.text2 };
 		
 		SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
 				R.layout.album_list_entry, cursor, from, to);
