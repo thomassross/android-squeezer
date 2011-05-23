@@ -53,9 +53,11 @@ public class AlbumCacheCursor extends CursorWrapper {
 		// TODO: Assumes there's two columns, and ID is always first
 		
 		String testVal = mCursor.getString(1);
-		if (testVal == null && mLiveUpdate) {
-			int position = getPosition();
-			requestPageAtPosition(position);
+		if (testVal == null) {
+			if (mLiveUpdate) {
+				int position = getPosition();
+				requestPageAtPosition(position);
+			}
 			
 			// TODO: Zeroth column is always ID, autoincrements, so has valid
 			// data which can be returned immediately
