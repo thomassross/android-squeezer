@@ -1,5 +1,10 @@
 package com.danga.squeezer.service;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,9 +13,12 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
+import android.util.TypedValue;
 
 import com.danga.squeezer.R;
 import com.danga.squeezer.Squeezer;
+import com.google.android.panoramio.BitmapUtils;
 
 public class AlbumCacheCursor extends CursorWrapper {
 	private static final String TAG = AlbumCacheCursor.class.getName();
@@ -20,6 +28,11 @@ public class AlbumCacheCursor extends CursorWrapper {
 	
 	private Cursor mCursor;
 	private AlbumCacheProvider mProvider;
+	
+	/**
+	 * Default album artwork
+	 */
+	private static byte[] mDefaultArtwork;
 	
 	/**
 	 * Whether queries should fetch from the server for missing data.
@@ -39,7 +52,7 @@ public class AlbumCacheCursor extends CursorWrapper {
 		defaults.put(AlbumCache.Albums.COL_NAME, "Loading... (name)");
 		defaults.put(AlbumCache.Albums.COL_ARTIST, "Loading... (artist)");
 		defaults.put(AlbumCache.Albums.COL_YEAR, "Loading... (year)");
-		defaults.put(AlbumCache.Albums.COL_ARTWORK, "Loading... (artwork)");
+		defaults.put(AlbumCache.Albums.COL_ARTWORK_ID, "Loading... (artwork)");
 	}
 	
 	public AlbumCacheCursor(Cursor cursor, AlbumCacheProvider provider) {
@@ -51,7 +64,7 @@ public class AlbumCacheCursor extends CursorWrapper {
 	
 	@Override
 	public String getString(int columnIndex) {
-		// TODO: Assumes there's two columns, and ID is always first
+		// TODO: Assumes there's at least two columns, and ID is always first
 		
 		String testVal = mCursor.getString(1);
 		if (testVal == null) {
@@ -59,17 +72,51 @@ public class AlbumCacheCursor extends CursorWrapper {
 				int position = getPosition();
 				requestPageAtPosition(position);
 			}
+
+			String thisColumnName = getColumnName(columnIndex);
 			
-			// TODO: Zeroth column is always ID, autoincrements, so has valid
-			// data which can be returned immediately
-			if (columnIndex == 0)
+			if (thisColumnName == AlbumCache.Albums.COL_ID)
 				return super.getString(columnIndex);
-			
-			String thisColumn = getColumnName(columnIndex);
-			return defaults.get(thisColumn);			
+				
+			return defaults.get(thisColumnName);			
 		}
 			
 		return super.getString(columnIndex);
+	}
+	
+	@Override
+	public byte[] getBlob(int columnIndex) {
+		byte[] img = super.getBlob(columnIndex);
+		
+		if (img == null) {
+			if (mDefaultArtwork == null) {
+				Log.v(TAG, "Creating default album artwork");
+				// Approach 1
+//				ByteArrayOutputStream out = new ByteArrayOutputStream();			
+//				Bitmap b = BitmapFactory.decodeResource(Squeezer.getContext().getResources(), R.drawable.icon_album_noart);
+//				b.compress(Bitmap.CompressFormat.JPEG, 100, out);
+//				ByteArrayOutputStream out = new ByteArrayOutputStream();
+//				BitmapUtils.copyInputStreamToOutputStream(in, out);
+
+				
+				// Approach 2
+				InputStream in = Squeezer.getContext().getResources().openRawResource(R.drawable.icon_album_noart);
+	            ByteArrayOutputStream out = new ByteArrayOutputStream();
+	            try {
+					BitmapUtils.copyInputStreamToOutputStream(in, (OutputStream) out);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}			
+				
+				
+				mDefaultArtwork = out.toByteArray(); //out.toByteArray();
+			}
+			
+			return mDefaultArtwork;
+		}
+		
+		return img;
 	}
 
 	/**

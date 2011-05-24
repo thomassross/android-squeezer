@@ -12,6 +12,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.SimpleCursorAdapter;
 
 import com.danga.squeezer.service.AlbumCache.Albums;
+import com.danga.squeezer.service.AlbumCacheBinder;
 import com.danga.squeezer.service.AlbumCacheCursor;
 
 public class AlbumListActivity extends ListActivity implements AbsListView.OnScrollListener {
@@ -27,13 +28,15 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.album_list_activity);
 		
+		// TODO: Should this be Activity.managedQuery(), per
+		// http://developer.android.com/guide/topics/providers/content-providers.html ?
 		cursor = getContentResolver().query(Albums.CONTENT_URI,
-				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST },
+				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_BLOB },
 				null, null, null);
 
 		// Columns to bind
-		String[] from= new String[] { Albums.COL_NAME, Albums.COL_ARTIST };
-		int[] to = new int[] { R.id.text1, R.id.text2 };
+		String[] from= new String[] { Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_BLOB };
+		int[] to = new int[] { R.id.text1, R.id.text2, R.id.icon };
 		
 		SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
 				R.layout.album_list_entry, cursor, from, to);
@@ -43,6 +46,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 		LiveUpdateF.putInt("TYPE", AlbumCacheCursor.TYPE_LIVEUPDATE);
 		LiveUpdateF.putBoolean("LiveUpdate", false);
 
+		mAdapter.setViewBinder(new AlbumCacheBinder());
 		setListAdapter(mAdapter);
 	
 		getListView().setOnScrollListener(this);
