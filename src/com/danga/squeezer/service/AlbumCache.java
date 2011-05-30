@@ -56,10 +56,9 @@ public final class AlbumCache {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "serverorder ASC";
+        public static final String DEFAULT_SORT_ORDER = "_id ASC";
         
-		public static final String COL_ID = android.provider.BaseColumns._ID;
-		public static final String COL_SERVERORDER = "serverorder";
+		public static final String COL_SERVERORDER = android.provider.BaseColumns._ID;
 		public static final String COL_ALBUMID = "albumid";
 		public static final String COL_NAME = "name";
 		public static final String COL_ARTIST = "artist";

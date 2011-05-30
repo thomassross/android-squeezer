@@ -126,7 +126,6 @@ public class AlbumCacheProvider extends ContentProvider {
         // given a string. The two are usually equal.
         sAlbumsProjectionMap = new HashMap<String, String>();
 
-        sAlbumsProjectionMap.put(AlbumCache.Albums._ID, AlbumCache.Albums._ID);
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_SERVERORDER, AlbumCache.Albums.COL_SERVERORDER);
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ALBUMID, AlbumCache.Albums.COL_ALBUMID);
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_NAME, AlbumCache.Albums.COL_NAME);
@@ -159,8 +158,7 @@ public class AlbumCacheProvider extends ContentProvider {
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE " + AlbumCache.Albums.TABLE_NAME + " ("
-					+ AlbumCache.Albums.COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ AlbumCache.Albums.COL_SERVERORDER + " INTEGER,"
+					+ AlbumCache.Albums.COL_SERVERORDER + " INTEGER PRIMARY KEY,"
 	                + AlbumCache.Albums.COL_ALBUMID + " TEXT,"
 	                + AlbumCache.Albums.COL_NAME + " TEXT,"
 	                + AlbumCache.Albums.COL_ARTIST + " TEXT,"
