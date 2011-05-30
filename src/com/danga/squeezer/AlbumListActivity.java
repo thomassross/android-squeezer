@@ -31,11 +31,11 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 		// TODO: Should this be Activity.managedQuery(), per
 		// http://developer.android.com/guide/topics/providers/content-providers.html ?
 		cursor = getContentResolver().query(Albums.CONTENT_URI,
-				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_BLOB },
+				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH },
 				null, null, null);
 
 		// Columns to bind
-		String[] from= new String[] { Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_BLOB };
+		String[] from = new String[] { Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH };
 		int[] to = new int[] { R.id.text1, R.id.text2, R.id.icon };
 		
 		SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,

@@ -1,8 +1,11 @@
 package com.danga.squeezer.service;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -24,10 +27,10 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.LiveFolders;
 import android.text.TextUtils;
@@ -130,7 +133,8 @@ public class AlbumCacheProvider extends ContentProvider {
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTIST, AlbumCache.Albums.COL_ARTIST);
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_YEAR, AlbumCache.Albums.COL_YEAR);
         sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTWORK_ID, AlbumCache.Albums.COL_ARTWORK_ID);
-        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTWORK_BLOB, AlbumCache.Albums.COL_ARTWORK_BLOB);
+        sAlbumsProjectionMap.put(AlbumCache.Albums.COL_ARTWORK_PATH, AlbumCache.Albums.COL_ARTWORK_PATH);
+        sAlbumsProjectionMap.put("_data", "_data");
         
         /*
          * Creates an initializes a projection map for handling Live Folders
@@ -162,7 +166,8 @@ public class AlbumCacheProvider extends ContentProvider {
 	                + AlbumCache.Albums.COL_ARTIST + " TEXT,"
 	                + AlbumCache.Albums.COL_YEAR + " TEXT,"
 	                + AlbumCache.Albums.COL_ARTWORK_ID + " TEXT,"
-	                + AlbumCache.Albums.COL_ARTWORK_BLOB + " BLOB"
+	                + AlbumCache.Albums.COL_ARTWORK_PATH + " TEXT,"
+	                + "_data TEXT" // Album artwork location metadata
 	                + ");");		
 		}
 		
@@ -201,7 +206,16 @@ public class AlbumCacheProvider extends ContentProvider {
 			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
-		}			
+		}
+		
+		// Remove the cache
+		File root = new File(Environment.getExternalStorageDirectory(), 
+			"/Android/data/com.danga.squeezer/cache/album");
+		if (root.exists()) {
+			for (File f : root.listFiles()) {
+				f.delete();
+			}	
+		}
 	}
 	
 	@Override
@@ -289,8 +303,7 @@ public class AlbumCacheProvider extends ContentProvider {
 	    // Tells the Cursor what URI to watch, so it knows when its source data changes
 	    c.setNotificationUri(getContext().getContentResolver(), uri);
 	    	    
-	    AlbumCacheCursor a = new AlbumCacheCursor(c, this);
-	    return a;
+	    return new AlbumCacheCursor(c, this);
 	}
 
 	@Override
@@ -344,47 +357,6 @@ public class AlbumCacheProvider extends ContentProvider {
         throw new SQLException("Failed to insert row into " + uri);
     }
 	
-	// TODO: Might need to keep this, and call via
-	// getContentResolver().acquireContentProviderClient(uri) if the speed up is
-	// worthwhile.
-	public int batchUpdateViaServerOrder(Uri uri, int startServerOrder, List<SqueezerAlbum> albums) {
-		if (sUriMatcher.match(uri) != ALBUMS) {
-			throw new IllegalArgumentException("Unknown URI " + uri);
-		}
-		
-    	SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-    	ContentValues cv = new ContentValues();
-    	int serverOrder = startServerOrder;
-    	SqueezerAlbum thisAlbum;
-    	
-    	db.beginTransaction();
-    	try {
-    		Iterator<SqueezerAlbum> it = albums.iterator();
-    		while (it.hasNext()) {
-    			thisAlbum = it.next();
-    			cv.put(AlbumCache.Albums.COL_NAME, thisAlbum.getName());
-    	    	cv.put(AlbumCache.Albums.COL_ALBUMID, thisAlbum.getId());
-    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
-    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
-    	    	cv.put(AlbumCache.Albums.COL_ARTWORK_ID, thisAlbum.getArtwork_track_id());
-    	    	
-    	    	db.update(AlbumCache.Albums.TABLE_NAME, cv,
-    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
-    	    			new String[] {Integer.toString(serverOrder)});
-    	    	
-    	    	serverOrder++;
-			}
-    		
-    		db.setTransactionSuccessful();
-    	} finally {
-    		db.endTransaction();
-    	}
-    	
-        getContext().getContentResolver().notifyChange(uri, null);
-    	
-    	return serverOrder - startServerOrder;
-	}
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where,
@@ -453,6 +425,7 @@ public class AlbumCacheProvider extends ContentProvider {
         return count;
     }
 
+
 	private IServiceAlbumListCallback albumListCallback = new IServiceAlbumListCallback.Stub() {
 		/**
 		 * Update the affected rows.
@@ -478,6 +451,8 @@ public class AlbumCacheProvider extends ContentProvider {
 	    	       	cv.put(AlbumCache.Albums.COL_ARTIST, thisAlbum.getArtist());
 	    	    	cv.put(AlbumCache.Albums.COL_YEAR, thisAlbum.getYear());
 	    	    	cv.put(AlbumCache.Albums.COL_ARTWORK_ID, thisAlbum.getArtwork_track_id());
+
+	    	    	// Kick off a fetch of album artwork.
 	    	    	updateAlbumArt(serverOrder, thisAlbum.getArtwork_track_id());
 	    	    	
 	    	    	db.update(AlbumCache.Albums.TABLE_NAME, cv,
@@ -496,7 +471,8 @@ public class AlbumCacheProvider extends ContentProvider {
 		}
 	};
 	
-	protected void updateAlbumArt(final int serverOrder, String trackId) {
+
+	protected void updateAlbumArt(final int serverOrder, final String trackId) {
 		final String albumArtUrl = getAlbumArtUrl(trackId);
 
 		Log.v(TAG, "Url for " + trackId + " is " + albumArtUrl);
@@ -504,36 +480,61 @@ public class AlbumCacheProvider extends ContentProvider {
 			return;
 		}
 
-//		ContentValues cv = new ContentValues();
-//		cv.put(AlbumCache.Albums.COL_ARTWORK_BLOB, albumArtUrl);
-//		getContext().getContentResolver().update(AlbumCache.Albums.CONTENT_URI,
-//				cv, AlbumCache.Albums.COL_SERVERORDER + "=?",
-//				new String[] {Integer.toString(serverOrder)});					
-
-
 		backgroundExecutor.execute(new Runnable() {
 			public void run() {
-//				try {
-					byte[] blob = BitmapUtils.loadByteArrayFromUrl(albumArtUrl);
+				File root = new File(Environment.getExternalStorageDirectory(), 
+					"/Android/data/com.danga.squeezer/cache/album");
+
+				if (! root.exists())
+					if (! root.mkdirs())
+						return;	
+				
+				File artwork = new File(root, trackId + ".jpg");
+				Log.v(TAG, "Artwork file: " + artwork.getAbsoluteFile());
+				
+				try {
+					// File doesn't exist?  Fetch data from the network and cache.
+					if (artwork.createNewFile()) {
+						BufferedInputStream in = null;
+						BufferedOutputStream out = null;
+
+						try {
+							in = new BufferedInputStream(new URL(albumArtUrl).openStream(), 4 * 1024);
+				            out = new BufferedOutputStream(new FileOutputStream(artwork));
+				            BitmapUtils.copyInputStreamToOutputStream(in, out);
+						} catch (MalformedURLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} finally {
+							BitmapUtils.closeStream(in);
+							BitmapUtils.closeStream(out);
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return;
+				}
 					
-//					URL url = new URL(albumArtUrl);
-//					InputStream in = (InputStream) url.getContent();
-//					Bitmap bitmap = BitmapFactory.decodeStream(in);
-//					ByteArrayOutputStream out = new ByteArrayOutputStream();
-//					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-//					byte[] bitmapdata = out.toByteArray();
-					
-					ContentValues cv = new ContentValues();
-					cv.put(AlbumCache.Albums.COL_ARTWORK_BLOB, blob);
-					getContext().getContentResolver().update(AlbumCache.Albums.CONTENT_URI,
-							cv, AlbumCache.Albums.COL_SERVERORDER + "=?",
-							new String[] {Integer.toString(serverOrder)});					
-//				} catch (MalformedURLException e) {
-//				} catch (IOException e) {
-//				}
+				// File is on disk, update the DB to point to it
+				ContentValues cv = new ContentValues();
+				cv.put(AlbumCache.Albums.COL_ARTWORK_PATH, AlbumCache.Albums.CONTENT_ID_URI_BASE + Integer.toString(serverOrder));
+				cv.put("_data", artwork.getAbsolutePath());
+
+		    	SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+
+		    	db.update(AlbumCache.Albums.TABLE_NAME, cv,
+    	    			AlbumCache.Albums.COL_SERVERORDER + "=?",
+    	    			new String[] {Integer.toString(serverOrder)});
+				
+		        getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);
 			}
 		});
 	}
+
 
 	private String getAlbumArtUrl(String artwork_track_id) {
 		if (artwork_track_id == null)
@@ -548,5 +549,18 @@ public class AlbumCacheProvider extends ContentProvider {
 			Log.e(TAG, "Error requesting album art url: " + e);
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * 
+	 */
+	@Override
+	public ParcelFileDescriptor openFile(Uri uri, String mode)
+			throws FileNotFoundException {
+		if (sUriMatcher.match(uri) != ALBUM_ID)
+			throw new IllegalArgumentException("openFile not supported for multiple albums");
+				
+	    return openFileHelper(uri, mode);
 	}
 }

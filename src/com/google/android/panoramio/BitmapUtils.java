@@ -38,7 +38,7 @@ public class BitmapUtils {
     
     private static final String TAG = "Panoramio";
     
-    private static final int IO_BUFFER_SIZE = 4 * 1024;
+    private static final int IO_BUFFER_SIZE = 32 * 1024;
     
     /**
      * Loads a byte array from the specified url.  This can take a while, so it
@@ -58,6 +58,7 @@ public class BitmapUtils {
         	//in = new BufferedInputStream(new URL(url).openStream(), IO_BUFFER_SIZE);
         	in = new BufferedInputStream(conn.getInputStream());
         	int length = conn.getContentLength();
+        	Log.v(TAG, "Url: " + url + " has size " + length);
             final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
             out = new BufferedOutputStream(dataStream, length != -1 ? length : IO_BUFFER_SIZE);
             copyInputStreamToOutputStream(in, out);
@@ -82,7 +83,7 @@ public class BitmapUtils {
      * 
      * @return The bitmap, or null if it could not be loaded
      */
-    public static Bitmap loadBitmap(String url) {
+    public static Bitmap loadBitmapFromUrl(String url) {
         byte[] data = loadByteArrayFromUrl(url);
         if (data != null) {
         	return BitmapFactory.decodeByteArray(data, 0, data.length);
@@ -96,7 +97,7 @@ public class BitmapUtils {
      * 
      * @param stream The stream to close.
      */
-    private static void closeStream(Closeable stream) {
+    public static void closeStream(Closeable stream) {
         if (stream != null) {
             try {
                 stream.close();
