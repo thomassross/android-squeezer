@@ -3,7 +3,6 @@ package com.danga.squeezer.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -15,7 +14,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -272,7 +270,7 @@ public class SqueezeService extends Service {
     private Map<String,SqueezerCmdHandler> playerSpecificHandlers = initializePlayerSpecificHandlers();
 	
     void onLineReceived(String serverLine) {
-        //if (debugLogging) Log.v(TAG, "LINE: " + serverLine);
+        if (debugLogging) Log.v(TAG, "LINE: " + serverLine);
         List<String> tokens = Arrays.asList(serverLine.split(" "));
         if (tokens.size() < 2) return;
         
@@ -382,7 +380,6 @@ public class SqueezeService extends Service {
 
     	SqueezerServerState oldServerState = serverState;
     	serverState.setRescan(tokenMap.get("rescan") == "1");
-    	serverState.setLastScan(Integer.valueOf(tokenMap.get("lastscan")));
     	serverState.setVersion(tokenMap.get("version"));
     	serverState.setUuid(tokenMap.get("uuid"));
     	serverState.setTotalAlbums(Integer.valueOf(tokenMap.get("info total albums")));
@@ -392,7 +389,12 @@ public class SqueezeService extends Service {
     	serverState.setPlayerCount(Integer.valueOf(tokenMap.get("player count")));
     	serverState.setSeenPlayerCount(Integer.valueOf(tokenMap.get("sn player count")));
     	serverState.setOtherPlayerCount(Integer.valueOf(tokenMap.get("other player count")));
-
+    	
+    	String lastscan = tokenMap.get("lastscan");
+    	if (lastscan != null) {
+    		serverState.setLastScan(Integer.valueOf(lastscan));
+    	}
+    	
     	onServerStateChanged(oldServerState);
     }
     
