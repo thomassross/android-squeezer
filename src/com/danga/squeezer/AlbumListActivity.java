@@ -27,9 +27,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.album_list_activity);
 		
-		// TODO: Should this be Activity.managedQuery(), per
-		// http://developer.android.com/guide/topics/providers/content-providers.html ?
-		cursor = getContentResolver().query(Albums.CONTENT_URI,
+		cursor = managedQuery(Albums.CONTENT_URI,
 				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH },
 				null, null, null);
 
