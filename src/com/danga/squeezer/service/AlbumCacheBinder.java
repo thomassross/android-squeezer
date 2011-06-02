@@ -54,17 +54,6 @@ public class AlbumCacheBinder implements SimpleCursorAdapter.ViewBinder {
 				iv.setImageBitmap(mDefaultArtwork);
 				return true;
 			}
-
-			InputStream f;
-			try {
-				f = Squeezer.getContext().getContentResolver().openInputStream(Uri.parse(path));
-				iv.setImageBitmap(BitmapFactory.decodeStream(f));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			return true;
 		}
 		
 		return false;
