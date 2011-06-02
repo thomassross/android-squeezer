@@ -12,7 +12,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.SimpleCursorAdapter;
 
 import com.danga.squeezer.service.AlbumCache.Albums;
-import com.danga.squeezer.service.AlbumCacheBinder;
 import com.danga.squeezer.service.AlbumCacheCursor;
 
 public class AlbumListActivity extends ListActivity implements AbsListView.OnScrollListener {
@@ -46,7 +45,6 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 		LiveUpdateF.putInt("TYPE", AlbumCacheCursor.TYPE_LIVEUPDATE);
 		LiveUpdateF.putBoolean("LiveUpdate", false);
 
-		mAdapter.setViewBinder(new AlbumCacheBinder());
 		setListAdapter(mAdapter);
 	
 		getListView().setOnScrollListener(this);

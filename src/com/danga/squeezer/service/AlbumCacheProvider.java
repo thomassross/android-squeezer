@@ -27,6 +27,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
@@ -487,19 +489,31 @@ public class AlbumCacheProvider extends ContentProvider {
 					if (! root.mkdirs())
 						return;	
 				
-				File artwork = new File(root, trackId + ".jpg");
+				File artwork = new File(root, trackId + ".png");
+				File artwork64 = new File(root, trackId + "-64px.png");
+
+//				File artwork = new File(root, trackId + "/original.png");
+//				File artwork64 = new File(root, trackId + "/scaled-64px.png");
+
 				Log.v(TAG, "Artwork file: " + artwork.getAbsoluteFile());
 				
 				try {
-					// File doesn't exist?  Fetch data from the network and cache.
+					// File doesn't exist?  Fetch data from the network, scale, and cache.
 					if (artwork.createNewFile()) {
-						BufferedInputStream in = null;
+						//BufferedInputStream in = null;
 						BufferedOutputStream out = null;
-
+						BufferedOutputStream out64 = null;
+						
 						try {
-							in = new BufferedInputStream(new URL(albumArtUrl).openStream(), 4 * 1024);
-				            out = new BufferedOutputStream(new FileOutputStream(artwork));
-				            BitmapUtils.copyInputStreamToOutputStream(in, out);
+							//in = new BufferedInputStream(new URL(albumArtUrl).openStream(), 4 * 1024);
+							Bitmap b = BitmapFactory.decodeStream(new URL(albumArtUrl).openStream());
+							Bitmap b64 = b.createScaledBitmap(b, 64, 64, true);
+							
+				            out = new BufferedOutputStream(new FileOutputStream(artwork), 64 * 1024);
+				            out64 = new BufferedOutputStream(new FileOutputStream(artwork64), 8 * 1024);
+				        
+				            b.compress(Bitmap.CompressFormat.PNG, 100, out);
+				            b64.compress(Bitmap.CompressFormat.PNG, 100, out64);
 						} catch (MalformedURLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -507,8 +521,8 @@ public class AlbumCacheProvider extends ContentProvider {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} finally {
-							BitmapUtils.closeStream(in);
 							BitmapUtils.closeStream(out);
+							BitmapUtils.closeStream(out64);
 						}
 					}
 				} catch (IOException e) {
@@ -520,7 +534,7 @@ public class AlbumCacheProvider extends ContentProvider {
 				// File is on disk, update the DB to point to it
 				ContentValues cv = new ContentValues();
 				cv.put(AlbumCache.Albums.COL_ARTWORK_PATH, AlbumCache.Albums.CONTENT_ID_URI_BASE + Integer.toString(serverOrder));
-				cv.put("_data", artwork.getAbsolutePath());
+				cv.put("_data", artwork64.getAbsolutePath());
 
 		    	SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 

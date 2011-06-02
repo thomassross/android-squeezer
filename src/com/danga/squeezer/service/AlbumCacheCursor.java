@@ -36,10 +36,8 @@ public class AlbumCacheCursor extends CursorWrapper {
 	private static HashMap<String, String> defaults = new HashMap<String, String>();
 	{
 		// TODO: Localise
-		defaults.put(AlbumCache.Albums.COL_NAME, "Loading... (name)");
-		defaults.put(AlbumCache.Albums.COL_ARTIST, "Loading... (artist)");
-		defaults.put(AlbumCache.Albums.COL_YEAR, "Loading... (year)");
-		defaults.put(AlbumCache.Albums.COL_ARTWORK_ID, "Loading... (artwork)");
+		defaults.put(AlbumCache.Albums.COL_NAME, "Loading...");
+		defaults.put(AlbumCache.Albums.COL_ARTWORK_PATH, "android.resource://com.danga.squeezer/" + R.drawable.icon_album_noart);
 	}
 	
 	public AlbumCacheCursor(Cursor cursor, AlbumCacheProvider provider) {
