@@ -7,9 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.danga.squeezer.service.AlbumCache.Albums;
 import com.danga.squeezer.service.AlbumCacheCursor;
@@ -18,6 +23,8 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
     private static final String TAG = AlbumListActivity.class.getName();
     private static Bundle LiveUpdateT = new Bundle();
     private static Bundle LiveUpdateF = new Bundle();
+
+    private ListView mListView = null;
 
     private ContentProviderClient mContentProviderClient = null;
     private Cursor cursor = null;
@@ -36,11 +43,23 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_list_activity);
 
+        mListView = (ListView) findViewById(android.R.id.list);
+
+        mListView.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getApplicationContext(),
+                        "This is position " + position + ", from id: " + id,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
         cursor = managedQuery(Albums.CONTENT_URI,
                 new String[] {
                         Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH
                 },
                 null, null, null);
+
+        setTitle("Albums: " + cursor.getCount());
 
         SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
                 R.layout.album_list_entry, cursor, from, to);
