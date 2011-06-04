@@ -46,7 +46,7 @@ public class SqueezerHomeActivity extends ListActivity {
 			case FAVORITES:
 				break;
 			case TEST_ALBUMS:
-				AlbumListActivity.show(SqueezerHomeActivity.this);
+				AlbumsListActivity.show(SqueezerHomeActivity.this);
 				break;
 			}
 		}

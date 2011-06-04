@@ -19,8 +19,8 @@ import android.widget.Toast;
 import com.danga.squeezer.service.AlbumCache.Albums;
 import com.danga.squeezer.service.AlbumCacheCursor;
 
-public class AlbumListActivity extends ListActivity implements AbsListView.OnScrollListener {
-    private static final String TAG = AlbumListActivity.class.getName();
+public class AlbumsListActivity extends ListActivity implements AbsListView.OnScrollListener {
+    private static final String TAG = AlbumsListActivity.class.getName();
     private static Bundle LiveUpdateT = new Bundle();
     private static Bundle LiveUpdateF = new Bundle();
 
@@ -41,7 +41,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.album_list_activity);
+        setContentView(R.layout.albums_list_activity);
 
         mListView = (ListView) findViewById(android.R.id.list);
 
@@ -62,7 +62,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
         setTitle("Albums: " + cursor.getCount());
 
         SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
-                R.layout.album_list_entry, cursor, from, to);
+                R.layout.albums_list_entry, cursor, from, to);
 
         LiveUpdateT.putInt("TYPE", AlbumCacheCursor.TYPE_LIVEUPDATE);
         LiveUpdateT.putBoolean("LiveUpdate", true);
@@ -89,7 +89,7 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
     }
 
     static void show(Context context) {
-        final Intent intent = new Intent(context, AlbumListActivity.class);
+        final Intent intent = new Intent(context, AlbumsListActivity.class);
         context.startActivity(intent);
     }
 
