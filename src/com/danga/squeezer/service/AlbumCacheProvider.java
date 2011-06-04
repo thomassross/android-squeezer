@@ -44,6 +44,7 @@ import android.provider.LiveFolders;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.danga.squeezer.R;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.model.SqueezerAlbum;
 import com.google.android.panoramio.BitmapUtils;
@@ -52,6 +53,8 @@ public class AlbumCacheProvider extends ContentProvider {
     private static final String TAG = "AlbumCacheProvider";
     private static final String DATABASE_NAME = "album_cache.db";
     private static final int DATABASE_VERSION = 1;
+    private static final String defaultAlbumArtUri = "android.resource://com.danga.squeezer/"
+            + R.drawable.icon_album_noart;
 
     private ISqueezeService service = null;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -483,6 +486,7 @@ public class AlbumCacheProvider extends ContentProvider {
             ContentValues cv = new ContentValues();
             int serverOrder = start;
             SqueezerAlbum thisAlbum;
+            String albumArtUrl = null;
 
             db.beginTransaction();
             try {
@@ -496,7 +500,11 @@ public class AlbumCacheProvider extends ContentProvider {
                     cv.put(AlbumCache.Albums.COL_ARTWORK_ID, thisAlbum.getArtwork_track_id());
 
                     // Kick off a fetch of album artwork.
-                    updateAlbumArt(serverOrder, thisAlbum.getArtwork_track_id());
+                    albumArtUrl = getAlbumArtUrl(thisAlbum.getArtwork_track_id());
+                    if (albumArtUrl == null || albumArtUrl.length() == 0)
+                        cv.put(AlbumCache.Albums.COL_ARTWORK_PATH, defaultAlbumArtUri);
+                    else
+                        updateAlbumArt(serverOrder, thisAlbum.getArtwork_track_id(), albumArtUrl);
 
                     db.update(AlbumCache.Albums.TABLE_NAME, cv,
                             AlbumCache.Albums.COL_SERVERORDER + "=?",
@@ -516,11 +524,8 @@ public class AlbumCacheProvider extends ContentProvider {
         }
     };
 
-    protected void updateAlbumArt(final int serverOrder, final String trackId) {
-        final String albumArtUrl = getAlbumArtUrl(trackId);
-
-        if (albumArtUrl == null || albumArtUrl.length() == 0)
-            return;
+    protected void updateAlbumArt(final int serverOrder, final String trackId,
+            final String albumArtUrl) {
 
         artworkThreadPool.execute(new Runnable() {
             public void run() {
