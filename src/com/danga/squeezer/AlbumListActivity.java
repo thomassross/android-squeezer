@@ -5,8 +5,8 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.SimpleCursorAdapter;
@@ -20,20 +20,21 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
 	private static Bundle LiveUpdateF = new Bundle();
 	
 	private ContentProviderClient mContentProviderClient = null;
-	private Cursor cursor;
+	private Cursor cursor = null;
 	
+
+	// Columns to bind
+	private static final String[] from = new String[] { Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH };
+	private static final int[] to = new int[] { R.id.text1, R.id.text2, R.id.icon };
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.album_list_activity);
-		
+
 		cursor = managedQuery(Albums.CONTENT_URI,
 				new String[] { Albums._ID, Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH },
 				null, null, null);
-
-		// Columns to bind
-		String[] from = new String[] { Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH };
-		int[] to = new int[] { R.id.text1, R.id.text2, R.id.icon };
 		
 		SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
 				R.layout.album_list_entry, cursor, from, to);
@@ -81,14 +82,16 @@ public class AlbumListActivity extends ListActivity implements AbsListView.OnScr
             
             Bundle extras = new Bundle();
             extras.putInt("TYPE", AlbumCacheCursor.TYPE_REQUEST_PAGE);
-            extras.putInt("position", view.getFirstVisiblePosition());
+            extras.putInt("firstPosition", view.getFirstVisiblePosition());
+            extras.putInt("lastPosition", view.getLastVisiblePosition());
             cursor.respond(extras);
 
             break;
+        
         case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
             break;
+
         case OnScrollListener.SCROLL_STATE_FLING:
-        	Log.v(TAG, "Flinging");
             cursor.respond(LiveUpdateF);
         }
     }
