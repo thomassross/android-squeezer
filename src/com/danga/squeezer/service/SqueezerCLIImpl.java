@@ -113,6 +113,11 @@ class SqueezerCLIImpl {
                                     service.changeActivePlayer(defaultPlayer);
                             return true;
                         }
+
+                            public void onItemsFinished() {
+                                // TODO Auto-generated method stub
+
+                            }
                         }
                 )
                 );
@@ -381,6 +386,12 @@ class SqueezerCLIImpl {
          * @return
          */
         boolean processList(boolean rescan, int count, int start);
+
+        /**
+         * Called when all items requested have been retrieved and passed to
+         * processList().
+         */
+        void onItemsFinished();
     }
 
     /**
@@ -470,7 +481,7 @@ class SqueezerCLIImpl {
         processLists: if (checkCorrelation(cmd.cmd, correlationid)) {
             int end = start + itemsPerResponse;
             int max = 0;
-            for (SqueezeParserInfo parser : cmd.parserInfos)
+            for (SqueezeParserInfo parser : cmd.parserInfos) {
                 if (checkCorrelation(parser.handler.getDataType(), correlationid)) {
                     Integer count = counts.get(parser.count_id);
                     int countValue = (count == null ? 0 : count);
@@ -481,12 +492,14 @@ class SqueezerCLIImpl {
                             max = countValue;
                     }
                 }
-            if (end % pageSize != 0 && end < max) {
-                int count = (end + pageSize > max ? max - end : pageSize - itemsPerResponse);
-                StringBuilder cmdline = new StringBuilder(cmd.cmd + " " + end + " " + count);
-                for (String parameter : taggedParameters.values())
-                    cmdline.append(" " + parameter);
-                sendCommand(playerid + cmdline.toString());
+                if (end % pageSize != 0 && end < max) {
+                    int count = (end + pageSize > max ? max - end : pageSize - itemsPerResponse);
+                    StringBuilder cmdline = new StringBuilder(cmd.cmd + " " + end + " " + count);
+                    for (String parameter : taggedParameters.values())
+                        cmdline.append(" " + parameter);
+                    sendCommand(playerid + cmdline.toString());
+                } else
+                    parser.handler.onItemsFinished();
             }
         }
     }
@@ -518,6 +531,11 @@ class SqueezerCLIImpl {
                 }
             return false;
         }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
+        }
     }
 
     private class GenreListHandler implements SqueezerListHandler {
@@ -546,6 +564,11 @@ class SqueezerCLIImpl {
                     Log.e(TAG, e.toString());
                 }
             return false;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
         }
 
     }
@@ -578,6 +601,11 @@ class SqueezerCLIImpl {
                 }
             return false;
         }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
+        }
     }
 
     private class AlbumListHandler implements SqueezerListHandler {
@@ -606,6 +634,11 @@ class SqueezerCLIImpl {
                     Log.e(TAG, e.toString());
                 }
             return false;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
         }
     }
 
@@ -636,6 +669,15 @@ class SqueezerCLIImpl {
                 }
             return false;
         }
+
+        public void onItemsFinished() {
+            if (service.songListCallback.get() != null)
+                try {
+                    service.songListCallback.get().onItemsFinished();
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
+        }
     }
 
     private class PlaylistsHandler implements SqueezerListHandler {
@@ -664,6 +706,11 @@ class SqueezerCLIImpl {
                     Log.e(TAG, e.toString());
                 }
             return false;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
         }
 
     }

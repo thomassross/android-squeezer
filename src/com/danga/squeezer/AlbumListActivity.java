@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.danga.squeezer.itemlists.IServiceSongListCallback;
@@ -32,6 +33,7 @@ public class AlbumListActivity extends ListActivity {
     private static final String TAG = AlbumsListActivity.class.getName();
     private ListView mListView;
     private View mHeaderView;
+    private ProgressBar mProgressBar;
 
     private Uri mAlbumUri;
     private Cursor mCursor;
@@ -73,6 +75,8 @@ public class AlbumListActivity extends ListActivity {
         mHeaderView = getLayoutInflater().inflate(R.layout.album_list_header, mListView, false);
         mListView.addHeaderView(mHeaderView, null, false);
         mListView.setHeaderDividersEnabled(true);
+
+        mProgressBar = (ProgressBar) mListView.findViewById(R.id.progress);
 
         // Get the URI for the album to display
         Intent intent = getIntent();
@@ -152,6 +156,14 @@ public class AlbumListActivity extends ListActivity {
                 mSongListAdapter.setItem(i, song);
                 i++;
             }
+        }
+
+        public void onItemsFinished() {
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            });
         }
     };
 
