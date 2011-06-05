@@ -22,6 +22,7 @@ import com.danga.squeezer.service.AlbumCacheCursor;
 
 public class AlbumsListActivity extends ListActivity implements AbsListView.OnScrollListener,
         AbsListView.OnItemClickListener {
+    @SuppressWarnings("unused")
     private static final String TAG = AlbumsListActivity.class.getName();
     private static Bundle LiveUpdateT = new Bundle();
     private static Bundle LiveUpdateF = new Bundle();

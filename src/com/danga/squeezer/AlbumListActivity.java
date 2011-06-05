@@ -30,6 +30,7 @@ import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SqueezeService;
 
 public class AlbumListActivity extends ListActivity {
+    @SuppressWarnings("unused")
     private static final String TAG = AlbumsListActivity.class.getName();
     private ListView mListView;
     private View mHeaderView;

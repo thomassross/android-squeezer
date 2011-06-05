@@ -14,6 +14,7 @@ import com.danga.squeezer.R;
 import com.danga.squeezer.Squeezer;
 
 public class AlbumCacheCursor extends CursorWrapper {
+    @SuppressWarnings("unused")
     private static final String TAG = AlbumCacheCursor.class.getName();
 
     public static final int TYPE_LIVEUPDATE = 0;
