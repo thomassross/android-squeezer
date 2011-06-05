@@ -33,7 +33,6 @@ public class AlbumListActivity extends ListActivity {
     @SuppressWarnings("unused")
     private static final String TAG = AlbumsListActivity.class.getName();
     private ListView mListView;
-    private View mHeaderView;
     private ProgressBar mProgressBar;
 
     private Uri mAlbumUri;
@@ -71,13 +70,8 @@ public class AlbumListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_list_activity);
 
-        // Create a static header showing album information
         mListView = getListView();
-        mHeaderView = getLayoutInflater().inflate(R.layout.album_list_header, mListView, false);
-        mListView.addHeaderView(mHeaderView, null, false);
-        mListView.setHeaderDividersEnabled(true);
-
-        mProgressBar = (ProgressBar) mListView.findViewById(R.id.progress);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress);
 
         // Get the URI for the album to display
         Intent intent = getIntent();
@@ -95,12 +89,12 @@ public class AlbumListActivity extends ListActivity {
         mAlbumArtist = mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTIST));
 
         // Set the header with information about this album
-        TextView t = (TextView) mHeaderView.findViewById(R.id.text1);
+        TextView t = (TextView) findViewById(R.id.text1);
         t.setText(mAlbumName);
-        t = (TextView) mHeaderView.findViewById(R.id.text2);
+        t = (TextView) findViewById(R.id.text2);
         t.setText(mAlbumArtist);
 
-        ImageView img = (ImageView) mHeaderView.findViewById(R.id.icon);
+        ImageView img = (ImageView) findViewById(R.id.icon);
         img.setImageURI(Uri.parse(mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTWORK_PATH))));
 
         setListAdapter(mSongListAdapter);
