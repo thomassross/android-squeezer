@@ -22,8 +22,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity android:name="AlbumsListActivity" android:label="Album list test" />
+
+        <activity android:name=".AlbumsListActivity" android:label="Albums list">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.danga.squeezer.album" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".AlbumListActivity" android:label="Album list">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.danga.squeezer.album" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SettingsActivity" android:label="@string/activity_settings_name" />
         <activity android:name=".SqueezerSearchActivity" android:label="@string/app_name" />
         <activity android:name=".SqueezerHomeActivity" android:label="@string/app_name" />

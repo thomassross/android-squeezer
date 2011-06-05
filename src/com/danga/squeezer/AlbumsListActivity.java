@@ -3,23 +3,25 @@ package com.danga.squeezer;
 
 import android.app.ListActivity;
 import android.content.ContentProviderClient;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
 
+import com.danga.squeezer.service.AlbumCache;
 import com.danga.squeezer.service.AlbumCache.Albums;
 import com.danga.squeezer.service.AlbumCacheCursor;
 
-public class AlbumsListActivity extends ListActivity implements AbsListView.OnScrollListener {
+public class AlbumsListActivity extends ListActivity implements AbsListView.OnScrollListener,
+        AbsListView.OnItemClickListener {
     private static final String TAG = AlbumsListActivity.class.getName();
     private static Bundle LiveUpdateT = new Bundle();
     private static Bundle LiveUpdateF = new Bundle();
@@ -29,11 +31,12 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
     private ContentProviderClient mContentProviderClient = null;
     private Cursor cursor = null;
 
-    // Columns to bind
+    // Columns to bind to resources (in order)
     private static final String[] from = new String[] {
             Albums.COL_NAME, Albums.COL_ARTIST, Albums.COL_ARTWORK_PATH
     };
 
+    // Resources to bind column values to (in order)
     private static final int[] to = new int[] {
             R.id.text1, R.id.text2, R.id.icon
     };
@@ -43,15 +46,9 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.albums_list_activity);
 
-        mListView = (ListView) findViewById(android.R.id.list);
-
-        mListView.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(),
-                        "This is position " + position + ", from id: " + id,
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+        mListView = getListView();
+        mListView.setOnItemClickListener(this);
+        mListView.setOnScrollListener(this);
 
         cursor = managedQuery(Albums.CONTENT_URI,
                 new String[] {
@@ -70,8 +67,6 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
         LiveUpdateF.putBoolean("LiveUpdate", false);
 
         setListAdapter(mAdapter);
-
-        getListView().setOnScrollListener(this);
     }
 
     @Override
@@ -91,6 +86,15 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
     static void show(Context context) {
         final Intent intent = new Intent(context, AlbumsListActivity.class);
         context.startActivity(intent);
+    }
+
+    /** OnItemClickListener methods */
+
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Uri albumUri = ContentUris
+                .withAppendedId(AlbumCache.Albums.CONTENT_ID_URI_BASE, id);
+        Intent i = new Intent(Intent.ACTION_VIEW, albumUri);
+        startActivity(i);
     }
 
     /** OnScrollListener methods */

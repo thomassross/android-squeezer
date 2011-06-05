@@ -1,5 +1,5 @@
-package com.danga.squeezer;
 
+package com.danga.squeezer;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -9,53 +9,58 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.danga.squeezer.service.AlbumCache;
+
 public class SqueezerHomeActivity extends ListActivity {
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setHomeMenu();
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHomeMenu();
+    }
 
-	private void setHomeMenu() {
-		int[] icons = new int[] { R.drawable.icon_nowplaying,
-				R.drawable.icon_mymusic, R.drawable.icon_internet_radio,
-				R.drawable.icon_favorites, R.drawable.icon_ml_albums };
-		setListAdapter(new IconRowAdapter(this, getResources().getStringArray(R.array.home_items), icons));
-		getListView().setOnItemClickListener(onHomeItemClick);
-	}
+    private void setHomeMenu() {
+        int[] icons = new int[] {
+                R.drawable.icon_nowplaying,
+                R.drawable.icon_mymusic, R.drawable.icon_internet_radio,
+                R.drawable.icon_favorites, R.drawable.icon_ml_albums
+        };
+        setListAdapter(new IconRowAdapter(this, getResources().getStringArray(R.array.home_items),
+                icons));
+        getListView().setOnItemClickListener(onHomeItemClick);
+    }
 
-	private OnItemClickListener onHomeItemClick = new OnItemClickListener() {
-		private static final int NOW_PLAYING = 0;
-		private static final int MUSIC = 1;
-		private static final int INTERNET_RADIO = 2;
-		private static final int FAVORITES = 3;
-		private static final int TEST_ALBUMS = 4;
+    private final OnItemClickListener onHomeItemClick = new OnItemClickListener() {
+        private static final int NOW_PLAYING = 0;
+        private static final int MUSIC = 1;
+        private static final int INTERNET_RADIO = 2;
+        private static final int FAVORITES = 3;
+        private static final int TEST_ALBUMS = 4;
 
-		// 
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			switch (position) {
-			case NOW_PLAYING:
-				SqueezerActivity.show(SqueezerHomeActivity.this);
-				break;
-			case MUSIC:
-				SqueezerMusicActivity.show(SqueezerHomeActivity.this);
-				break;
-			case INTERNET_RADIO:
-				break;
-			case FAVORITES:
-				break;
-			case TEST_ALBUMS:
-				AlbumsListActivity.show(SqueezerHomeActivity.this);
-				break;
-			}
-		}
-	};
+        //
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            switch (position) {
+                case NOW_PLAYING:
+                SqueezerActivity.show(SqueezerHomeActivity.this);
+                break;
+            case MUSIC:
+                SqueezerMusicActivity.show(SqueezerHomeActivity.this);
+                break;
+            case INTERNET_RADIO:
+                break;
+            case FAVORITES:
+                break;
+            case TEST_ALBUMS:
+                startActivity(new Intent(Intent.ACTION_VIEW, AlbumCache.Albums.CONTENT_ID_URI_BASE));
+                break;
+        }
+    }
+    };
 
-	public static void show(Context context) {
+    public static void show(Context context) {
         final Intent intent = new Intent(context, SqueezerHomeActivity.class)
-        		.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        		.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         context.startActivity(intent);
     }
 

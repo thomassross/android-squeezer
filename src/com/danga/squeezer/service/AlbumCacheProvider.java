@@ -351,10 +351,38 @@ public class AlbumCacheProvider extends ContentProvider {
         return 0;
     }
 
+    /**
+     * This is called when a client calls
+     * {@link android.content.ContentResolver#getType(Uri)}. Returns the MIME
+     * data type of the URI given as a parameter.
+     * 
+     * @param uri The URI whose MIME type is desired.
+     * @return The MIME type of the URI.
+     * @throws IllegalArgumentException if the incoming URI pattern is invalid.
+     */
     @Override
     public String getType(Uri uri) {
-        // TODO Auto-generated method stub
-        return null;
+        /**
+         * Chooses the MIME type based on the incoming URI pattern
+         */
+        switch (sUriMatcher.match(uri)) {
+
+            // If the pattern is for albums or live folders, returns the general
+            // content type.
+            case ALBUMS:
+            case LIVE_FOLDER_ALBUMS:
+                return AlbumCache.Albums.CONTENT_TYPE;
+
+                // If the pattern is for album IDs, returns the album ID content
+                // type.
+            case ALBUM_ID:
+                return AlbumCache.Albums.CONTENT_ITEM_TYPE;
+
+                // If the URI pattern doesn't match any permitted patterns,
+                // throws an exception.
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri);
+        }
     }
 
     @Override
