@@ -52,8 +52,31 @@
 	    />
 	</RelativeLayout>
 
-    <ListView
-        android:id="@android:id/android:list"
+    <ListView android:id="@android:id/android:list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10px"
+        android:paddingRight="10px"
+        android:paddingTop="8px"
+        android:paddingBottom="8px">
+
+        <Button android:id="@+id/play_now"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Play now"
+            android:onClick="onPlayNow" />
+
+        <Button android:id="@+id/add_to_playlist"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/play_now"
+            android:text="Add to playlist"
+            android:onClick="onAddToPlaylist" />
+    </RelativeLayout>
 </LinearLayout>

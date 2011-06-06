@@ -38,6 +38,7 @@ public class AlbumListActivity extends ListActivity {
     private Uri mAlbumUri;
     private Cursor mCursor;
 
+    private SqueezerAlbum mAlbum;
     private String mAlbumId;
     private String mAlbumName;
     private String mAlbumArtist;
@@ -88,6 +89,9 @@ public class AlbumListActivity extends ListActivity {
         mAlbumName = mCursor.getString(mCursor.getColumnIndex(Albums.COL_NAME));
         mAlbumArtist = mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTIST));
 
+        mAlbum = new SqueezerAlbum(mAlbumId, mAlbumName);
+        mAlbum.setArtist(mAlbumArtist);
+
         // Set the header with information about this album
         TextView t = (TextView) findViewById(R.id.text1);
         t.setText(mAlbumName);
@@ -98,6 +102,13 @@ public class AlbumListActivity extends ListActivity {
         img.setImageURI(Uri.parse(mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTWORK_PATH))));
 
         setListAdapter(mSongListAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindService(new Intent(this, SqueezeService.class), serviceConnection,
+                Context.BIND_AUTO_CREATE);
     }
 
     protected void onServiceConnected() {
@@ -113,11 +124,41 @@ public class AlbumListActivity extends ListActivity {
         });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        bindService(new Intent(this, SqueezeService.class), serviceConnection,
-                Context.BIND_AUTO_CREATE);
+    /**
+     * Fetch song information for the current album.
+     * 
+     * @throws RemoteException
+     */
+    protected void fetchSongInformation() throws RemoteException {
+        service.songs(0, "tracknum", null, mAlbum, null, null, null);
+    }
+
+    /**
+     * Play the displayed album.
+     * 
+     * @param v The view that was clicked.
+     */
+    public void onPlayNow(View v) {
+        try {
+            service.playlistControl("load", mAlbum.getClass().getName(), mAlbum.getId());
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Add the displayed album to the end of the current playlist.
+     * 
+     * @param v
+     */
+    public void onAddToPlaylist(View v) {
+        try {
+            service.playlistControl("add", mAlbum.getClass().getName(), mAlbum.getId());
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -127,22 +168,11 @@ public class AlbumListActivity extends ListActivity {
             unbindService(serviceConnection);
     }
 
-    /**
-     * Fetch song information for the current album.
-     * 
-     * @throws RemoteException
-     */
-    protected void fetchSongInformation() throws RemoteException {
-        // Request data for the album
-        SqueezerAlbum album = new SqueezerAlbum(mAlbumId, mAlbumName);
-        service.songs(0, "tracknum", null, album, null, null, null);
-    }
-
-    /**
-     * Process the list of songs received from the server. Add each song to the
-     * mSongListAdapter at it's given position in the results.
-     */
     private final IServiceSongListCallback songListCallback = new IServiceSongListCallback.Stub() {
+        /**
+         * Process the list of songs received from the server. Add each song to
+         * the mSongListAdapter at it's given position in the results.
+         */
         public void onSongsReceived(int count, int start,
                 java.util.List<com.danga.squeezer.model.SqueezerSong> items) {
             int i = start;
@@ -153,6 +183,9 @@ public class AlbumListActivity extends ListActivity {
             }
         }
 
+        /**
+         * Turn off the progress spinner.
+         */
         public void onItemsFinished() {
             runOnUiThread(new Runnable() {
                 public void run() {
@@ -184,7 +217,8 @@ public class AlbumListActivity extends ListActivity {
 
             SqueezerSong song = songs.get(position);
             TextView t;
-            String name = song.getName();
+            String name = song.getName(); // TODO: Seen an NPE here. How is that
+                                          // possible?
             String artist = song.getArtist();
 
             if (name != null) {
