@@ -39,9 +39,6 @@ public class AlbumListActivity extends ListActivity {
     private Cursor mCursor;
 
     private SqueezerAlbum mAlbum;
-    private String mAlbumId;
-    private String mAlbumName;
-    private String mAlbumArtist;
 
     private ISqueezeService service;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -85,21 +82,16 @@ public class AlbumListActivity extends ListActivity {
         }, null, null, null);
 
         mCursor.moveToFirst();
-        mAlbumId = mCursor.getString(mCursor.getColumnIndex(Albums.COL_ALBUMID));
-        mAlbumName = mCursor.getString(mCursor.getColumnIndex(Albums.COL_NAME));
-        mAlbumArtist = mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTIST));
-
-        mAlbum = new SqueezerAlbum(mAlbumId, mAlbumName);
-        mAlbum.setArtist(mAlbumArtist);
+        mAlbum = new SqueezerAlbum(mCursor);
 
         // Set the header with information about this album
         TextView t = (TextView) findViewById(R.id.text1);
-        t.setText(mAlbumName);
+        t.setText(mAlbum.getName());
         t = (TextView) findViewById(R.id.text2);
-        t.setText(mAlbumArtist);
+        t.setText(mAlbum.getArtist());
 
         ImageView img = (ImageView) findViewById(R.id.icon);
-        img.setImageURI(Uri.parse(mCursor.getString(mCursor.getColumnIndex(Albums.COL_ARTWORK_PATH))));
+        img.setImageURI(Uri.parse(mAlbum.getArtworkPath()));
 
         setListAdapter(mSongListAdapter);
     }
