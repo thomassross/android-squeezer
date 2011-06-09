@@ -40,8 +40,11 @@ public class AlbumCacheCursor extends CursorWrapper {
     {
         // TODO: Localise
         defaults.put(AlbumCache.Albums.COL_NAME, "Loading...");
-        defaults.put(AlbumCache.Albums.COL_ARTWORK_PATH, "android.resource://com.danga.squeezer/"
-                + R.drawable.icon_empty);
+
+        // Do it this way, instead of specifying android:src in the layout
+        // because the system throws many errors to the log when trying to set
+        // null as the image.
+        defaults.put(AlbumCache.Albums.COL_ARTWORK_PATH, Integer.toString(R.drawable.icon_empty));
     }
 
     public AlbumCacheCursor(Cursor cursor, AlbumCacheProvider provider) {
