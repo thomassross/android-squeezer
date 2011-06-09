@@ -16,6 +16,7 @@ import com.danga.squeezer.model.SqueezerArtist;
 import com.danga.squeezer.model.SqueezerYear;
 import com.danga.squeezer.model.SqueezerGenre;
 import com.danga.squeezer.model.SqueezerPlaylist;
+import com.danga.squeezer.service.SqueezerServerState;
 
 interface ISqueezeService {
 	    // For the activity to get callbacks on interesting events:
@@ -30,6 +31,9 @@ interface ISqueezeService {
         
         // For the SettingsActivity to notify the Service that a setting changed.
         void preferenceChanged(String key);
+        
+        // Return the current server state.
+        SqueezerServerState getServerState();
 
 		// Call this to change the player we are controlling
 	    void setActivePlayer(in SqueezerPlayer player);

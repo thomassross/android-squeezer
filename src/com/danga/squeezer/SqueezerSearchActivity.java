@@ -35,6 +35,7 @@ import com.danga.squeezer.model.SqueezerAlbum;
 import com.danga.squeezer.model.SqueezerArtist;
 import com.danga.squeezer.model.SqueezerGenre;
 import com.danga.squeezer.model.SqueezerSong;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class SqueezerSearchActivity extends SqueezerItemListActivity {
     private TextView loadingLabel;
@@ -230,6 +231,12 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
         public void onAlbumsReceived(int count, int start, List<SqueezerAlbum> items)
                 throws RemoteException {
             onItemsReceived(count, start, items);
+        }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     };
 

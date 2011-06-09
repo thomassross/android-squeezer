@@ -26,6 +26,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
@@ -44,6 +46,7 @@ import android.provider.LiveFolders;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.model.SqueezerAlbum;
@@ -51,12 +54,15 @@ import com.google.android.panoramio.BitmapUtils;
 
 public class AlbumCacheProvider extends ContentProvider {
     private static final String TAG = "AlbumCacheProvider";
-    private static final String DATABASE_NAME = "album_cache.db";
-    private static final int DATABASE_VERSION = 1;
-    private static final String defaultAlbumArtUri = "android.resource://com.danga.squeezer/"
-            + R.drawable.icon_album_noart;
 
-    private ISqueezeService service = null;
+    /**
+     * The resource to use when no album artwork exists.
+     */
+    private static final String defaultAlbumArtUri = Integer.toString(R.drawable.icon_album_noart);
+
+    private SqueezerServerState mServerState;
+
+    private ISqueezeService service;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder binder) {
             service = ISqueezeService.Stub.asInterface(binder);
@@ -76,7 +82,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
     /**
      * Batch database update notifications. Maintain a boolean that indicates
-     * whether or not the content resolved should be notified about a database
+     * whether or not the content resolver should be notified about a database
      * change, and a pool of threads to do this notification.
      */
     private final AtomicBoolean notifyUpdates = new AtomicBoolean(false);
@@ -124,6 +130,12 @@ public class AlbumCacheProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
 
     private DatabaseHelper mOpenHelper;
+
+    /**
+     * A representation of the directory that the provider uses as the root of
+     * the cache.
+     */
+    private File mCacheDirectory;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -178,9 +190,19 @@ public class AlbumCacheProvider extends ContentProvider {
                 LiveFolders.NAME);
     }
 
-    static class DatabaseHelper extends SQLiteOpenHelper {
-        DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    class DatabaseHelper extends SQLiteOpenHelper {
+
+        private static final String DATABASE_NAME_SUFFIX = "-album_cache.db";
+        private static final int DATABASE_VERSION = 1;
+
+        private final SqueezerServerState mServerState;
+        private final SharedPreferences preferences;
+
+        DatabaseHelper(Context context, SqueezerServerState serverState) {
+            super(context, serverState.getUuid() + DATABASE_NAME_SUFFIX, null, DATABASE_VERSION);
+            mServerState = serverState;
+
+            preferences = context.getSharedPreferences(Preferences.NAME, Context.MODE_PRIVATE);
         }
 
         @Override
@@ -202,6 +224,70 @@ public class AlbumCacheProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + AlbumCache.Albums.TABLE_NAME + ";");
             onCreate(db);
         }
+
+        /*
+         * (non-Javadoc)
+         * @see android.database.sqlite.SQLiteOpenHelper#getWritableDatabase()
+         */
+        @Override
+        public synchronized SQLiteDatabase getWritableDatabase() {
+            SQLiteDatabase db = super.getWritableDatabase();
+
+            Log.v(TAG, "getWriteableDatabase()");
+
+            final String uuid = mServerState.getUuid();
+
+            if (uuid == null)
+                throw new IllegalStateException(
+                        "getWritableDatabase() called when server has no uuid");
+
+            // Check the cache is still valid, re-create if necessary
+            final String lastScanKey = uuid + ":lastscan";
+            final int oldLastScan = preferences.getInt(lastScanKey, 0);
+            final int curLastScan = mServerState.getLastScan();
+
+            /**
+             * Recreate the database if we haven't got any record of the last
+             * scan time, or we do, and they don't match.
+             */
+            if (oldLastScan == 0 || oldLastScan != curLastScan) {
+                Log.v(TAG, "Rebuilding album cache... " + oldLastScan + " : " + curLastScan);
+                InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
+                final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
+                final int totalAlbums = mServerState.getTotalAlbums();
+
+                onUpgrade(db, 0, 1);
+
+                db.beginTransaction();
+                try {
+                    for (int i = 0; i < totalAlbums; i++) {
+                        if (i % 50 == 0)
+                            Log.v("reset", "Created " + i);
+                        ih.prepareForInsert();
+                        ih.bind(serverOrderColumn, i);
+                        ih.execute();
+                    }
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+
+                // Remove the cache directory
+                if (mCacheDirectory.exists())
+                    for (File f : mCacheDirectory.listFiles())
+                        f.delete();
+
+                mCacheDirectory.mkdirs();
+
+                Editor editor = preferences.edit();
+                editor.putInt(lastScanKey, curLastScan);
+                editor.commit();
+                Log.v(TAG, "... album cache rebuilt");
+            }
+
+            return db;
+        }
     }
 
     /**
@@ -218,50 +304,13 @@ public class AlbumCacheProvider extends ContentProvider {
         }, 2, 2, TimeUnit.SECONDS);
     }
 
-    /**
-     * Reset the database to n almost empty rows -- only the serverorder column
-     * is populated.
-     * 
-     * @param totalAlbums the number of albums (and hence rows) to create
-     */
-    public void reset(int totalAlbums) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        // db.execSQL("DELETE FROM " + AlbumCache.Albums.TABLE_NAME + ";");
-        mOpenHelper.onUpgrade(db, 0, 1);
-
-        InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
-        final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
-
-        db.beginTransaction();
-        try {
-            for (int i = 0; i < totalAlbums; i++) {
-                if (i % 50 == 0)
-                    Log.v("reset", "Created " + i);
-                ih.prepareForInsert();
-                ih.bind(serverOrderColumn, i);
-                ih.execute();
-            }
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-
-        // Remove the cache
-        File root = new File(Environment.getExternalStorageDirectory(),
-                "/Android/data/com.danga.squeezer/cache/album");
-        if (root.exists())
-            for (File f : root.listFiles())
-                f.delete();
-    }
-
     @Override
     public boolean onCreate() {
-        mOpenHelper = new DatabaseHelper(getContext());
+        Log.v(TAG, "AlbumCacheProvider::onCreate running");
+        Context context = getContext();
 
-        Intent intent = new Intent(getContext(), SqueezeService.class);
-        getContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-        return true;
+        Intent intent = new Intent(context, SqueezeService.class);
+        return context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -550,6 +599,24 @@ public class AlbumCacheProvider extends ContentProvider {
 
             getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);
         }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            Log.v(TAG, "onServerStateChanged");
+            mServerState = newState;
+            String uuid = mServerState.getUuid();
+
+            Log.v(TAG, "AlbumCacheProvider: Server UUID is now " + uuid);
+
+            if (uuid != null)
+                mCacheDirectory = new File(Environment.getExternalStorageDirectory(),
+                        "/Android/data/com.danga.squeezer/cache/album/"
+                                + mServerState.getUuid());
+            else
+                mCacheDirectory = null;
+
+            mOpenHelper = new DatabaseHelper(getContext(), mServerState);
+        }
     };
 
     protected void updateAlbumArt(final int serverOrder, final String trackId,
@@ -557,15 +624,12 @@ public class AlbumCacheProvider extends ContentProvider {
 
         artworkThreadPool.execute(new Runnable() {
             public void run() {
-                File root = new File(Environment.getExternalStorageDirectory(),
-                        "/Android/data/com.danga.squeezer/cache/album");
-
-                if (!root.exists())
-                    if (!root.mkdirs())
+                if (!mCacheDirectory.exists())
+                    if (!mCacheDirectory.mkdirs())
                         return;
 
-                File artwork = new File(root, trackId + ".jpg");
-                File artwork64 = new File(root, trackId + "-64px.png");
+                File artwork = new File(mCacheDirectory, trackId + ".jpg");
+                File artwork64 = new File(mCacheDirectory, trackId + "-64px.png");
 
                 // File artwork = new File(root, trackId + "/original.png");
                 // File artwork64 = new File(root, trackId +

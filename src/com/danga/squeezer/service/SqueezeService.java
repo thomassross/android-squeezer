@@ -13,8 +13,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -395,7 +393,11 @@ public class SqueezeService extends Service {
         SqueezerServerState oldServerState = serverState;
         serverState.setRescan(tokenMap.get("rescan") == "1");
         serverState.setVersion(tokenMap.get("version"));
+
+        // TODO: Not convinced this is the server UUID. It might be the UUID of
+        // the first connected player, if the docs are accurate.
         serverState.setUuid(tokenMap.get("uuid"));
+
         serverState.setTotalAlbums(Integer.valueOf(tokenMap.get("info total albums")));
         serverState.setTotalArtists(Integer.valueOf(tokenMap.get("info total artists")));
         serverState.setTotalGenres(Integer.valueOf(tokenMap.get("info total genres")));
@@ -418,50 +420,14 @@ public class SqueezeService extends Service {
      * @param oldServerState The previous state of the server.
      */
     private void onServerStateChanged(SqueezerServerState oldServerState) {
-        // Fetch the previous lastscan time, compare against the current. If
-        // the scan time has changed then invalidate and rebuild the cache
-        final String lastScanKey = serverState.getUuid() + ":lastscan";
-        Integer oldLastScan = preferences.getInt(lastScanKey, 0);
 
-        // Always update while debugging
-        // if(oldLastScan != serverState.getLastScan()) {
-        executor.execute(new Runnable() {
-            public void run() {
-                Log.v(TAG, "Rebuilding album cache...");
-                buildAlbumCache(serverState.getUuid());
-                Log.v(TAG, "... album cache rebuilt");
-                final SharedPreferences preferences = getSharedPreferences(Preferences.NAME,
-                        MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt(lastScanKey, serverState.getLastScan());
-                editor.commit();
+        if (albumListCallback.get() != null)
+            try {
+                albumListCallback.get().onServerStateChanged(oldServerState, serverState);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        });
-        // }
-    }
-
-    private void buildAlbumCache(String uuid) {
-        ContentResolver cr = getContentResolver();
-
-        // TODO: Force database recreation while testing, remove this in
-        // production
-        // code (maybe -- we'd delete everything from the cache table anyway,
-        // and
-        // this is probably the simplest way to do that).
-
-        // TODO: Fix this. How? Force upgrade through the provider?
-        // h.onUpgrade(db, 0, 0);
-        ContentProviderClient client = cr
-                .acquireContentProviderClient(AlbumCache.Albums.CONTENT_URI);
-        AlbumCacheProvider p = (AlbumCacheProvider) client.getLocalContentProvider();
-        p.reset(serverState.getTotalAlbums());
-        client.release();
-
-        // TODO: At this point anything that depends on the cache can start
-        // using it. Need to flip a boolean at this point to indicate that.
-        // ...
-
-        // Fetch album information from the server and update the database.
     }
 
     private void parseStatusLine(List<String> tokens) {
@@ -1162,6 +1128,10 @@ public class SqueezeService extends Service {
                 parameters.add("term:" + searchString);
             cli.requestItems("search", start, parameters);
             return true;
+        }
+
+        public SqueezerServerState getServerState() {
+            return serverState;
         }
     };
 }
