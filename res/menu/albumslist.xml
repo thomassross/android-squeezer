@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:title="Clear cache" android:id="@+id/clear_cache"></item>
+	<item android:title="Pre-load cache" android:id="@+id/preload_cache"></item>
+
+</menu>

@@ -2,13 +2,10 @@
 package com.danga.squeezer.service;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.os.Bundle;
-import android.os.RemoteException;
 
 import com.danga.squeezer.R;
 import com.danga.squeezer.Squeezer;
@@ -27,8 +24,6 @@ public class AlbumCacheCursor extends CursorWrapper {
      * Whether queries should fetch from the server for missing data.
      */
     private Boolean mLiveUpdate = true;
-
-    private final Set<Integer> mOrderedPages = new HashSet<Integer>();
 
     private final int mPageSize = Squeezer.getContext().getResources()
             .getInteger(R.integer.PageSize);
@@ -90,33 +85,15 @@ public class AlbumCacheCursor extends CursorWrapper {
         int firstPage = firstPosition / mPageSize;
         int lastPage = lastPosition / mPageSize;
 
-        maybeRequestPage(firstPage);
+        mProvider.maybeRequestPage(firstPage);
 
         if (lastPage != firstPage)
-            maybeRequestPage(lastPage);
+            mProvider.maybeRequestPage(lastPage);
 
         // If we're more than halfway through the current page then request the
         // next one as well
         if (lastPosition % mPageSize > mPageSize / 2)
-            maybeRequestPage(lastPage + 1);
-    }
-
-    /**
-     * @param page
-     */
-    private void maybeRequestPage(int page) {
-        ISqueezeService service = mProvider.getService();
-
-        if (!mOrderedPages.contains(page))
-            try {
-                mOrderedPages.add(page);
-                service.albums(page * mPageSize, "album", null, null, null, null);
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                mOrderedPages.remove(page);
-                e.printStackTrace();
-            }
-
+            mProvider.maybeRequestPage(lastPage + 1);
     }
 
     @Override

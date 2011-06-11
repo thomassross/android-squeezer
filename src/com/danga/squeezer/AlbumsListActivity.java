@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -19,6 +22,7 @@ import android.widget.SimpleCursorAdapter;
 import com.danga.squeezer.service.AlbumCache;
 import com.danga.squeezer.service.AlbumCache.Albums;
 import com.danga.squeezer.service.AlbumCacheCursor;
+import com.danga.squeezer.service.AlbumCacheProvider;
 
 public class AlbumsListActivity extends ListActivity implements AbsListView.OnScrollListener,
         AbsListView.OnItemClickListener {
@@ -84,6 +88,43 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
             mContentProviderClient.release();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.albumslist, menu);
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.clear_cache:
+                if (mContentProviderClient != null) {
+                    AlbumCacheProvider p = (AlbumCacheProvider) mContentProviderClient
+                            .getLocalContentProvider();
+                    p.rebuildCache();
+                }
+                return true;
+
+            case R.id.preload_cache:
+                // Need to show a progress dialog...
+                return true;
+        }
+
+        return false;
+    }
+
+    // TODO: Remove this when activity navigation is URI based
     static void show(Context context) {
         final Intent intent = new Intent(context, AlbumsListActivity.class);
         context.startActivity(intent);

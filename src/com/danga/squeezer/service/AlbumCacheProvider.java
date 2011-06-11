@@ -11,8 +11,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +50,7 @@ import android.util.Log;
 
 import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
+import com.danga.squeezer.Squeezer;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.model.SqueezerAlbum;
 import com.google.android.panoramio.BitmapUtils;
@@ -88,6 +91,17 @@ public class AlbumCacheProvider extends ContentProvider {
     private final AtomicBoolean notifyUpdates = new AtomicBoolean(false);
     private final ScheduledExecutorService notifyUpdatesThreadPool = Executors
             .newScheduledThreadPool(1);
+
+    /**
+     * The set of pages that have been fetched from the server so far.
+     */
+    private final Set<Integer> mOrderedPages = new HashSet<Integer>();
+
+    /**
+     * The number of items per page.
+     */
+    private final int mPageSize = Squeezer.getContext().getResources()
+            .getInteger(R.integer.PageSize);
 
     /**
      * Thread pool for background image fetches.
@@ -207,6 +221,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            Log.v(TAG, "onCreate()");
             db.execSQL("CREATE TABLE " + AlbumCache.Albums.TABLE_NAME + " ("
                     + AlbumCache.Albums.COL_SERVERORDER + " INTEGER PRIMARY KEY,"
                     + AlbumCache.Albums.COL_ALBUMID + " TEXT,"
@@ -221,6 +236,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.v(TAG, "onUpgrade()");
             db.execSQL("DROP TABLE IF EXISTS " + AlbumCache.Albums.TABLE_NAME + ";");
             onCreate(db);
         }
@@ -235,11 +251,22 @@ public class AlbumCacheProvider extends ContentProvider {
 
             Log.v(TAG, "getWriteableDatabase()");
 
+            // Rebuild the cache if necessary
+            maybeRebuildCache(db, false);
+
+            return db;
+        }
+
+        /**
+         * @param db
+         * @param force Force the rebuild, irrespective of the server state
+         */
+        public synchronized void maybeRebuildCache(SQLiteDatabase db, boolean force) {
             final String uuid = mServerState.getUuid();
 
             if (uuid == null)
                 throw new IllegalStateException(
-                        "getWritableDatabase() called when server has no uuid");
+                        "maybeRebuildCache() called when server has no uuid");
 
             // Check the cache is still valid, re-create if necessary
             final String lastScanKey = uuid + ":lastscan";
@@ -247,10 +274,14 @@ public class AlbumCacheProvider extends ContentProvider {
             final int curLastScan = mServerState.getLastScan();
 
             /**
-             * Recreate the database if we haven't got any record of the last
-             * scan time, or we do, and they don't match.
+             * Recreate the database if:
+             * <p>
+             * force is true, or
+             * <p>
+             * we haven't got any record of the last scan time, or we do, and
+             * they don't match.
              */
-            if (oldLastScan == 0 || oldLastScan != curLastScan) {
+            if (force || oldLastScan == 0 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding album cache... " + oldLastScan + " : " + curLastScan);
                 InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
                 final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
@@ -283,10 +314,11 @@ public class AlbumCacheProvider extends ContentProvider {
                 Editor editor = preferences.edit();
                 editor.putInt(lastScanKey, curLastScan);
                 editor.commit();
+
+                getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);
+
                 Log.v(TAG, "... album cache rebuilt");
             }
-
-            return db;
         }
     }
 
@@ -728,5 +760,33 @@ public class AlbumCacheProvider extends ContentProvider {
             throw new IllegalArgumentException("openFile not supported for multiple albums");
 
         return openFileHelper(uri, mode);
+    }
+
+    /**
+     * Possibly fetch the requested page of data from the service, if it's not
+     * previously been requested.
+     * 
+     * @param page The index of the page to fetch.
+     */
+    public void maybeRequestPage(int page) {
+        if (!mOrderedPages.contains(page))
+            try {
+                mOrderedPages.add(page);
+                service.albums(page * mPageSize, "album", null, null, null, null);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                mOrderedPages.remove(page);
+                e.printStackTrace();
+            }
+    }
+
+    /**
+     * Rebuild the provider's cache of information, irrespective of whether or
+     * not it is out of date.
+     */
+    public void rebuildCache() {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        mOpenHelper.maybeRebuildCache(db, true);
+        mOrderedPages.clear();
     }
 }
