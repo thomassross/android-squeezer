@@ -11,8 +11,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +50,7 @@ import android.util.Log;
 
 import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
+import com.danga.squeezer.Squeezer;
 import com.danga.squeezer.itemlists.IServiceAlbumListCallback;
 import com.danga.squeezer.model.SqueezerAlbum;
 import com.google.android.panoramio.BitmapUtils;
@@ -88,6 +91,13 @@ public class AlbumCacheProvider extends ContentProvider {
     private final AtomicBoolean notifyUpdates = new AtomicBoolean(false);
     private final ScheduledExecutorService notifyUpdatesThreadPool = Executors
             .newScheduledThreadPool(1);
+
+    /** The set of pages that have been fetched from the server so far. */
+    private final Set<Integer> mOrderedPages = new HashSet<Integer>();
+
+    /** The number of items per page. */
+    private final int mPageSize = Squeezer.getContext().getResources()
+            .getInteger(R.integer.PageSize);
 
     /**
      * Thread pool for background image fetches.
@@ -235,11 +245,21 @@ public class AlbumCacheProvider extends ContentProvider {
 
             Log.v(TAG, "getWriteableDatabase()");
 
+            maybeRebuildCache(db, false);
+
+            return db;
+        }
+
+        /**
+         * @param db
+         * @param force Always rebuild if this is true.
+         */
+        public void maybeRebuildCache(SQLiteDatabase db, boolean force) {
             final String uuid = mServerState.getUuid();
 
             if (uuid == null)
                 throw new IllegalStateException(
-                        "getWritableDatabase() called when server has no uuid");
+                        "maybeRebuildCache() called when server has no uuid");
 
             // Check the cache is still valid, re-create if necessary
             final String lastScanKey = uuid + ":lastscan";
@@ -250,7 +270,7 @@ public class AlbumCacheProvider extends ContentProvider {
              * Recreate the database if we haven't got any record of the last
              * scan time, or we do, and they don't match.
              */
-            if (oldLastScan == 0 || oldLastScan != curLastScan) {
+            if (force || oldLastScan == 0 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding album cache... " + oldLastScan + " : " + curLastScan);
                 InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
                 final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
@@ -273,6 +293,8 @@ public class AlbumCacheProvider extends ContentProvider {
                     db.endTransaction();
                 }
 
+                getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);
+
                 // Remove the cache directory
                 if (mCacheDirectory.exists())
                     for (File f : mCacheDirectory.listFiles())
@@ -285,8 +307,6 @@ public class AlbumCacheProvider extends ContentProvider {
                 editor.commit();
                 Log.v(TAG, "... album cache rebuilt");
             }
-
-            return db;
         }
     }
 
@@ -404,7 +424,7 @@ public class AlbumCacheProvider extends ContentProvider {
      * This is called when a client calls
      * {@link android.content.ContentResolver#getType(Uri)}. Returns the MIME
      * data type of the URI given as a parameter.
-     * 
+     *
      * @param uri The URI whose MIME type is desired.
      * @return The MIME type of the URI.
      * @throws IllegalArgumentException if the incoming URI pattern is invalid.
@@ -551,7 +571,7 @@ public class AlbumCacheProvider extends ContentProvider {
     private final IServiceAlbumListCallback albumListCallback = new IServiceAlbumListCallback.Stub() {
         /**
          * Update the affected rows.
-         * 
+         *
          * @param count Number of items as reported by squeezeserver.
          * @param start The start position of items in this update.
          * @param items New items to update in the cache
@@ -719,7 +739,7 @@ public class AlbumCacheProvider extends ContentProvider {
     }
 
     /**
-	 * 
+	 *
 	 */
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode)
@@ -728,5 +748,33 @@ public class AlbumCacheProvider extends ContentProvider {
             throw new IllegalArgumentException("openFile not supported for multiple albums");
 
         return openFileHelper(uri, mode);
+    }
+
+    /**
+     * Possibly fetch the requested page of data from the service, if it's not
+     * previously been requested.
+     *
+     * @param page The index of the page to fetch.
+     */
+    public void maybeRequestPage(int page) {
+        if (!mOrderedPages.contains(page))
+            try {
+                mOrderedPages.add(page);
+                service.albums(page * mPageSize, "album", null, null, null, null);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                mOrderedPages.remove(page);
+                e.printStackTrace();
+            }
+    }
+
+    /**
+     * Rebuild the provider's cache of information, irrespective of whether or
+     * not it is out of date.
+     */
+    public void rebuildCache() {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        mOpenHelper.maybeRebuildCache(db, true);
+        mOrderedPages.clear();
     }
 }

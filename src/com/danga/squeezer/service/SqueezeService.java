@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -72,7 +73,7 @@ public class SqueezeService extends Service {
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     final AtomicReference<IServicePlayerListCallback> playerListCallback = new AtomicReference<IServicePlayerListCallback>();
-    final AtomicReference<IServiceAlbumListCallback> albumListCallback = new AtomicReference<IServiceAlbumListCallback>();
+    final RemoteCallbackList<IServiceAlbumListCallback> albumListCallbacks = new RemoteCallbackList<IServiceAlbumListCallback>();
     final AtomicReference<IServiceArtistListCallback> artistListCallback = new AtomicReference<IServiceArtistListCallback>();
     final AtomicReference<IServiceYearListCallback> yearListCallback = new AtomicReference<IServiceYearListCallback>();
     final AtomicReference<IServiceGenreListCallback> genreListCallback = new AtomicReference<IServiceGenreListCallback>();
@@ -384,7 +385,7 @@ public class SqueezeService extends Service {
 
     /**
      * Populate serverState with new information from the server.
-     * 
+     *
      * @param tokens
      */
     private void parseServerStatusLine(List<String> tokens) {
@@ -416,18 +417,21 @@ public class SqueezeService extends Service {
     /**
      * Called when the server state has changed and the changes have been
      * parsed.
-     * 
+     *
      * @param oldServerState The previous state of the server.
      */
     private void onServerStateChanged(SqueezerServerState oldServerState) {
-
-        if (albumListCallback.get() != null)
+        int i = albumListCallbacks.beginBroadcast();
+        while (i > 0) {
+            i--;
             try {
-                albumListCallback.get().onServerStateChanged(oldServerState, serverState);
+                albumListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState, serverState);
             } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
             }
+        }
+        albumListCallbacks.finishBroadcast();
     }
 
     private void parseStatusLine(List<String> tokens) {
@@ -912,13 +916,13 @@ public class SqueezeService extends Service {
         public void registerAlbumListCallback(IServiceAlbumListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "AlbumListCallback attached.");
-            SqueezeService.this.albumListCallback.set(callback);
+            albumListCallbacks.register(callback);
         }
 
         public void unregisterAlbumListCallback(IServiceAlbumListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "AlbumListCallback detached.");
-            SqueezeService.this.albumListCallback.compareAndSet(callback, null);
+            albumListCallbacks.unregister(callback);
             cli.cancelRequests(SqueezerAlbum.class);
         }
 

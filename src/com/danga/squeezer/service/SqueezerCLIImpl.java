@@ -279,7 +279,7 @@ class SqueezerCLIImpl {
      * response arrives. See
      * {@link #parseSqueezerList(boolean, String, String, List, SqueezerListHandler)}
      * for details.
-     * 
+     *
      * @param playerid Id of the current player or null
      * @param cmd Identifies the
      * @param start
@@ -314,7 +314,7 @@ class SqueezerCLIImpl {
     /**
      * Data for
      * {@link SqueezerCLIImpl#parseSqueezerList(boolean, List, SqueezeParserInfo...)}
-     * 
+     *
      * @author kaa
      */
     private static class SqueezeParserInfo {
@@ -350,7 +350,7 @@ class SqueezerCLIImpl {
      * {@link SqueezerCLIImpl#parseSqueezerList(List, SqueezerListHandler)} for
      * each extended query format command you wish to support.
      * </p>
-     * 
+     *
      * @author Kurt Aaholst
      */
     private static interface SqueezerListHandler {
@@ -367,7 +367,7 @@ class SqueezerCLIImpl {
         /**
          * Called for each item received in the current reply. Just store this
          * internally.
-         * 
+         *
          * @param record
          */
         void add(Map<String, String> record);
@@ -377,7 +377,7 @@ class SqueezerCLIImpl {
          * information on to your activity now. If there are any more data, it
          * is automatically ordered by
          * {@link SqueezerCLIImpl#parseSqueezerList(List, SqueezerListHandler)}
-         * 
+         *
          * @param rescan Set if SqueezeServer is currently doing a scan of the
          *            music library.
          * @param count Total number of result for the current query.
@@ -398,15 +398,17 @@ class SqueezerCLIImpl {
      * <h1>Generic method to parse replies for queries in extended query format</h1>
      * <p>
      * This is the control center for asynchronous and paging receiving of data
-     * from SqueezeServer.<br/>
+     * from SqueezeServer.
+     * <p>
      * Transfer of each data type are started by an asynchronous request by one
      * of the public method in this module. This method will forward the data
      * using the supplied {@link SqueezerListHandler}, and and order the next
-     * page if necessary, repeating the current query parameters.<br/>
+     * page if necessary, repeating the current query parameters.
+     * <p>
      * Activities should just initiate the request, and supply a callback to
      * receive a page of data.
      * <p>
-     * 
+     *
      * @param playercmd Set this for replies for the current player, to skip the
      *            playerid
      * @param tokens List of tokens with value or key:value.
@@ -626,14 +628,22 @@ class SqueezerCLIImpl {
         }
 
         public boolean processList(boolean rescan, int count, int start) {
-            if (service.albumListCallback.get() != null)
+            int i = service.albumListCallbacks.beginBroadcast();
+            if (i == 0)
+                return false;
+
+            while (i > 0) {
+                i--;
                 try {
-                    service.albumListCallback.get().onAlbumsReceived(count, start, albums);
-                    return true;
+                    service.albumListCallbacks.getBroadcastItem(i).onAlbumsReceived(count, start,
+                            albums);
                 } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
+                    // The RemoteCallbackList will take care of removing
+                    // the dead object for us.
                 }
-            return false;
+            }
+            service.albumListCallbacks.finishBroadcast();
+            return true;
         }
 
         public void onItemsFinished() {
