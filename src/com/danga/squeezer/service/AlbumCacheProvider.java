@@ -217,6 +217,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            Log.v(TAG, "onCreate()");
             db.execSQL("CREATE TABLE " + AlbumCache.Albums.TABLE_NAME + " ("
                     + AlbumCache.Albums.COL_SERVERORDER + " INTEGER PRIMARY KEY,"
                     + AlbumCache.Albums.COL_ALBUMID + " TEXT,"
@@ -231,6 +232,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.v(TAG, "onUpgrade()");
             db.execSQL("DROP TABLE IF EXISTS " + AlbumCache.Albums.TABLE_NAME + ";");
             onCreate(db);
         }
@@ -245,6 +247,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
             Log.v(TAG, "getWriteableDatabase()");
 
+            // Rebuild the cache if necessary
             maybeRebuildCache(db, false);
 
             return db;
@@ -252,9 +255,9 @@ public class AlbumCacheProvider extends ContentProvider {
 
         /**
          * @param db
-         * @param force Always rebuild if this is true.
+         * @param force Force the rebuild, irrespective of the server state
          */
-        public void maybeRebuildCache(SQLiteDatabase db, boolean force) {
+        public synchronized void maybeRebuildCache(SQLiteDatabase db, boolean force) {
             final String uuid = mServerState.getUuid();
 
             if (uuid == null)
@@ -267,8 +270,12 @@ public class AlbumCacheProvider extends ContentProvider {
             final int curLastScan = mServerState.getLastScan();
 
             /**
-             * Recreate the database if we haven't got any record of the last
-             * scan time, or we do, and they don't match.
+             * Recreate the database if:
+             * <p>
+             * force is true, or
+             * <p>
+             * we haven't got any record of the last scan time, or we do, and
+             * they don't match.
              */
             if (force || oldLastScan == 0 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding album cache... " + oldLastScan + " : " + curLastScan);
@@ -305,6 +312,9 @@ public class AlbumCacheProvider extends ContentProvider {
                 Editor editor = preferences.edit();
                 editor.putInt(lastScanKey, curLastScan);
                 editor.commit();
+
+                getContext().getContentResolver().notifyChange(AlbumCache.Albums.CONTENT_URI, null);
+
                 Log.v(TAG, "... album cache rebuilt");
             }
         }
