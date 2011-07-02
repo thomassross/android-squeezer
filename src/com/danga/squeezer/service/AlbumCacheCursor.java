@@ -20,17 +20,13 @@ public class AlbumCacheCursor extends CursorWrapper {
     private final Cursor mCursor;
     private final AlbumCacheProvider mProvider;
 
-    /**
-     * Whether queries should fetch from the server for missing data.
-     */
+    /** Whether queries should fetch from the server for missing data. */
     private Boolean mLiveUpdate = true;
 
     private final int mPageSize = Squeezer.getContext().getResources()
             .getInteger(R.integer.PageSize);
 
-    /**
-     * Map column names to default values for those columns.
-     */
+    /** Map column names to default values for those columns. */
     private static HashMap<String, String> defaults = new HashMap<String, String>();
     {
         // TODO: Localise
@@ -58,12 +54,19 @@ public class AlbumCacheCursor extends CursorWrapper {
 
             // Name? If so, kick off a fetch.
             if (thisColumnName.equals(AlbumCache.Albums.COL_NAME)) {
-                String testVal = mCursor.getString(columnIndex);
-                if (testVal == null)
-                    if (mLiveUpdate)
-                        requestPagesFromPositions(getPosition(), getPosition());
+                if (mLiveUpdate)
+                    requestPagesFromPositions(getPosition(), getPosition());
 
                 return defaults.get(AlbumCache.Albums.COL_NAME);
+            }
+
+            // Artwork? If so, kick off a fetch.
+            // ...
+            if (thisColumnName.equals(AlbumCache.Albums.COL_ARTWORK_PATH)) {
+                if (mLiveUpdate)
+                    requestArtworkFromPosition(getPosition());
+
+                return defaults.get(AlbumCache.Albums.COL_ARTWORK_PATH);
             }
 
             // Got a default value for it? If so, return it.
@@ -76,6 +79,7 @@ public class AlbumCacheCursor extends CursorWrapper {
 
         return theString;
     }
+
 
     /**
      * @param firstPosition
@@ -94,6 +98,15 @@ public class AlbumCacheCursor extends CursorWrapper {
         // next one as well
         if (lastPosition % mPageSize > mPageSize / 2)
             mProvider.maybeRequestPage(lastPage + 1);
+    }
+
+    /**
+     * Fetch the artwork for a given album.
+     *
+     * @param position
+     */
+    private void requestArtworkFromPosition(int position) {
+        mProvider.requestArtwork(position);
     }
 
     @Override

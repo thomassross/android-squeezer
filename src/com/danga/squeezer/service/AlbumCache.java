@@ -76,7 +76,7 @@ public final class AlbumCache {
         public static final String COL_NAME = "name";
         public static final String COL_ARTIST = "artist";
         public static final String COL_YEAR = "year";
-        public static final String COL_ARTWORK_ID = "artwork_id";
+        public static final String COL_ARTWORK_TRACK_ID = "artwork_id";
         public static final String COL_ARTWORK_PATH = "artwork_path";
     }
 }
