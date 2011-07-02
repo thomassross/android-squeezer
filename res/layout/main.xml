@@ -8,6 +8,7 @@
 			android:layout_height="wrap_content"
 			android:orientation="horizontal">
 			
+			<!--  TODO: I think this LinearLayout is unnecessary -->
 			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -46,6 +47,7 @@
 		            android:textAppearance="?android:attr/textAppearanceSmall" />
 			</LinearLayout>
 
+            <!--  TODO: I think this LinearLayout is unnecessary -->
 			<LinearLayout
 				android:gravity="right"
 				android:layout_width="wrap_content"
@@ -62,6 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom">
     
+        <!--  TODO: Suspect this wrapping LinearLayout is also superfluous -->
 	    <LinearLayout
 	    	android:gravity="center"
 	        android:layout_width="fill_parent"
