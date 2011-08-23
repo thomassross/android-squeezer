@@ -9,8 +9,21 @@ import android.os.Parcel;
 import com.danga.squeezer.framework.SqueezerItem;
 
 public class SqueezerServerState extends SqueezerItem {
+    /*
+     * TODO: Suspect that the use of these AtomicReferences is wrong. Should
+     * either use Atomic[Type] instead, or follow the statistics update example
+     * at http://www.javamex.com/tutorials/
+     * synchronization_concurrency_7_atomic_reference.shtml for updates to this
+     * object.
+     */
+
+    /** The server is currently scanning the music database. */
     private final AtomicBoolean mRescan = new AtomicBoolean(false);
-    private final AtomicReference<Integer> mLastScan = new AtomicReference<Integer>();
+
+    /** Timestamp when the last scan finished. 0 (not null) if unknown. */
+    private final AtomicReference<Integer> mLastScan = new AtomicReference<Integer>(new Integer(0));
+
+    /** Squeezebox Server version. */
     private final AtomicReference<String> mVersion = new AtomicReference<String>();
     private final AtomicReference<String> mUuid = new AtomicReference<String>();
     private final AtomicReference<Integer> mTotalAlbums = new AtomicReference<Integer>();

@@ -410,6 +410,14 @@ public class SqueezeService extends Service {
         String lastscan = tokenMap.get("lastscan");
         if (lastscan != null)
             serverState.setLastScan(Integer.valueOf(lastscan));
+        else
+            Log.v(TAG, "lastscan is null, not been run");
+
+        String lastscanfailed = tokenMap.get("lastscanfailed");
+        if (lastscanfailed != null)
+            Log.v(TAG, "lastscanfailed = " + lastscanfailed);
+        else
+            Log.v(TAG, "No lastscanfailed info");
 
         onServerStateChanged(oldServerState);
     }

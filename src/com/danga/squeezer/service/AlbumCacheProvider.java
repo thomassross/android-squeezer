@@ -270,7 +270,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
             // Check the cache is still valid, re-create if necessary
             final String lastScanKey = uuid + ":lastscan";
-            final int oldLastScan = preferences.getInt(lastScanKey, 0);
+            final int oldLastScan = preferences.getInt(lastScanKey, -1);
             final int curLastScan = mServerState.getLastScan();
 
             /**
@@ -281,7 +281,7 @@ public class AlbumCacheProvider extends ContentProvider {
              * we haven't got any record of the last scan time, or we do, and
              * they don't match.
              */
-            if (force || oldLastScan == 0 || oldLastScan != curLastScan) {
+            if (force || oldLastScan == -1 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding album cache... " + oldLastScan + " : " + curLastScan);
                 InsertHelper ih = new InsertHelper(db, AlbumCache.Albums.TABLE_NAME);
                 final int serverOrderColumn = ih.getColumnIndex(AlbumCache.Albums.COL_SERVERORDER);
@@ -682,6 +682,21 @@ public class AlbumCacheProvider extends ContentProvider {
         if (mOrderedPages.contains(page))
             return;
 
+        /*
+         * Check to see if we already have an albumID for the first album in
+         * this page of data. If we do then there's no need to fetch.
+         */
+        Cursor c = query(ContentUris.withAppendedId(Albums.CONTENT_URI, page * mPageSize),
+                new String[] {
+                    AlbumCache.Albums.COL_ALBUMID
+                }, null, null, "");
+        c.moveToFirst();
+        final String albumId = c.getString(0);
+        if (albumId != null) {
+            mOrderedPages.add(page);
+            return;
+        }
+
         try {
             mOrderedPages.add(page);
             service.albums(page * mPageSize, "album", null, null, null, null);
@@ -695,29 +710,48 @@ public class AlbumCacheProvider extends ContentProvider {
     /**
      * Request the artwork for a given album.
      *
-     * @param position
+     * @param position The album position (note: not page) in the list.
      */
     public void requestArtwork(final int position) {
         artworkThreadPool.execute(new Runnable() {
             public void run() {
-                if (mOrderedArtwork.contains(position))
+                // Do nothing if we're already ordering it.
+                if (mOrderedArtwork.contains(position)) {
                     return;
+                }
 
-                mOrderedArtwork.add(position);
-
-                Log.v(TAG, "requestArtwork( " + position + ")");
+                // Determine the URL for the album artwork. Check the album ID
+                // and the track ID -- no album ID means we know nothing about
+                // this album yet.
+                //
+                // This means the album hasn't been fetched. Rely on the fact
+                // that something else should already be in the process of
+                // fetching it.
                 Cursor c = query(ContentUris.withAppendedId(Albums.CONTENT_URI, position),
                         new String[] {
+                                AlbumCache.Albums.COL_ALBUMID,
                         AlbumCache.Albums.COL_ARTWORK_TRACK_ID
                     }, null, null, "");
 
                 c.moveToFirst();
-                final String trackId = c.getString(0);
+                final String albumId = c.getString(0);
 
-                final String albumArtUrl = getAlbumArtUrl(trackId);
+                // No albumId means no album.
+                if (albumId == null || albumId.length() == 0) {
+                    return;
+                }
+
+                // Figure out the URL for the artwork.
+                final String artworkTrackId = c.getString(1);
+                final String albumArtUrl = getAlbumArtUrl(artworkTrackId);
                 c.close();
 
+                // If we know the album, and there's no artwork URL then no
+                // artwork exists. Update the database to use the default album
+                // artwork, and return
                 if (albumArtUrl == null || albumArtUrl.length() == 0) {
+                    mOrderedArtwork.add(position);
+
                     ContentValues cv = new ContentValues();
                     cv.put(AlbumCache.Albums.COL_ARTWORK_PATH,
                             Integer.toString(R.drawable.icon_album_noart_143));
@@ -733,12 +767,14 @@ public class AlbumCacheProvider extends ContentProvider {
                 }
 
                 try {
+                    mOrderedArtwork.add(position);
+
                     if (!mCacheDirectory.exists())
                         if (!mCacheDirectory.mkdirs())
                             return;
 
-                    File artwork = new File(mCacheDirectory, trackId + ".jpg");
-                    File artwork64 = new File(mCacheDirectory, trackId + "-64px.png");
+                    File artwork = new File(mCacheDirectory, artworkTrackId + ".jpg");
+                    File artwork64 = new File(mCacheDirectory, artworkTrackId + "-64px.png");
 
                     // File artwork = new File(root, trackId + "/original.png");
                     // File artwork64 = new File(root, trackId +
@@ -797,8 +833,10 @@ public class AlbumCacheProvider extends ContentProvider {
                     }
                 } catch (MalformedURLException e) {
                     // TODO Auto-generated catch block
+                    mOrderedArtwork.remove(position);
                     e.printStackTrace();
                 } catch (IOException e) {
+                    mOrderedArtwork.remove(position);
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
