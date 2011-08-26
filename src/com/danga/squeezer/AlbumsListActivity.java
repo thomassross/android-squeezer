@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -220,8 +221,9 @@ public class AlbumsListActivity extends ListActivity implements AbsListView.OnSc
                     e.printStackTrace();
                 }
                 resetListAdapter();
-            } else {
+            } else if (total != 0) { // Skip the very first result received.
                 try {
+                    Log.v(TAG, "Calling albums(" + msg.arg2 + ")");
                     mService.albums(msg.arg2, "album", null, null, null, null);
                 } catch (RemoteException e) {
                     // TODO Auto-generated catch block
