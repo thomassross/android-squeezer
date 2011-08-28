@@ -39,8 +39,15 @@ public class AlbumsListFragment extends ListFragment implements AbsListView.OnSc
     private static Bundle LiveUpdateT = new Bundle();
     private static Bundle LiveUpdateF = new Bundle();
 
+    /** The number of items per page. */
+    private final int mPageSize = Squeezer.getContext().getResources()
+            .getInteger(R.integer.PageSize);
+
     /** The active cursor, so we can send it messages. */
     private Cursor mCursor;
+
+    /** Total number of rows (albums) in the dataset. */
+    private int mRowCount;
 
     SimpleCursorAdapter mAdapter;
     private OnAlbumSelectedListener mListener;
@@ -126,6 +133,7 @@ public class AlbumsListFragment extends ListFragment implements AbsListView.OnSc
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
         mCursor = data;
+        mRowCount = mCursor.getCount();
         getActivity().setTitle("Albums: " + data.getCount());
     }
 
@@ -154,17 +162,11 @@ public class AlbumsListFragment extends ListFragment implements AbsListView.OnSc
             case OnScrollListener.SCROLL_STATE_IDLE:
                 mCursor.respond(LiveUpdateT);
 
-                // TODO: Check to see whether this request is now necessary,
-                // given that the cursor will request data based on whether or
-                // not certain columns or null.
-                //
-                // Quick testing commenting out the mCursor.respond(extras) line
-                // suggests that it's not needed.
-                Bundle extras = new Bundle();
-                extras.putInt("TYPE", AlbumCacheCursor.TYPE_REQUEST_PAGE);
-                extras.putInt("firstPosition", view.getFirstVisiblePosition());
-                extras.putInt("lastPosition", view.getLastVisiblePosition());
-                mCursor.respond(extras);
+                Bundle idle = new Bundle();
+                idle.putInt("TYPE", AlbumCacheCursor.TYPE_REQUEST_PAGE);
+                idle.putInt("firstPosition", view.getFirstVisiblePosition());
+                idle.putInt("lastPosition", view.getLastVisiblePosition());
+                mCursor.respond(idle);
 
                 break;
 
@@ -173,6 +175,25 @@ public class AlbumsListFragment extends ListFragment implements AbsListView.OnSc
 
             case OnScrollListener.SCROLL_STATE_FLING:
                 mCursor.respond(LiveUpdateF);
+
+                /**
+                 * Per http://code.google.com/p/android/issues/detail?id=15182,
+                 * we might not receive the SCROLL_STATE_IDLE message if the
+                 * user has flung down to the very bottom of the list.
+                 * <p>
+                 * If this is the last page of data then fetch it irrespective
+                 * of the scroll state.
+                 */
+                int lastPosition = view.getLastVisiblePosition();
+                if (lastPosition + mPageSize > mRowCount) {
+                    Bundle fling = new Bundle();
+                    fling.putInt("TYPE", AlbumCacheCursor.TYPE_REQUEST_PAGE);
+                    fling.putInt("firstPosition", view.getFirstVisiblePosition());
+                    fling.putInt("lastPosition", lastPosition);
+                    mCursor.respond(fling);
+                }
+
+                break;
         }
     }
 }
