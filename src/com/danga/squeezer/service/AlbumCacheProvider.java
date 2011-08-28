@@ -690,6 +690,11 @@ public class AlbumCacheProvider extends ContentProvider {
                 new String[] {
                     AlbumCache.Albums.COL_ALBUMID
                 }, null, null, "");
+
+        // Might get 0 rows if the page is past the end of the data set.
+        if (c.getCount() == 0)
+            return;
+
         c.moveToFirst();
         final String albumId = c.getString(0);
         if (albumId != null) {
