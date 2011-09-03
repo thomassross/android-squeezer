@@ -594,14 +594,22 @@ class SqueezerCLIImpl {
         }
 
         public boolean processList(boolean rescan, int count, int start) {
-            if (service.artistListCallback.get() != null)
+            int i = service.artistListCallbacks.beginBroadcast();
+            if (i == 0)
+                return false;
+
+            while (i > 0) {
+                i--;
                 try {
-                    service.artistListCallback.get().onArtistsReceived(count, start, artists);
-                    return true;
+                    service.artistListCallbacks.getBroadcastItem(i).onArtistsReceived(count, start,
+                            artists);
                 } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
+                    // The RemoteCallbackList will take care of removing
+                    // the dead object for us.
                 }
-            return false;
+            }
+            service.artistListCallbacks.finishBroadcast();
+            return true;
         }
 
         public void onItemsFinished() {

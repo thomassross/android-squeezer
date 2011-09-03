@@ -24,6 +24,7 @@ import com.danga.squeezer.itemlists.GenreSpinner.GenreSpinnerCallback;
 import com.danga.squeezer.model.SqueezerAlbum;
 import com.danga.squeezer.model.SqueezerArtist;
 import com.danga.squeezer.model.SqueezerGenre;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<SqueezerArtist> implements GenreSpinnerCallback{
 	private String searchString = null;
@@ -76,7 +77,7 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 	protected void onItemSelected(int index, SqueezerArtist item) throws RemoteException {
 		SqueezerAlbumListActivity.show(this, item);
 	}
-	
+
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -93,12 +94,12 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 			filterForm.findViewById(R.id.year_view).setVisibility(View.GONE);
 			final Spinner genreSpinnerView = (Spinner) filterForm.findViewById(R.id.genre_spinner);
 	        genreSpinner = new GenreSpinner(this, this, genreSpinnerView);
-	        
-	        if (album != null) { 
+
+	        if (album != null) {
 	        	((EditText)filterForm.findViewById(R.id.album)).setText(album.getName());
 	        	(filterForm.findViewById(R.id.album_view)).setVisibility(View.VISIBLE);
 	        }
-	        
+
 	        editText.setOnKeyListener(new OnKeyListener() {
 	            public boolean onKey(View v, int keyCode, KeyEvent event) {
 	                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
@@ -111,7 +112,7 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 	                return false;
 	            }
 	        });
-	        
+
 	        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
                 	searchString = editText.getText().toString();
@@ -120,12 +121,12 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 				}
 			});
 	        builder.setNegativeButton(android.R.string.cancel, null);
-	        
+
 			return builder.create();
         }
         return null;
     }
-    
+
 	public static void show(Context context, SqueezerItem... items) {
         final Intent intent = new Intent(context, SqueezerArtistListActivity.class);
         for (SqueezerItem item: items)
@@ -133,10 +134,16 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
         context.startActivity(intent);
     }
 
-    private IServiceArtistListCallback artistsListCallback = new IServiceArtistListCallback.Stub() {
+    private final IServiceArtistListCallback artistsListCallback = new IServiceArtistListCallback.Stub() {
 		public void onArtistsReceived(int count, int start, List<SqueezerArtist> items) throws RemoteException {
 			onItemsReceived(count, start, items);
 		}
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
     };
 
 }

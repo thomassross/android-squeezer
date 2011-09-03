@@ -74,7 +74,7 @@ public class SqueezeService extends Service {
 
     final AtomicReference<IServicePlayerListCallback> playerListCallback = new AtomicReference<IServicePlayerListCallback>();
     final RemoteCallbackList<IServiceAlbumListCallback> albumListCallbacks = new RemoteCallbackList<IServiceAlbumListCallback>();
-    final AtomicReference<IServiceArtistListCallback> artistListCallback = new AtomicReference<IServiceArtistListCallback>();
+    final RemoteCallbackList<IServiceArtistListCallback> artistListCallbacks = new RemoteCallbackList<IServiceArtistListCallback>();
     final AtomicReference<IServiceYearListCallback> yearListCallback = new AtomicReference<IServiceYearListCallback>();
     final AtomicReference<IServiceGenreListCallback> genreListCallback = new AtomicReference<IServiceGenreListCallback>();
     final RemoteCallbackList<IServiceSongListCallback> songListCallbacks = new RemoteCallbackList<IServiceSongListCallback>();
@@ -453,6 +453,20 @@ public class SqueezeService extends Service {
             }
         }
         songListCallbacks.finishBroadcast();
+
+        i = artistListCallbacks.beginBroadcast();
+        while (i > 0) {
+            i--;
+            try {
+                artistListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState,
+                        serverState);
+            } catch (RemoteException e) {
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
+            }
+        }
+        artistListCallbacks.finishBroadcast();
+
     }
 
     private void parseStatusLine(List<String> tokens) {
@@ -966,13 +980,13 @@ public class SqueezeService extends Service {
         public void registerArtistListCallback(IServiceArtistListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "ArtistListCallback attached.");
-            SqueezeService.this.artistListCallback.set(callback);
+            artistListCallbacks.register(callback);
         }
 
         public void unregisterArtistListCallback(IServiceArtistListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "ArtistListCallback detached.");
-            SqueezeService.this.artistListCallback.compareAndSet(callback, null);
+            artistListCallbacks.unregister(callback);
             cli.cancelRequests(SqueezerArtist.class);
         }
 

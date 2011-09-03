@@ -39,6 +39,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ArtistsListActivity" android:label="Artists list">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.danga.squeezer.artist" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SongsListActivity" android:label="Songs list">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -69,6 +77,10 @@
         <provider
             android:name="com.danga.squeezer.service.AlbumCacheProvider"
             android:authorities="com.danga.squeezer.service.AlbumCache"/>
+
+        <provider
+            android:name="com.danga.squeezer.service.ArtistCacheProvider"
+            android:authorities="com.danga.squeezer.service.ArtistCache"/>
 
         <provider
             android:name="com.danga.squeezer.service.SongCacheProvider"

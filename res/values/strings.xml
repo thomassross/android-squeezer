@@ -133,6 +133,7 @@ This project is very new and is undergoing active development. Patches and featu
         <item>Favorites</item>
         <item>Test albums</item>
         <item>Test songs</item>
+        <item>Test artists</item>
     </string-array>
 
     <string-array name="music_items">

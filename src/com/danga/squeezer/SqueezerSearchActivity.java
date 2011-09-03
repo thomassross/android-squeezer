@@ -225,6 +225,12 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
                 throws RemoteException {
             onItemsReceived(count, start, items);
         }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
     };
 
     private final IServiceAlbumListCallback albumsCallback = new IServiceAlbumListCallback.Stub() {
