@@ -28,6 +28,7 @@ import com.danga.squeezer.model.SqueezerSong;
 import com.danga.squeezer.service.AlbumCache.Albums;
 import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SqueezeService;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class AlbumListActivity extends ListActivity {
     @SuppressWarnings("unused")
@@ -118,7 +119,7 @@ public class AlbumListActivity extends ListActivity {
 
     /**
      * Fetch song information for the current album.
-     * 
+     *
      * @throws RemoteException
      */
     protected void fetchSongInformation() throws RemoteException {
@@ -127,7 +128,7 @@ public class AlbumListActivity extends ListActivity {
 
     /**
      * Play the displayed album.
-     * 
+     *
      * @param v The view that was clicked.
      */
     public void onPlayNow(View v) {
@@ -141,7 +142,7 @@ public class AlbumListActivity extends ListActivity {
 
     /**
      * Add the displayed album to the end of the current playlist.
-     * 
+     *
      * @param v
      */
     public void onAddToPlaylist(View v) {
@@ -184,6 +185,12 @@ public class AlbumListActivity extends ListActivity {
                     mProgressBar.setVisibility(View.GONE);
                 }
             });
+        }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     };
 

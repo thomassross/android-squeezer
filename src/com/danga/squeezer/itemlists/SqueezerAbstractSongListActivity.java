@@ -7,6 +7,7 @@ import android.os.RemoteException;
 
 import com.danga.squeezer.framework.SqueezerBaseListActivity;
 import com.danga.squeezer.model.SqueezerSong;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public abstract class SqueezerAbstractSongListActivity extends
         SqueezerBaseListActivity<SqueezerSong> {
@@ -28,6 +29,12 @@ public abstract class SqueezerAbstractSongListActivity extends
         }
 
         public void onItemsFinished() {
+        }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
     };
 

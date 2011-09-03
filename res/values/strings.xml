@@ -132,6 +132,7 @@ This project is very new and is undergoing active development. Patches and featu
         <item>Internet Radio</item>
         <item>Favorites</item>
         <item>Test albums</item>
+        <item>Test songs</item>
     </string-array>
 
     <string-array name="music_items">

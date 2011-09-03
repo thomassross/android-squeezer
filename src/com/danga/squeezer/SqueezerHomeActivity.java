@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.danga.squeezer.service.AlbumCache;
+import com.danga.squeezer.service.SongCache;
 
 public class SqueezerHomeActivity extends ListActivity {
 
@@ -23,7 +24,8 @@ public class SqueezerHomeActivity extends ListActivity {
         int[] icons = new int[] {
                 R.drawable.icon_nowplaying,
                 R.drawable.icon_mymusic, R.drawable.icon_internet_radio,
-                R.drawable.icon_favorites, R.drawable.icon_ml_albums
+                R.drawable.icon_favorites, R.drawable.icon_ml_albums,
+                R.drawable.icon_ml_songs
         };
         setListAdapter(new IconRowAdapter(this, getResources().getStringArray(R.array.home_items),
                 icons));
@@ -36,6 +38,7 @@ public class SqueezerHomeActivity extends ListActivity {
         private static final int INTERNET_RADIO = 2;
         private static final int FAVORITES = 3;
         private static final int TEST_ALBUMS = 4;
+        private static final int TEST_SONGS = 5;
 
         //
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -52,6 +55,9 @@ public class SqueezerHomeActivity extends ListActivity {
                 break;
             case TEST_ALBUMS:
                 startActivity(new Intent(Intent.ACTION_VIEW, AlbumCache.Albums.CONTENT_ID_URI_BASE));
+                break;
+            case TEST_SONGS:
+                startActivity(new Intent(Intent.ACTION_VIEW, SongCache.Songs.CONTENT_ID_URI_BASE));
                 break;
         }
     }

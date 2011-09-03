@@ -255,6 +255,12 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
 
         public void onItemsFinished() {
         }
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
     };
 
 }
