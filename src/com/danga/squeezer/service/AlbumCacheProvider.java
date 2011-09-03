@@ -59,11 +59,6 @@ import com.google.android.panoramio.BitmapUtils;
 public class AlbumCacheProvider extends ContentProvider {
     private static final String TAG = "AlbumCacheProvider";
 
-    /**
-     * The resource to use when no album artwork exists.
-     */
-    private static final String defaultAlbumArtUri = Integer.toString(R.drawable.icon_album_noart);
-
     private SqueezerServerState mServerState;
 
     private ISqueezeService service;

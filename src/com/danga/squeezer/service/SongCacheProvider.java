@@ -59,11 +59,6 @@ import com.google.android.panoramio.BitmapUtils;
 public class SongCacheProvider extends ContentProvider {
     private static final String TAG = "SongCacheProvider";
 
-    /**
-     * The resource to use when no song artwork exists.
-     */
-    private static final String defaultSongArtUri = Integer.toString(R.drawable.icon_album_noart);
-
     private SqueezerServerState mServerState;
 
     private ISqueezeService service;
