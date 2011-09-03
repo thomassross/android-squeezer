@@ -11,12 +11,13 @@ import com.danga.squeezer.framework.SqueezerItemAdapter;
 import com.danga.squeezer.framework.SqueezerItemListActivity;
 import com.danga.squeezer.model.SqueezerGenre;
 import com.danga.squeezer.service.ISqueezeService;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class GenreSpinner {
 	private static final String TAG = GenreSpinner.class.getName();
 	GenreSpinnerCallback callback;
-	private SqueezerItemListActivity activity;
-	private Spinner spinner;
+	private final SqueezerItemListActivity activity;
+	private final Spinner spinner;
 
 	public GenreSpinner(GenreSpinnerCallback callback, SqueezerItemListActivity activity, Spinner spinner) {
 		this.callback = callback;
@@ -56,9 +57,9 @@ public class GenreSpinner {
 		}
 	}
 
-    private IServiceGenreListCallback genreListCallback = new IServiceGenreListCallback.Stub() {
+    private final IServiceGenreListCallback genreListCallback = new IServiceGenreListCallback.Stub() {
 		private SqueezerItemAdapter<SqueezerGenre> adapter;
-    	
+
 		public void onGenresReceived(final int count, final int start, final List<SqueezerGenre> list) throws RemoteException {
 			callback.getUIThreadHandler().post(new Runnable() {
 				public void run() {
@@ -77,9 +78,15 @@ public class GenreSpinner {
 				}
 			});
 		}
-    	
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
     };
-    
+
     public interface GenreSpinnerCallback {
     	ISqueezeService getService();
     	Handler getUIThreadHandler();

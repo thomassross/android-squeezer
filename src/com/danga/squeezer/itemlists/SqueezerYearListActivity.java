@@ -9,6 +9,7 @@ import android.os.RemoteException;
 import com.danga.squeezer.framework.SqueezerBaseListActivity;
 import com.danga.squeezer.framework.SqueezerItemView;
 import com.danga.squeezer.model.SqueezerYear;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class SqueezerYearListActivity extends SqueezerBaseListActivity<SqueezerYear>{
 
@@ -37,16 +38,22 @@ public class SqueezerYearListActivity extends SqueezerBaseListActivity<SqueezerY
 		SqueezerAlbumListActivity.show(this, item);
 	}
 
-    
+
 	public static void show(Context context) {
         final Intent intent = new Intent(context, SqueezerYearListActivity.class);
         context.startActivity(intent);
     }
 
-    private IServiceYearListCallback yearListCallback = new IServiceYearListCallback.Stub() {
+    private final IServiceYearListCallback yearListCallback = new IServiceYearListCallback.Stub() {
 		public void onYearsReceived(int count, int start, List<SqueezerYear> items) throws RemoteException {
 			onItemsReceived(count, start, items);
 		}
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
     };
 
 }

@@ -75,8 +75,8 @@ public class SqueezeService extends Service {
     final AtomicReference<IServicePlayerListCallback> playerListCallback = new AtomicReference<IServicePlayerListCallback>();
     final RemoteCallbackList<IServiceAlbumListCallback> albumListCallbacks = new RemoteCallbackList<IServiceAlbumListCallback>();
     final RemoteCallbackList<IServiceArtistListCallback> artistListCallbacks = new RemoteCallbackList<IServiceArtistListCallback>();
-    final AtomicReference<IServiceYearListCallback> yearListCallback = new AtomicReference<IServiceYearListCallback>();
-    final AtomicReference<IServiceGenreListCallback> genreListCallback = new AtomicReference<IServiceGenreListCallback>();
+    final RemoteCallbackList<IServiceYearListCallback> yearListCallbacks = new RemoteCallbackList<IServiceYearListCallback>();
+    final RemoteCallbackList<IServiceGenreListCallback> genreListCallbacks = new RemoteCallbackList<IServiceGenreListCallback>();
     final RemoteCallbackList<IServiceSongListCallback> songListCallbacks = new RemoteCallbackList<IServiceSongListCallback>();
     final AtomicReference<IServicePlaylistsCallback> playlistsCallback = new AtomicReference<IServicePlaylistsCallback>();
     final AtomicReference<IServicePlaylistMaintenanceCallback> playlistMaintenanceCallback = new AtomicReference<IServicePlaylistMaintenanceCallback>();
@@ -419,7 +419,14 @@ public class SqueezeService extends Service {
         else
             Log.v(TAG, "No lastscanfailed info");
 
+        // TODO: Should only call this if the state is different.
         onServerStateChanged(oldServerState);
+    }
+
+    void updateYears(int years) {
+        serverState.setTotalYears(years);
+
+        // TODO: Might have to call onServerStateChanged.
     }
 
     /**
@@ -429,6 +436,7 @@ public class SqueezeService extends Service {
      * @param oldServerState The previous state of the server.
      */
     private void onServerStateChanged(SqueezerServerState oldServerState) {
+        // TODO: Refactor in to a function
         int i = albumListCallbacks.beginBroadcast();
         while (i > 0) {
             i--;
@@ -440,19 +448,6 @@ public class SqueezeService extends Service {
             }
         }
         albumListCallbacks.finishBroadcast();
-
-        i = songListCallbacks.beginBroadcast();
-        while (i > 0) {
-            i--;
-            try {
-                songListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState,
-                        serverState);
-            } catch (RemoteException e) {
-                // The RemoteCallbackList will take care of removing
-                // the dead object for us.
-            }
-        }
-        songListCallbacks.finishBroadcast();
 
         i = artistListCallbacks.beginBroadcast();
         while (i > 0) {
@@ -467,6 +462,44 @@ public class SqueezeService extends Service {
         }
         artistListCallbacks.finishBroadcast();
 
+        i = genreListCallbacks.beginBroadcast();
+        while (i > 0) {
+            i--;
+            try {
+                genreListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState,
+                        serverState);
+            } catch (RemoteException e) {
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
+            }
+        }
+        genreListCallbacks.finishBroadcast();
+
+        i = songListCallbacks.beginBroadcast();
+        while (i > 0) {
+            i--;
+            try {
+                songListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState,
+                        serverState);
+            } catch (RemoteException e) {
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
+            }
+        }
+        songListCallbacks.finishBroadcast();
+
+        i = yearListCallbacks.beginBroadcast();
+        while (i > 0) {
+            i--;
+            try {
+                yearListCallbacks.getBroadcastItem(i).onServerStateChanged(oldServerState,
+                        serverState);
+            } catch (RemoteException e) {
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
+            }
+        }
+        yearListCallbacks.finishBroadcast();
     }
 
     private void parseStatusLine(List<String> tokens) {
@@ -564,6 +597,15 @@ public class SqueezeService extends Service {
                 "players 0 1", // initiate an async player fetch
                 "can randomplay ?", // learn random play function functionality
                 "pref httpport ?", // learn the HTTP port (needed for images)
+
+                /*
+                 * There's no "info total years ?" command, so we have to
+                 * determine how many years there are by issuing this and
+                 * waiting for the response. See updateYears() in this file, and
+                 * YearListHandler::processList() in SqueezerCLIImpl.
+                 */
+                "years 0 0",
+
                 "serverstatus 0 1 subscribe:0" // Realtime status updates
         );
     }
@@ -1001,13 +1043,13 @@ public class SqueezeService extends Service {
         public void registerYearListCallback(IServiceYearListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "YearListCallback attached.");
-            SqueezeService.this.yearListCallback.set(callback);
+            yearListCallbacks.register(callback);
         }
 
         public void unregisterYearListCallback(IServiceYearListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "YearListCallback detached.");
-            SqueezeService.this.yearListCallback.compareAndSet(callback, null);
+            yearListCallbacks.unregister(callback);
             cli.cancelRequests(SqueezerYear.class);
         }
 
@@ -1022,13 +1064,13 @@ public class SqueezeService extends Service {
         public void registerGenreListCallback(IServiceGenreListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "GenreListCallback attached.");
-            SqueezeService.this.genreListCallback.set(callback);
+            genreListCallbacks.register(callback);
         }
 
         public void unregisterGenreListCallback(IServiceGenreListCallback callback)
                 throws RemoteException {
             Log.v(TAG, "GenreListCallback detached.");
-            SqueezeService.this.genreListCallback.compareAndSet(callback, null);
+            genreListCallbacks.unregister(callback);
             cli.cancelRequests(SqueezerGenre.class);
         }
 

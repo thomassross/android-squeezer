@@ -524,14 +524,37 @@ class SqueezerCLIImpl {
         }
 
         public boolean processList(boolean rescan, int count, int start) {
-            if (service.yearListCallback.get() != null)
+            Log.v("YearListHandler", "processList(" + rescan + ", " + count + ", " + start
+                    + ")");
+
+            /*
+             * Hack: If no years were returned then this (should) be the result
+             * of the "years 0 0" call the service makes when it connects (see
+             * onCliPortConnectionEstablished() in the service). If so, set the
+             * actual number of years so the service can update the server
+             * state, and return.
+             */
+            if (years.size() == 0) {
+                service.updateYears(count);
+                return true;
+            }
+
+            int i = service.yearListCallbacks.beginBroadcast();
+            if (i == 0)
+                return false;
+
+            while (i > 0) {
+                i--;
                 try {
-                    service.yearListCallback.get().onYearsReceived(count, start, years);
-                    return true;
+                    service.yearListCallbacks.getBroadcastItem(i).onYearsReceived(count, start,
+                            years);
                 } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
+                    // The RemoteCallbackList will take care of removing
+                    // the dead object for us.
                 }
-            return false;
+            }
+            service.yearListCallbacks.finishBroadcast();
+            return true;
         }
 
         public void onItemsFinished() {
@@ -558,14 +581,22 @@ class SqueezerCLIImpl {
         }
 
         public boolean processList(boolean rescan, int count, int start) {
-            if (service.genreListCallback.get() != null)
+            int i = service.genreListCallbacks.beginBroadcast();
+            if (i == 0)
+                return false;
+
+            while (i > 0) {
+                i--;
                 try {
-                    service.genreListCallback.get().onGenresReceived(count, start, genres);
-                    return true;
+                    service.genreListCallbacks.getBroadcastItem(i).onGenresReceived(count, start,
+                            genres);
                 } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
+                    // The RemoteCallbackList will take care of removing
+                    // the dead object for us.
                 }
-            return false;
+            }
+            service.genreListCallbacks.finishBroadcast();
+            return true;
         }
 
         public void onItemsFinished() {

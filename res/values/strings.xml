@@ -134,6 +134,8 @@ This project is very new and is undergoing active development. Patches and featu
         <item>Test albums</item>
         <item>Test songs</item>
         <item>Test artists</item>
+        <item>Test genres</item>
+        <item>Test years</item>
     </string-array>
 
     <string-array name="music_items">

@@ -30,6 +30,7 @@ public class SqueezerServerState extends SqueezerItem {
     private final AtomicReference<Integer> mTotalArtists = new AtomicReference<Integer>();
     private final AtomicReference<Integer> mTotalGenres = new AtomicReference<Integer>();
     private final AtomicReference<Integer> mTotalSongs = new AtomicReference<Integer>();
+    private final AtomicReference<Integer> mTotalYears = new AtomicReference<Integer>();
     private final AtomicReference<Integer> mPlayerCount = new AtomicReference<Integer>();
     private final AtomicReference<Integer> mSeenPlayerCount = new AtomicReference<Integer>();
     private final AtomicReference<Integer> mOtherPlayerCount = new AtomicReference<Integer>();
@@ -107,6 +108,15 @@ public class SqueezerServerState extends SqueezerItem {
 
     public SqueezerServerState setTotalSongs(Integer total) {
         mTotalSongs.set(total);
+        return this;
+    }
+
+    public Integer getTotalYears() {
+        return mTotalYears.get();
+    }
+
+    public SqueezerServerState setTotalYears(Integer total) {
+        mTotalYears.set(total);
         return this;
     }
 

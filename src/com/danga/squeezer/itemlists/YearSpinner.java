@@ -11,12 +11,13 @@ import com.danga.squeezer.framework.SqueezerItemAdapter;
 import com.danga.squeezer.framework.SqueezerItemListActivity;
 import com.danga.squeezer.model.SqueezerYear;
 import com.danga.squeezer.service.ISqueezeService;
+import com.danga.squeezer.service.SqueezerServerState;
 
 public class YearSpinner {
 	private static final String TAG = YearSpinner.class.getName();
 	YearSpinnerCallback callback;
-	private SqueezerItemListActivity activity;
-	private Spinner spinner;
+	private final SqueezerItemListActivity activity;
+	private final Spinner spinner;
 
 	public YearSpinner(YearSpinnerCallback callback, SqueezerItemListActivity activity, Spinner spinner) {
 		this.callback = callback;
@@ -56,9 +57,9 @@ public class YearSpinner {
 		}
 	}
 
-    private IServiceYearListCallback yearListCallback = new IServiceYearListCallback.Stub() {
+    private final IServiceYearListCallback yearListCallback = new IServiceYearListCallback.Stub() {
 		private SqueezerItemAdapter<SqueezerYear> adapter;
-    	
+
 		public void onYearsReceived(final int count, final int start, final List<SqueezerYear> list) throws RemoteException {
 			callback.getUIThreadHandler().post(new Runnable() {
 				public void run() {
@@ -77,9 +78,15 @@ public class YearSpinner {
 				}
 			});
 		}
-    	
+
+        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
     };
-    
+
     public interface YearSpinnerCallback {
     	ISqueezeService getService();
     	Handler getUIThreadHandler();

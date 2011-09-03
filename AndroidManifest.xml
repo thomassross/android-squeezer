@@ -47,11 +47,27 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".GenresListActivity" android:label="Genres list">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.danga.squeezer.genre" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SongsListActivity" android:label="Songs list">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/vnd.danga.squeezer.song" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".YearsListActivity" android:label="Years list">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.danga.squeezer.year" />
             </intent-filter>
         </activity>
 
@@ -83,8 +99,16 @@
             android:authorities="com.danga.squeezer.service.ArtistCache"/>
 
         <provider
+            android:name="com.danga.squeezer.service.GenreCacheProvider"
+            android:authorities="com.danga.squeezer.service.GenreCache"/>
+
+        <provider
             android:name="com.danga.squeezer.service.SongCacheProvider"
             android:authorities="com.danga.squeezer.service.SongCache"/>
+
+        <provider
+            android:name="com.danga.squeezer.service.YearCacheProvider"
+            android:authorities="com.danga.squeezer.service.YearCache"/>
         
     </application>
     
