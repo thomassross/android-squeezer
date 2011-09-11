@@ -4,8 +4,6 @@ package com.danga.squeezer.service;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,42 +27,39 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.LiveFolders;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.danga.squeezer.Preferences;
 import com.danga.squeezer.R;
 import com.danga.squeezer.Squeezer;
-import com.danga.squeezer.itemlists.IServiceGenreListCallback;
-import com.danga.squeezer.model.SqueezerGenre;
-import com.danga.squeezer.service.GenreCache.Genres;
 
-public class GenreCacheProvider extends ContentProvider {
-    private static final String TAG = "GenreCacheProvider";
+public abstract class GenericCacheProvider extends ContentProvider {
+    private static final String TAG = GenericCacheProvider.class.getName();
 
-    private SqueezerServerState mServerState;
+    SqueezerServerState mServerState;
 
-    private ISqueezeService service;
+    protected ISqueezeService service;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder binder) {
             service = ISqueezeService.Stub.asInterface(binder);
-            try {
-                service.registerGenreListCallback(genreListCallback);
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
+            GenericCacheProvider.this.onServiceConnected(name, binder);
         }
 
         public void onServiceDisconnected(ComponentName name) {
             service = null;
         };
     };
+
+    /**
+     * Connected to the service. Subclasses should register any callbacks.
+     *
+     * @param name
+     * @param binder
+     */
+    abstract void onServiceConnected(ComponentName name, IBinder binder);
 
     /**
      * Batch database update notifications. Maintain a boolean that indicates
@@ -79,7 +74,7 @@ public class GenreCacheProvider extends ContentProvider {
     private final Set<Integer> mOrderedPages = new HashSet<Integer>();
 
     /** The number of items per page. */
-    private final int mPageSize = Squeezer.getContext().getResources()
+    protected final int mPageSize = Squeezer.getContext().getResources()
             .getInteger(R.integer.PageSize);
 
     /**
@@ -89,98 +84,38 @@ public class GenreCacheProvider extends ContentProvider {
         return service;
     }
 
-    /**
-     * A projection map used to select columns from the database
-     */
-    private static HashMap<String, String> sProjectionMap;
+    /** A projection map used to select columns from the database. */
+    protected HashMap<String, String> sProjectionMap;
 
-    /**
-     * A projection map used to select columns from the database
-     */
-    private static HashMap<String, String> sLiveFolderProjectionMap;
+    /** A projection map used to select columns from the database. */
+    protected HashMap<String, String> sLiveFolderProjectionMap;
 
     /*
      * Constants used by the Uri matcher to choose an action based on the
      * pattern of the incoming URI
      */
-    // The incoming URI matches the Genres URI pattern
-    private static final int ALL_ENTRIES = 1;
+    protected static final int ALL_ENTRIES = 1;
+    protected static final int SINGLE_ENTRY = 2;
+    protected static final int LIVE_FOLDER = 3;
 
-    // The incoming URI matches the Genre ID URI pattern
-    private static final int SINGLE_ENTRY = 2;
+    /** A UriMatcher instance. */
+    protected UriMatcher sUriMatcher;
 
-    // The incoming URI matches the Live Folder URI pattern
-    private static final int LIVE_FOLDER = 3;
-
-    /**
-     * A UriMatcher instance
-     */
-    private static final UriMatcher sUriMatcher;
-
-    private DatabaseHelper mOpenHelper;
+    protected DatabaseHelper mOpenHelper;
 
     /**
      * A representation of the directory that the provider uses as the root of
      * the cache.
      */
-    private File mCacheDirectory;
+    protected File mCacheDirectory;
 
-    static {
-        sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-        // Add a pattern that routes URIs terminated with "genres" to an
-        // GENRES operation
-        sUriMatcher.addURI(GenreCache.AUTHORITY, "genres", ALL_ENTRIES);
-
-        // Add a pattern that routes URIs terminated with "genres" plus an
-        // integer to an genre ID operation
-        sUriMatcher.addURI(GenreCache.AUTHORITY, "genres/#", SINGLE_ENTRY);
-
-        // Add a pattern that routes URIs terminated with live_folders/genres
-        // to a live folder operation
-        sUriMatcher.addURI(GenreCache.AUTHORITY, "live_folders/genres", LIVE_FOLDER);
-
-        /*
-         * Creates and initializes a projection map that returns all columns
-         */
-
-        // Creates a new projection map instance. The map returns a column name
-        // given a string. The two are usually equal.
-        sProjectionMap = new HashMap<String, String>();
-
-        sProjectionMap.put(GenreCache.Genres.COL_SERVERORDER,
-                GenreCache.Genres.COL_SERVERORDER);
-        sProjectionMap.put(GenreCache.Genres.COL_GENREID,
-                GenreCache.Genres.COL_GENREID);
-        sProjectionMap.put(GenreCache.Genres.COL_NAME, GenreCache.Genres.COL_NAME);
-
-        /*
-         * Creates an initializes a projection map for handling Live Folders
-         */
-
-        // Creates a new projection map instance
-        sLiveFolderProjectionMap = new HashMap<String, String>();
-
-        // Maps "_ID" to "_ID AS _ID" for a live folder
-        sLiveFolderProjectionMap.put(LiveFolders._ID, GenreCache.Genres._ID + " AS "
-                + LiveFolders._ID);
-
-        // Maps "NAME" to "title AS NAME"
-        sLiveFolderProjectionMap.put(LiveFolders.NAME, GenreCache.Genres.COL_NAME + " AS " +
-                LiveFolders.NAME);
-    }
+    protected SqueezerTable mTableDefinition;
 
     class DatabaseHelper extends SQLiteOpenHelper {
-
-        private static final String DATABASE_NAME_SUFFIX = "-genre_cache.db";
-        private static final int DATABASE_VERSION = 1;
-
-        private final SqueezerServerState mServerState;
         private final SharedPreferences preferences;
 
-        DatabaseHelper(Context context, SqueezerServerState serverState) {
-            super(context, serverState.getUuid() + DATABASE_NAME_SUFFIX, null, DATABASE_VERSION);
-            mServerState = serverState;
+        DatabaseHelper(Context context, String name, int version) {
+            super(context, name, null, version);
 
             preferences = context.getSharedPreferences(Preferences.NAME, Context.MODE_PRIVATE);
         }
@@ -188,18 +123,11 @@ public class GenreCacheProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "onCreate()");
-            db.execSQL("CREATE TABLE " + GenreCache.Genres.TABLE_NAME + " ("
-                    + GenreCache.Genres.COL_SERVERORDER + " INTEGER PRIMARY KEY,"
-                    + GenreCache.Genres.COL_GENREID + " TEXT,"
-                    + GenreCache.Genres.COL_NAME + " TEXT"
-                    + ");");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.v(TAG, "onUpgrade()");
-            db.execSQL("DROP TABLE IF EXISTS " + GenreCache.Genres.TABLE_NAME + ";");
-            onCreate(db);
         }
 
         /*
@@ -244,16 +172,16 @@ public class GenreCacheProvider extends ContentProvider {
              */
             if (force || oldLastScan == -1 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding cache... " + oldLastScan + " : " + curLastScan);
-                InsertHelper ih = new InsertHelper(db, GenreCache.Genres.TABLE_NAME);
+                InsertHelper ih = new InsertHelper(db, mTableDefinition.TABLE_NAME);
                 final int serverOrderColumn = ih
-                        .getColumnIndex(GenreCache.Genres.COL_SERVERORDER);
-                final int totalGenres = mServerState.getTotalGenres();
+                        .getColumnIndex(mTableDefinition.COL_SERVERORDER);
+                final int totalRows = getTotalRows();
 
                 onUpgrade(db, 0, 1);
 
                 db.beginTransaction();
                 try {
-                    for (int i = 0; i < totalGenres; i++) {
+                    for (int i = 0; i < totalRows; i++) {
                         if (i % 50 == 0)
                             Log.v("reset", "Created " + i);
                         ih.prepareForInsert();
@@ -266,8 +194,7 @@ public class GenreCacheProvider extends ContentProvider {
                     db.endTransaction();
                 }
 
-                getContext().getContentResolver().notifyChange(GenreCache.Genres.CONTENT_URI,
-                        null);
+                getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI, null);
 
                 // Remove the cache directory
                 if (mCacheDirectory.exists())
@@ -280,8 +207,7 @@ public class GenreCacheProvider extends ContentProvider {
                 editor.putInt(lastScanKey, curLastScan);
                 editor.commit();
 
-                getContext().getContentResolver().notifyChange(GenreCache.Genres.CONTENT_URI,
-                        null);
+                getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI, null);
 
                 Log.v(TAG, "... cache rebuilt");
             }
@@ -289,62 +215,67 @@ public class GenreCacheProvider extends ContentProvider {
     }
 
     /**
-     * Every two seconds check to see if the content resolver should be notified
-     * about updates, and if it should, send the notification.
+     * Returns the total number of rows that should be pre-allocated in the
+     * database.
+     * <p>
+     * Subclasses should override this and return the result of calling the
+     * correct getTotal*() method on the service.
+     *
+     * @return
      */
-    public GenreCacheProvider() {
-        notifyUpdatesThreadPool.scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                if (notifyUpdates.getAndSet(false) == true)
-                    getContext().getContentResolver().notifyChange(GenreCache.Genres.CONTENT_URI,
-                            null);
-            }
-        }, 2, 2, TimeUnit.SECONDS);
-    }
+    abstract int getTotalRows();
 
     @Override
     public boolean onCreate() {
         Log.v(TAG, "onCreate running");
         Context context = getContext();
 
+        /**
+         * Every two seconds check to see if the content resolver should be
+         * notified about updates, and if it should, send the notification.
+         */
+        notifyUpdatesThreadPool.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                if (notifyUpdates.getAndSet(false) == true)
+                    getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI,
+                            null);
+            }
+        }, 2, 2, TimeUnit.SECONDS);
+
         Intent intent = new Intent(context, SqueezeService.class);
         return context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    public GenreCacheCursor query(Uri uri, String[] projection, String selection,
+    public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs,
             String sortOrder) {
 
         // Constructs a new query builder and sets its table name
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(GenreCache.Genres.TABLE_NAME);
+        qb.setTables(mTableDefinition.TABLE_NAME);
 
         /**
          * Choose the projection and adjust the "where" clause based on URI
          * pattern-matching.
          */
         switch (sUriMatcher.match(uri)) {
-            // If the incoming URI is for genres, chooses the Genres
-            // projection
+            // If the incoming URI is for all items, use the normal projection
+            // map.
             case ALL_ENTRIES:
                 qb.setProjectionMap(sProjectionMap);
                 break;
 
             /*
-             * If the incoming URI is for a single genre identified by its ID,
-             * chooses the genre ID projection, and appends "_ID = <genreID>" to
-             * the where clause, so that it selects that single genre.
+             * If the incoming URI is for a single item identified by its ID,
+             * choose normal projection, and append "_ID = <itemID>" to the
+             * where clause, so that it selects that single item.
              */
             case SINGLE_ENTRY:
                 qb.setProjectionMap(sProjectionMap);
                 qb.appendWhere(
-                        GenreCache.Genres._ID + // the name of the ID column
-                                "=" +
-                                // the position of the genre ID itself in the
-                                // incoming URI
-                                uri.getPathSegments().get(
-                                        GenreCache.Genres.ID_PATH_POSITION));
+                        mTableDefinition.COL_SERVERORDER + "="
+                                + uri.getPathSegments().get(mTableDefinition.ID_PATH_POSITION));
                 break;
 
             case LIVE_FOLDER:
@@ -359,10 +290,10 @@ public class GenreCacheProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
-        String orderBy;
         // If no sort order is specified, uses the default
+        String orderBy;
         if (TextUtils.isEmpty(sortOrder))
-            orderBy = GenreCache.Genres.DEFAULT_SORT_ORDER;
+            orderBy = mTableDefinition.DEFAULT_SORT_ORDER;
         else
             // otherwise, uses the incoming sort order
             orderBy = sortOrder;
@@ -391,13 +322,23 @@ public class GenreCacheProvider extends ContentProvider {
         // changes
         c.setNotificationUri(getContext().getContentResolver(), uri);
 
-        return new GenreCacheCursor(c, this);
+        return WrapCursor(c);
     }
+
+    /**
+     * Wrap the supplied Cursor with a cursor of a different type.
+     * <p>
+     * Subclasses should override this and return a cursor of the correct type
+     * for the concrete cache.
+     *
+     * @param c The cursor to wrap.
+     * @return The wrapped cursor.
+     */
+    abstract Cursor WrapCursor(Cursor c);
 
     @Override
     public int delete(Uri arg0, String arg1, String[] arg2) {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -416,22 +357,20 @@ public class GenreCacheProvider extends ContentProvider {
          */
         switch (sUriMatcher.match(uri)) {
 
-            // If the pattern is for genres or live folders, returns the
-            // general
-            // content type.
             case ALL_ENTRIES:
             case LIVE_FOLDER:
-                return GenreCache.Genres.CONTENT_TYPE;
+                // If the pattern is for all items or live folders, returns the
+                // general content type.
+                return mTableDefinition.CONTENT_TYPE;
 
-                // If the pattern is for genre IDs, returns the genre ID
-                // content
-                // type.
             case SINGLE_ENTRY:
-                return GenreCache.Genres.ITEM_CONTENT_TYPE;
+                // If the pattern is for individual IDs, returns the item
+                // content type.
+                return mTableDefinition.ITEM_CONTENT_TYPE;
 
-                // If the URI pattern doesn't match any permitted patterns,
-                // throws an exception.
             default:
+                // If the URI pattern doesn't match any permitted patterns,
+                // throw an exception.
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
     }
@@ -457,19 +396,19 @@ public class GenreCacheProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         // Performs the insert and returns the ID of the new note.
-        long rowId = db.insert(GenreCache.Genres.TABLE_NAME, null, values);
+        long rowId = db.insert(mTableDefinition.TABLE_NAME, null, values);
 
         // If the insert succeeded, the row ID exists.
         if (rowId > 0) {
-            // Creates a URI with the note ID pattern and the new row ID
+            // Creates a URI with the item ID pattern and the new row ID
             // appended to it.
-            Uri genreUri = ContentUris.withAppendedId(GenreCache.Genres.CONTENT_ID_URI_BASE,
+            Uri u = ContentUris.withAppendedId(mTableDefinition.CONTENT_ID_URI_BASE,
                     rowId);
 
             // Notifies observers registered against this provider that the data
             // changed.
-            getContext().getContentResolver().notifyChange(genreUri, null);
-            return genreUri;
+            getContext().getContentResolver().notifyChange(u, null);
+            return u;
         }
 
         // If the insert didn't succeed, then the rowID is <= 0. Throws an
@@ -487,34 +426,26 @@ public class GenreCacheProvider extends ContentProvider {
 
         // Does the update based on the incoming URI pattern
         switch (sUriMatcher.match(uri)) {
-            // If the incoming URI matches the general genres pattern, does the
+            // If the incoming URI matches the general items pattern, does the
             // update based on the incoming data.
             case ALL_ENTRIES:
 
                 // Does the update and returns the number of rows updated.
-                count = db.update(
-                        GenreCache.Genres.TABLE_NAME, // The database table
-                                                      // name.
-                        values, // A map of column names and new values to use.
-                        where, // The where clause column names.
-                        whereArgs // The where clause column values to select
-                                  // on.
-                        );
+                count = db.update(mTableDefinition.TABLE_NAME, values,
+                        where, whereArgs);
                 break;
 
-            // If the incoming URI matches a single genres ID, does the update
+            // If the incoming URI matches a single items ID, does the update
             // based on the incoming data, but modifies the where clause to
-            // restrict it to the particular genre ID.
+            // restrict it to the particular item ID.
             case SINGLE_ENTRY:
                 /*
                  * Starts creating the final WHERE clause by restricting it to
-                 * the incoming note ID.
+                 * the incoming ID.
                  */
                 finalWhere =
-                        GenreCache.Genres._ID + // The ID column name
-                                " = " + // test for equality
-                                uri.getPathSegments(). // the incoming note ID
-                                        get(GenreCache.Genres.ID_PATH_POSITION);
+                        mTableDefinition.COL_SERVERORDER + " = "
+                                + uri.getPathSegments().get(mTableDefinition.ID_PATH_POSITION);
 
                 // If there were additional selection criteria, append them to
                 // the final WHERE clause.
@@ -522,16 +453,8 @@ public class GenreCacheProvider extends ContentProvider {
                     finalWhere = finalWhere + " AND " + where;
 
                 // Does the update and returns the number of rows updated.
-                count = db.update(
-                        GenreCache.Genres.TABLE_NAME, // The database table
-                                                      // name.
-                        values, // A map of column names and new values to use.
-                        finalWhere, // The final WHERE clause to use
-                                    // placeholders for whereArgs
-                        whereArgs // The where clause column values to select
-                                  // on, or null if the values are in the where
-                                  // argument.
-                        );
+                count = db.update(mTableDefinition.TABLE_NAME, values,
+                        finalWhere, whereArgs);
                 break;
             // If the incoming pattern is invalid, throws an exception.
             default:
@@ -550,66 +473,6 @@ public class GenreCacheProvider extends ContentProvider {
         return count;
     }
 
-    private final IServiceGenreListCallback genreListCallback = new IServiceGenreListCallback.Stub() {
-        /**
-         * Update the affected rows.
-         *
-         * @param count Number of items as reported by squeezeserver.
-         * @param start The start position of items in this update.
-         * @param items New items to update in the cache
-         */
-        public void onGenresReceived(int count, int start, List<SqueezerGenre> items)
-                throws RemoteException {
-            SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-            ContentValues cv = new ContentValues();
-            int serverOrder = start;
-            SqueezerGenre thisGenre;
-
-            db.beginTransaction();
-            try {
-                Iterator<SqueezerGenre> it = items.iterator();
-                while (it.hasNext()) {
-                    thisGenre = it.next();
-                    cv.put(GenreCache.Genres.COL_NAME, thisGenre.getName());
-                    cv.put(GenreCache.Genres.COL_GENREID, thisGenre.getId());
-
-                    db.update(GenreCache.Genres.TABLE_NAME, cv,
-                            GenreCache.Genres.COL_SERVERORDER + "=?",
-                            new String[] {
-                                Integer.toString(serverOrder)
-                            });
-
-                    serverOrder++;
-                }
-
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
-
-            getContext().getContentResolver().notifyChange(GenreCache.Genres.CONTENT_URI, null);
-        }
-
-        public void onServerStateChanged(SqueezerServerState oldState, SqueezerServerState newState)
-                throws RemoteException {
-            Log.v(TAG, "onServerStateChanged");
-            mServerState = newState;
-            String uuid = mServerState.getUuid();
-
-            Log.v(TAG, "Server UUID is now " + uuid);
-
-            if (uuid != null)
-                mCacheDirectory = new File(Environment.getExternalStorageDirectory(),
-                        "/Android/data/com.danga.squeezer/cache/genre/"
-                                + mServerState.getUuid());
-            else
-                mCacheDirectory = null;
-
-            mOpenHelper = new DatabaseHelper(getContext(), mServerState);
-        }
-    };
-
     /**
      * Possibly fetch the requested page of data from the service, if it's not
      * previously been requested.
@@ -621,12 +484,13 @@ public class GenreCacheProvider extends ContentProvider {
             return;
 
         /*
-         * Check to see if we already have an genreID for the first genre in
-         * this page of data. If we do then there's no need to fetch.
+         * Check to see if the mandatory column contains data. If it does then
+         * there's no need to fetch.
          */
-        Cursor c = query(ContentUris.withAppendedId(Genres.CONTENT_URI, page * mPageSize),
+        Cursor c = query(
+                ContentUris.withAppendedId(mTableDefinition.CONTENT_URI, page * mPageSize),
                 new String[] {
-                    GenreCache.Genres.COL_GENREID
+                    mTableDefinition.MANDATORY_COLUMN
                 }, null, null, "");
 
         // Might get 0 rows if the page is past the end of the data set.
@@ -634,21 +498,31 @@ public class GenreCacheProvider extends ContentProvider {
             return;
 
         c.moveToFirst();
-        final String genreId = c.getString(0);
-        if (genreId != null) {
+        final String text = c.getString(0);
+        if (text != null) {
             mOrderedPages.add(page);
             return;
         }
 
         try {
             mOrderedPages.add(page);
-            service.genres(page * mPageSize);
+            requestPage(page * mPageSize);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             mOrderedPages.remove(page);
             e.printStackTrace();
         }
     }
+
+    /**
+     * Request a page of data from the service.
+     * <p>
+     * Subclasses should call the appropriate method on the service.
+     *
+     * @param page
+     * @throws RemoteException
+     */
+    abstract void requestPage(int page) throws RemoteException;
 
     /**
      * Rebuild the provider's cache of information, irrespective of whether or

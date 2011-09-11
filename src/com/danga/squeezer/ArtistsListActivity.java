@@ -27,7 +27,6 @@ import android.view.MenuItem;
 
 import com.danga.squeezer.itemlists.IServiceArtistListCallback;
 import com.danga.squeezer.model.SqueezerArtist;
-import com.danga.squeezer.service.ArtistCache.Artists;
 import com.danga.squeezer.service.ArtistCacheProvider;
 import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SqueezeService;
@@ -71,7 +70,7 @@ public class ArtistsListActivity extends FragmentActivity implements
 
         // Get a reference to the content provider.
         mContentProviderClient = getContentResolver().acquireContentProviderClient(
-                Artists.CONTENT_URI);
+                ArtistCacheProvider.Artists.CONTENT_URI);
         mProvider = (ArtistCacheProvider) mContentProviderClient.getLocalContentProvider();
 
         // Bind the service.

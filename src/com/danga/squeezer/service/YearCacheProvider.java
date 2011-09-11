@@ -434,7 +434,7 @@ public class YearCacheProvider extends ContentProvider {
                 // content
                 // type.
             case YEAR_ID:
-                return YearCache.Years.CONTENT_ITEM_TYPE;
+                return YearCache.Years.ITEM_CONTENT_TYPE;
 
                 // If the URI pattern doesn't match any permitted patterns,
                 // throws an exception.

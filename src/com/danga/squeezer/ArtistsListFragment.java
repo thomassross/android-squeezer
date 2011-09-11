@@ -16,9 +16,8 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
-import com.danga.squeezer.service.ArtistCache;
-import com.danga.squeezer.service.ArtistCache.Artists;
 import com.danga.squeezer.service.ArtistCacheCursor;
+import com.danga.squeezer.service.ArtistCacheProvider;
 
 /**
  * List fragment that shows artists from the content provider.
@@ -54,12 +53,12 @@ public class ArtistsListFragment extends ListFragment implements AbsListView.OnS
 
     /** Columns to fetch from the database. */
     private static final String[] boundColumns = new String[] {
-            Artists._ID, Artists.COL_NAME
+            ArtistCacheProvider.Artists._ID, ArtistCacheProvider.Artists.COL_NAME
     };
 
     /** Columns to bind to resources (in order). */
     private static final String[] from = new String[] {
-            Artists.COL_NAME
+            ArtistCacheProvider.Artists.COL_NAME
     };
 
     /** Resources to bind column values to (in order). */
@@ -120,15 +119,15 @@ public class ArtistsListFragment extends ListFragment implements AbsListView.OnS
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         Uri artistUri = ContentUris
-                .withAppendedId(ArtistCache.Artists.CONTENT_ID_URI_BASE, id);
+                .withAppendedId(ArtistCacheProvider.Artists.CONTENT_ID_URI_BASE, id);
         mListener.onArtistSelected(artistUri);
     }
 
     /** LoaderCallbacks */
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), Artists.CONTENT_URI, boundColumns,
-                null, null, null);
+        return new CursorLoader(getActivity(), ArtistCacheProvider.Artists.CONTENT_URI,
+                boundColumns, null, null, null);
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

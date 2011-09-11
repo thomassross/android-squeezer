@@ -373,7 +373,7 @@ public class AlbumCacheProvider extends ContentProvider {
                                 "=" +
                                 // the position of the album ID itself in the
                                 // incoming URI
-                                uri.getPathSegments().get(AlbumCache.Albums.ALBUM_ID_PATH_POSITION));
+                                uri.getPathSegments().get(AlbumCache.Albums.ID_PATH_POSITION));
                 break;
 
             case LIVE_FOLDER_ALBUMS:
@@ -454,7 +454,7 @@ public class AlbumCacheProvider extends ContentProvider {
                 // If the pattern is for album IDs, returns the album ID content
                 // type.
             case ALBUM_ID:
-                return AlbumCache.Albums.CONTENT_ITEM_TYPE;
+                return AlbumCache.Albums.ITEM_CONTENT_TYPE;
 
                 // If the URI pattern doesn't match any permitted patterns,
                 // throws an exception.
@@ -540,7 +540,7 @@ public class AlbumCacheProvider extends ContentProvider {
                         AlbumCache.Albums._ID + // The ID column name
                                 " = " + // test for equality
                                 uri.getPathSegments(). // the incoming note ID
-                                        get(AlbumCache.Albums.ALBUM_ID_PATH_POSITION);
+                                        get(AlbumCache.Albums.ID_PATH_POSITION);
 
                 // If there were additional selection criteria, append them to
                 // the final WHERE clause.

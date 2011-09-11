@@ -31,30 +31,30 @@ public final class GenreCache {
         /**
          * Path part for the Genres URI
          */
-        private static final String PATH_GENRES = "/genres";
+        private static final String PATH = "/genres";
 
         /**
          * Path part for the Genre ID URI
          */
-        private static final String PATH_GENRE_ID = "/genres/";
+        private static final String PATH_ID = "/genres/";
 
         /**
          * 0-relative position of an genre ID segment in the path part of a
          * genre ID URI
          */
-        public static final int GENRE_ID_PATH_POSITION = 1;
+        public static final int ID_PATH_POSITION = 1;
 
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH_GENRES);
+        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH);
 
         /**
          * The content URI base for a single genre. Callers must append a
          * numeric genre id to this Uri to retrieve an genre.
          */
         public static final Uri CONTENT_ID_URI_BASE = Uri
-                .parse(SCHEME + AUTHORITY + PATH_GENRE_ID);
+                .parse(SCHEME + AUTHORITY + PATH_ID);
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of notes.
@@ -65,7 +65,7 @@ public final class GenreCache {
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single
          * note.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.genre";
+        public static final String ITEM_CONTENT_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.genre";
 
         /**
          * The default sort order for this table

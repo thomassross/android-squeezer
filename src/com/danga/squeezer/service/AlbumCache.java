@@ -31,29 +31,29 @@ public final class AlbumCache {
         /**
          * Path part for the Albums URI
          */
-        private static final String PATH_ALBUMS = "/albums";
+        private static final String PATH = "/albums";
 
         /**
          * Path part for the Album ID URI
          */
-        private static final String PATH_ALBUM_ID = "/albums/";
+        private static final String PATH_ID = "/albums/";
 
         /**
          * 0-relative position of an album ID segment in the path part of a
          * album ID URI
          */
-        public static final int ALBUM_ID_PATH_POSITION = 1;
+        public static final int ID_PATH_POSITION = 1;
 
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUMS);
+        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH);
 
         /**
          * The content URI base for a single album. Callers must append a
          * numeric album id to this Uri to retrieve an album.
          */
-        public static final Uri CONTENT_ID_URI_BASE = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUM_ID);
+        public static final Uri CONTENT_ID_URI_BASE = Uri.parse(SCHEME + AUTHORITY + PATH_ID);
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of notes.
@@ -64,7 +64,7 @@ public final class AlbumCache {
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single
          * note.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.album";
+        public static final String ITEM_CONTENT_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.album";
 
         /**
          * The default sort order for this table

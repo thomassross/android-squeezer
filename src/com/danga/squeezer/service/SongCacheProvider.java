@@ -373,7 +373,7 @@ public class SongCacheProvider extends ContentProvider {
                                 "=" +
                                 // the position of the song ID itself in the
                                 // incoming URI
-                                uri.getPathSegments().get(SongCache.Songs.SONG_ID_PATH_POSITION));
+                                uri.getPathSegments().get(SongCache.Songs.ID_PATH_POSITION));
                 break;
 
             case LIVE_FOLDER_SONGS:
@@ -454,7 +454,7 @@ public class SongCacheProvider extends ContentProvider {
                 // If the pattern is for song IDs, returns the song ID content
                 // type.
             case SONG_ID:
-                return SongCache.Songs.CONTENT_ITEM_TYPE;
+                return SongCache.Songs.ITEM_CONTENT_TYPE;
 
                 // If the URI pattern doesn't match any permitted patterns,
                 // throws an exception.
@@ -540,7 +540,7 @@ public class SongCacheProvider extends ContentProvider {
                         SongCache.Songs._ID + // The ID column name
                                 " = " + // test for equality
                                 uri.getPathSegments(). // the incoming note ID
-                                        get(SongCache.Songs.SONG_ID_PATH_POSITION);
+                                        get(SongCache.Songs.ID_PATH_POSITION);
 
                 // If there were additional selection criteria, append them to
                 // the final WHERE clause.

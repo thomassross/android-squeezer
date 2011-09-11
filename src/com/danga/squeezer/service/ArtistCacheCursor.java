@@ -30,7 +30,7 @@ public class ArtistCacheCursor extends CursorWrapper {
     private static HashMap<String, String> defaults = new HashMap<String, String>();
     {
         // TODO: Localise
-        defaults.put(ArtistCache.Artists.COL_NAME, "Loading...");
+        defaults.put(ArtistCacheProvider.Artists.COL_NAME, "Loading...");
     }
 
     public ArtistCacheCursor(Cursor cursor, ArtistCacheProvider provider) {
@@ -48,11 +48,11 @@ public class ArtistCacheCursor extends CursorWrapper {
             String thisColumnName = getColumnName(columnIndex);
 
             // Name? If so, kick off a fetch.
-            if (thisColumnName.equals(ArtistCache.Artists.COL_NAME)) {
+            if (thisColumnName.equals(ArtistCacheProvider.Artists.COL_NAME)) {
                 if (mLiveUpdate)
                     requestPagesFromPositions(getPosition(), getPosition());
 
-                return defaults.get(ArtistCache.Artists.COL_NAME);
+                return defaults.get(ArtistCacheProvider.Artists.COL_NAME);
             }
 
             // Got a default value for it? If so, return it.
@@ -81,7 +81,13 @@ public class ArtistCacheCursor extends CursorWrapper {
             mProvider.maybeRequestPage(lastPage);
 
         // If we're more than halfway through the current page then request the
-        // next one as well
+        // next one as well.
+        //
+        // TODO: This has no benefit when (at least) scrolling through an item
+        // at a time (e.g., using arrow keys in the emulator), because this gets
+        // called when scrolling stops, and moving one item at a time is not
+        // considered to be scrolling. Code might be necessary in the onScroll()
+        // method in the list view for this to work properly.
         if (lastPosition % mPageSize > mPageSize / 2)
             mProvider.maybeRequestPage(lastPage + 1);
     }

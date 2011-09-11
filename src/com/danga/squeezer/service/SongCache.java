@@ -31,29 +31,29 @@ public final class SongCache {
         /**
          * Path part for the Songs URI
          */
-        private static final String PATH_ALBUMS = "/songs";
+        private static final String PATH = "/songs";
 
         /**
          * Path part for the Song ID URI
          */
-        private static final String PATH_ALBUM_ID = "/songs/";
+        private static final String PATH_ID = "/songs/";
 
         /**
          * 0-relative position of an song ID segment in the path part of a song
          * ID URI
          */
-        public static final int SONG_ID_PATH_POSITION = 1;
+        public static final int ID_PATH_POSITION = 1;
 
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUMS);
+        public static final Uri CONTENT_URI = Uri.parse(SCHEME + AUTHORITY + PATH);
 
         /**
          * The content URI base for a single song. Callers must append a numeric
          * song id to this Uri to retrieve an song.
          */
-        public static final Uri CONTENT_ID_URI_BASE = Uri.parse(SCHEME + AUTHORITY + PATH_ALBUM_ID);
+        public static final Uri CONTENT_ID_URI_BASE = Uri.parse(SCHEME + AUTHORITY + PATH_ID);
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of notes.
@@ -64,7 +64,7 @@ public final class SongCache {
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single
          * note.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.song";
+        public static final String ITEM_CONTENT_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.song";
 
         /**
          * The default sort order for this table

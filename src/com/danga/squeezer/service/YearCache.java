@@ -65,7 +65,7 @@ public final class YearCache {
          * The MIME type of a {@link #CONTENT_URI} sub-directory of a single
          * note.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.year";
+        public static final String ITEM_CONTENT_TYPE = "vnd.android.cursor.item/vnd.danga.squeezer.year";
 
         /**
          * The default sort order for this table
