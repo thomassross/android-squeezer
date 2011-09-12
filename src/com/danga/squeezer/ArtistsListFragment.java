@@ -18,6 +18,7 @@ import android.widget.ListView;
 
 import com.danga.squeezer.service.ArtistCacheCursor;
 import com.danga.squeezer.service.ArtistCacheProvider;
+import com.danga.squeezer.service.ProviderUri;
 
 /**
  * List fragment that shows artists from the content provider.
@@ -119,14 +120,15 @@ public class ArtistsListFragment extends ListFragment implements AbsListView.OnS
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         Uri artistUri = ContentUris
-                .withAppendedId(ArtistCacheProvider.Artists.CONTENT_ID_URI_BASE, id);
+                .withAppendedId(ProviderUri.ARTIST.getContentIdUriBase(), id);
         mListener.onArtistSelected(artistUri);
     }
 
     /** LoaderCallbacks */
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), ArtistCacheProvider.Artists.CONTENT_URI,
+        return new CursorLoader(getActivity(),
+                ProviderUri.ARTIST.getContentUri(),
                 boundColumns, null, null, null);
     }
 

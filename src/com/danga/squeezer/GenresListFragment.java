@@ -16,9 +16,9 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
-import com.danga.squeezer.service.GenreCache;
-import com.danga.squeezer.service.GenreCache.Genres;
 import com.danga.squeezer.service.GenreCacheCursor;
+import com.danga.squeezer.service.GenreCacheProvider;
+import com.danga.squeezer.service.ProviderUri;
 
 /**
  * List fragment that shows genres from the content provider.
@@ -54,12 +54,12 @@ public class GenresListFragment extends ListFragment implements AbsListView.OnSc
 
     /** Columns to fetch from the database. */
     private static final String[] boundColumns = new String[] {
-            Genres._ID, Genres.COL_NAME
+            GenreCacheProvider.Genres._ID, GenreCacheProvider.Genres.COL_NAME
     };
 
     /** Columns to bind to resources (in order). */
     private static final String[] from = new String[] {
-            Genres.COL_NAME
+            GenreCacheProvider.Genres.COL_NAME
     };
 
     /** Resources to bind column values to (in order). */
@@ -120,14 +120,15 @@ public class GenresListFragment extends ListFragment implements AbsListView.OnSc
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         Uri genreUri = ContentUris
-                .withAppendedId(GenreCache.Genres.CONTENT_ID_URI_BASE, id);
+                .withAppendedId(ProviderUri.GENRE.getContentIdUriBase(), id);
         mListener.onGenreSelected(genreUri);
     }
 
     /** LoaderCallbacks */
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), Genres.CONTENT_URI, boundColumns,
+        return new CursorLoader(getActivity(), ProviderUri.GENRE.getContentUri(),
+                boundColumns,
                 null, null, null);
     }
 

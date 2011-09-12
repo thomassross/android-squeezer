@@ -31,6 +31,7 @@ import com.danga.squeezer.service.ArtistCacheProvider;
 import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SqueezeService;
 import com.danga.squeezer.service.SqueezerServerState;
+import com.danga.squeezer.service.ProviderUri;
 
 public class ArtistsListActivity extends FragmentActivity implements
         ArtistsListFragment.OnArtistSelectedListener {
@@ -70,7 +71,7 @@ public class ArtistsListActivity extends FragmentActivity implements
 
         // Get a reference to the content provider.
         mContentProviderClient = getContentResolver().acquireContentProviderClient(
-                ArtistCacheProvider.Artists.CONTENT_URI);
+                ProviderUri.ARTIST.getContentUri());
         mProvider = (ArtistCacheProvider) mContentProviderClient.getLocalContentProvider();
 
         // Bind the service.

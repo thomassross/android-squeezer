@@ -27,11 +27,11 @@ import android.view.MenuItem;
 
 import com.danga.squeezer.itemlists.IServiceGenreListCallback;
 import com.danga.squeezer.model.SqueezerGenre;
-import com.danga.squeezer.service.GenreCache.Genres;
 import com.danga.squeezer.service.GenreCacheProvider;
 import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SqueezeService;
 import com.danga.squeezer.service.SqueezerServerState;
+import com.danga.squeezer.service.ProviderUri;
 
 public class GenresListActivity extends FragmentActivity implements
         GenresListFragment.OnGenreSelectedListener {
@@ -71,7 +71,7 @@ public class GenresListActivity extends FragmentActivity implements
 
         // Get a reference to the content provider.
         mContentProviderClient = getContentResolver().acquireContentProviderClient(
-                Genres.CONTENT_URI);
+                ProviderUri.GENRE.getContentUri());
         mProvider = (GenreCacheProvider) mContentProviderClient.getLocalContentProvider();
 
         // Bind the service.

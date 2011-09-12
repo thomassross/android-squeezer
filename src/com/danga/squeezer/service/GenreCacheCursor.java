@@ -30,7 +30,7 @@ public class GenreCacheCursor extends CursorWrapper {
     private static HashMap<String, String> defaults = new HashMap<String, String>();
     {
         // TODO: Localise
-        defaults.put(GenreCache.Genres.COL_NAME, "Loading...");
+        defaults.put(GenreCacheProvider.Genres.COL_NAME, "Loading...");
     }
 
     public GenreCacheCursor(Cursor cursor, GenreCacheProvider provider) {
@@ -48,11 +48,11 @@ public class GenreCacheCursor extends CursorWrapper {
             String thisColumnName = getColumnName(columnIndex);
 
             // Name? If so, kick off a fetch.
-            if (thisColumnName.equals(GenreCache.Genres.COL_NAME)) {
+            if (thisColumnName.equals(GenreCacheProvider.Genres.COL_NAME)) {
                 if (mLiveUpdate)
                     requestPagesFromPositions(getPosition(), getPosition());
 
-                return defaults.get(GenreCache.Genres.COL_NAME);
+                return defaults.get(GenreCacheProvider.Genres.COL_NAME);
             }
 
             // Got a default value for it? If so, return it.

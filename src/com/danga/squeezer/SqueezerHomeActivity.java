@@ -10,9 +10,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.danga.squeezer.service.AlbumCache;
-import com.danga.squeezer.service.ArtistCacheProvider;
-import com.danga.squeezer.service.GenreCache;
 import com.danga.squeezer.service.SongCache;
+import com.danga.squeezer.service.ProviderUri;
 import com.danga.squeezer.service.YearCache;
 
 public class SqueezerHomeActivity extends ListActivity {
@@ -70,11 +69,11 @@ public class SqueezerHomeActivity extends ListActivity {
                     break;
                 case TEST_ARTISTS:
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            ArtistCacheProvider.Artists.CONTENT_ID_URI_BASE));
+                            ProviderUri.ARTIST.getContentIdUriBase()));
                     break;
                 case TEST_GENRES:
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            GenreCache.Genres.CONTENT_ID_URI_BASE));
+                            ProviderUri.GENRE.getContentIdUriBase()));
                     break;
                 case TEST_YEARS:
                     startActivity(new Intent(Intent.ACTION_VIEW,

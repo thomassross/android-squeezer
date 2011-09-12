@@ -98,7 +98,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
     protected static final int SINGLE_ENTRY = 2;
     protected static final int LIVE_FOLDER = 3;
 
-    /** A UriMatcher instance. */
+    /** A UriMatcher */
     protected UriMatcher sUriMatcher;
 
     protected DatabaseHelper mOpenHelper;
@@ -109,7 +109,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
      */
     protected File mCacheDirectory;
 
-    protected SqueezerTable mTableDefinition;
+    protected ProviderUri mTableDefinition;
 
     class DatabaseHelper extends SQLiteOpenHelper {
         private final SharedPreferences preferences;
@@ -172,9 +172,9 @@ public abstract class GenericCacheProvider extends ContentProvider {
              */
             if (force || oldLastScan == -1 || oldLastScan != curLastScan) {
                 Log.v(TAG, "Rebuilding cache... " + oldLastScan + " : " + curLastScan);
-                InsertHelper ih = new InsertHelper(db, mTableDefinition.TABLE_NAME);
+                InsertHelper ih = new InsertHelper(db, mTableDefinition.getTableName());
                 final int serverOrderColumn = ih
-                        .getColumnIndex(mTableDefinition.COL_SERVERORDER);
+                        .getColumnIndex(mTableDefinition.getColServerOrder());
                 final int totalRows = getTotalRows();
 
                 onUpgrade(db, 0, 1);
@@ -194,7 +194,9 @@ public abstract class GenericCacheProvider extends ContentProvider {
                     db.endTransaction();
                 }
 
-                getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI, null);
+                getContext().getContentResolver().notifyChange(
+                        mTableDefinition.getContentUri(),
+                        null);
 
                 // Remove the cache directory
                 if (mCacheDirectory.exists())
@@ -207,7 +209,9 @@ public abstract class GenericCacheProvider extends ContentProvider {
                 editor.putInt(lastScanKey, curLastScan);
                 editor.commit();
 
-                getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI, null);
+                getContext().getContentResolver().notifyChange(
+                        mTableDefinition.getContentUri(),
+                        null);
 
                 Log.v(TAG, "... cache rebuilt");
             }
@@ -237,7 +241,8 @@ public abstract class GenericCacheProvider extends ContentProvider {
         notifyUpdatesThreadPool.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 if (notifyUpdates.getAndSet(false) == true)
-                    getContext().getContentResolver().notifyChange(mTableDefinition.CONTENT_URI,
+                    getContext().getContentResolver().notifyChange(
+                            mTableDefinition.getContentUri(),
                             null);
             }
         }, 2, 2, TimeUnit.SECONDS);
@@ -253,7 +258,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
 
         // Constructs a new query builder and sets its table name
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(mTableDefinition.TABLE_NAME);
+        qb.setTables(mTableDefinition.getTableName());
 
         /**
          * Choose the projection and adjust the "where" clause based on URI
@@ -273,9 +278,10 @@ public abstract class GenericCacheProvider extends ContentProvider {
              */
             case SINGLE_ENTRY:
                 qb.setProjectionMap(sProjectionMap);
-                qb.appendWhere(
-                        mTableDefinition.COL_SERVERORDER + "="
-                                + uri.getPathSegments().get(mTableDefinition.ID_PATH_POSITION));
+                qb.appendWhere(mTableDefinition.getColServerOrder()
+                        + "="
+                                + uri.getPathSegments().get(
+                                        mTableDefinition.getIdPathPosition()));
                 break;
 
             case LIVE_FOLDER:
@@ -293,7 +299,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
         // If no sort order is specified, uses the default
         String orderBy;
         if (TextUtils.isEmpty(sortOrder))
-            orderBy = mTableDefinition.DEFAULT_SORT_ORDER;
+            orderBy = mTableDefinition.getDefaultSortOrder();
         else
             // otherwise, uses the incoming sort order
             orderBy = sortOrder;
@@ -361,12 +367,12 @@ public abstract class GenericCacheProvider extends ContentProvider {
             case LIVE_FOLDER:
                 // If the pattern is for all items or live folders, returns the
                 // general content type.
-                return mTableDefinition.CONTENT_TYPE;
+                return mTableDefinition.getContentType();
 
             case SINGLE_ENTRY:
                 // If the pattern is for individual IDs, returns the item
                 // content type.
-                return mTableDefinition.ITEM_CONTENT_TYPE;
+                return mTableDefinition.getItemContentType();
 
             default:
                 // If the URI pattern doesn't match any permitted patterns,
@@ -396,13 +402,13 @@ public abstract class GenericCacheProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         // Performs the insert and returns the ID of the new note.
-        long rowId = db.insert(mTableDefinition.TABLE_NAME, null, values);
+        long rowId = db.insert(mTableDefinition.getTableName(), null, values);
 
         // If the insert succeeded, the row ID exists.
         if (rowId > 0) {
             // Creates a URI with the item ID pattern and the new row ID
             // appended to it.
-            Uri u = ContentUris.withAppendedId(mTableDefinition.CONTENT_ID_URI_BASE,
+            Uri u = ContentUris.withAppendedId(mTableDefinition.getContentIdUriBase(),
                     rowId);
 
             // Notifies observers registered against this provider that the data
@@ -431,7 +437,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
             case ALL_ENTRIES:
 
                 // Does the update and returns the number of rows updated.
-                count = db.update(mTableDefinition.TABLE_NAME, values,
+                count = db.update(mTableDefinition.getTableName(), values,
                         where, whereArgs);
                 break;
 
@@ -444,8 +450,10 @@ public abstract class GenericCacheProvider extends ContentProvider {
                  * the incoming ID.
                  */
                 finalWhere =
-                        mTableDefinition.COL_SERVERORDER + " = "
-                                + uri.getPathSegments().get(mTableDefinition.ID_PATH_POSITION);
+                        mTableDefinition.getColServerOrder()
+                                + " = "
+                                + uri.getPathSegments().get(
+                                        mTableDefinition.getIdPathPosition());
 
                 // If there were additional selection criteria, append them to
                 // the final WHERE clause.
@@ -453,7 +461,7 @@ public abstract class GenericCacheProvider extends ContentProvider {
                     finalWhere = finalWhere + " AND " + where;
 
                 // Does the update and returns the number of rows updated.
-                count = db.update(mTableDefinition.TABLE_NAME, values,
+                count = db.update(mTableDefinition.getTableName(), values,
                         finalWhere, whereArgs);
                 break;
             // If the incoming pattern is invalid, throws an exception.
@@ -488,9 +496,10 @@ public abstract class GenericCacheProvider extends ContentProvider {
          * there's no need to fetch.
          */
         Cursor c = query(
-                ContentUris.withAppendedId(mTableDefinition.CONTENT_URI, page * mPageSize),
+                ContentUris.withAppendedId(mTableDefinition.getContentUri(), page
+                        * mPageSize),
                 new String[] {
-                    mTableDefinition.MANDATORY_COLUMN
+                    mTableDefinition.getMandatoryColumn()
                 }, null, null, "");
 
         // Might get 0 rows if the page is past the end of the data set.
