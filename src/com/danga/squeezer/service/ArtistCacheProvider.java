@@ -44,8 +44,6 @@ public class ArtistCacheProvider extends GenericCacheProvider {
         private Artists() {
         }
 
-        public static final String TABLE_NAME = "artist";
-
         public static final String COL_SERVERORDER = android.provider.BaseColumns._ID;
         public static final String COL_ARTISTID = "artistid";
         public static final String COL_NAME = "name";

@@ -19,6 +19,14 @@ public enum ProviderUri {
             "vnd.android.cursor.dir/vnd.danga.squeezer.genre",
             "vnd.android.cursor.item/vnd.danga.squeezer.genre",
             "_id ASC", GenreCacheProvider.Genres.COL_GENREID
+    ),
+    YEAR(
+            "year",
+            "content://", "com.danga.squeezer.service.YearCache", "years",
+            1,
+            "vnd.android.cursor.dir/vnd.danga.squeezer.year",
+            "vnd.android.cursor.item/vnd.danga.squeezer.year",
+            "_id ASC", YearCacheProvider.Years.COL_YEARID
     );
 
     private final String authority;

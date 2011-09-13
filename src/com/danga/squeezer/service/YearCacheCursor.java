@@ -30,7 +30,7 @@ public class YearCacheCursor extends CursorWrapper {
     private static HashMap<String, String> defaults = new HashMap<String, String>();
     {
         // TODO: Localise
-        defaults.put(YearCache.Years.COL_NAME, "Loading...");
+        defaults.put(YearCacheProvider.Years.COL_NAME, "Loading...");
     }
 
     public YearCacheCursor(Cursor cursor, YearCacheProvider provider) {
@@ -48,11 +48,11 @@ public class YearCacheCursor extends CursorWrapper {
             String thisColumnName = getColumnName(columnIndex);
 
             // Name? If so, kick off a fetch.
-            if (thisColumnName.equals(YearCache.Years.COL_NAME)) {
+            if (thisColumnName.equals(YearCacheProvider.Years.COL_NAME)) {
                 if (mLiveUpdate)
                     requestPagesFromPositions(getPosition(), getPosition());
 
-                return defaults.get(YearCache.Years.COL_NAME);
+                return defaults.get(YearCacheProvider.Years.COL_NAME);
             }
 
             // Got a default value for it? If so, return it.

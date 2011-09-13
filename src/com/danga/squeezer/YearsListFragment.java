@@ -16,9 +16,9 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
-import com.danga.squeezer.service.YearCache;
-import com.danga.squeezer.service.YearCache.Years;
+import com.danga.squeezer.service.ProviderUri;
 import com.danga.squeezer.service.YearCacheCursor;
+import com.danga.squeezer.service.YearCacheProvider;
 
 /**
  * List fragment that shows years from the content provider.
@@ -54,12 +54,12 @@ public class YearsListFragment extends ListFragment implements AbsListView.OnScr
 
     /** Columns to fetch from the database. */
     private static final String[] boundColumns = new String[] {
-            Years._ID, Years.COL_NAME
+            YearCacheProvider.Years._ID, YearCacheProvider.Years.COL_NAME
     };
 
     /** Columns to bind to resources (in order). */
     private static final String[] from = new String[] {
-            Years.COL_NAME
+            YearCacheProvider.Years.COL_NAME
     };
 
     /** Resources to bind column values to (in order). */
@@ -120,14 +120,14 @@ public class YearsListFragment extends ListFragment implements AbsListView.OnScr
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         Uri yearUri = ContentUris
-                .withAppendedId(YearCache.Years.CONTENT_ID_URI_BASE, id);
+                .withAppendedId(ProviderUri.YEAR.getContentIdUriBase(), id);
         mListener.onYearSelected(yearUri);
     }
 
     /** LoaderCallbacks */
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), Years.CONTENT_URI, boundColumns,
+        return new CursorLoader(getActivity(), ProviderUri.YEAR.getContentUri(), boundColumns,
                 null, null, null);
     }
 

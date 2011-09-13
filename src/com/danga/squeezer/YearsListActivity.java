@@ -28,9 +28,9 @@ import android.view.MenuItem;
 import com.danga.squeezer.itemlists.IServiceYearListCallback;
 import com.danga.squeezer.model.SqueezerYear;
 import com.danga.squeezer.service.ISqueezeService;
+import com.danga.squeezer.service.ProviderUri;
 import com.danga.squeezer.service.SqueezeService;
 import com.danga.squeezer.service.SqueezerServerState;
-import com.danga.squeezer.service.YearCache.Years;
 import com.danga.squeezer.service.YearCacheProvider;
 
 public class YearsListActivity extends FragmentActivity implements
@@ -71,7 +71,7 @@ public class YearsListActivity extends FragmentActivity implements
 
         // Get a reference to the content provider.
         mContentProviderClient = getContentResolver().acquireContentProviderClient(
-                Years.CONTENT_URI);
+                ProviderUri.YEAR.getContentUri());
         mProvider = (YearCacheProvider) mContentProviderClient.getLocalContentProvider();
 
         // Bind the service.
