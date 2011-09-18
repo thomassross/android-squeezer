@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.itemlists;
 
 import java.util.List;
@@ -19,7 +35,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.danga.squeezer.R;
-import com.danga.squeezer.SqueezerActivity;
 import com.danga.squeezer.framework.SqueezerBaseListActivity;
 import com.danga.squeezer.framework.SqueezerItemView;
 import com.danga.squeezer.model.SqueezerPlaylist;
@@ -56,19 +71,12 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
 		getService().playlists(start);
 	}
 
-	@Override
-	protected void onItemSelected(int index, SqueezerPlaylist item) throws RemoteException {
-		play(item);
-		SqueezerActivity.show(this);
-	}
-	
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.playlistsmenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
-	
+
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
@@ -78,7 +86,7 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -140,12 +148,12 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
 			}
 			break;
         }
-        
+
         builder.setNegativeButton(android.R.string.cancel, null);
-        
+
         return builder.create();
     }
-    
+
     @Override
     protected void onPrepareDialog(int id, final Dialog dialog) {
         switch (id) {
@@ -176,7 +184,7 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
         }
     	super.onPrepareDialog(id, dialog);
     }
-    
+
     private void create(String name) {
    		try {
 			getService().playlistsNew(name);
@@ -185,40 +193,40 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
             Log.e(getTag(), "Error saving playlist as '"+ name + "': " + e);
 		}
     }
-    
+
     private void rename(String newname) {
    		try {
    			oldname = currentPlaylist.getName();
 			getService().playlistsRename(currentPlaylist, newname);
 			currentPlaylist.setName(newname);
-			getItemListAdapter().notifyDataSetChanged();
+			getItemAdapter().notifyDataSetChanged();
 		} catch (RemoteException e) {
             Log.e(getTag(), "Error renaming playlist to '"+ newname + "': " + e);
 		}
     }
 
-    
+
 	public static void show(Context context) {
         final Intent intent = new Intent(context, SqueezerPlaylistsActivity.class);
         context.startActivity(intent);
     }
 
-    private IServicePlaylistsCallback playlistsCallback = new IServicePlaylistsCallback.Stub() {
+    private final IServicePlaylistsCallback playlistsCallback = new IServicePlaylistsCallback.Stub() {
 		public void onPlaylistsReceived(int count, int start, List<SqueezerPlaylist> items) throws RemoteException {
 			onItemsReceived(count, start, items);
 		}
     };
-    
+
     private void showServiceMessage(final String msg) {
 		getUIThreadHandler().post(new Runnable() {
 			public void run() {
-				getItemListAdapter().notifyDataSetChanged();
+				getItemAdapter().notifyDataSetChanged();
 				Toast.makeText(SqueezerPlaylistsActivity.this, msg, Toast.LENGTH_SHORT).show();
 			}
 		});
     }
-    
-    private IServicePlaylistMaintenanceCallback playlistMaintenanceCallback = new IServicePlaylistMaintenanceCallback.Stub() {
+
+    private final IServicePlaylistMaintenanceCallback playlistMaintenanceCallback = new IServicePlaylistMaintenanceCallback.Stub() {
 
 		public void onRenameFailed(String msg) throws RemoteException {
 			currentPlaylist.setName(oldname);
@@ -228,7 +236,7 @@ public class SqueezerPlaylistsActivity extends SqueezerBaseListActivity<Squeezer
 		public void onCreateFailed(String msg) throws RemoteException {
 			showServiceMessage(msg);
 		}
-    	
+
     };
 
 }

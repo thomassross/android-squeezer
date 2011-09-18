@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.danga.squeezer.itemlists;
 
@@ -18,7 +33,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.danga.squeezer.R;
-import com.danga.squeezer.SqueezerActivity;
 import com.danga.squeezer.framework.SqueezerItem;
 import com.danga.squeezer.framework.SqueezerItemView;
 import com.danga.squeezer.framework.SqueezerOrderableListActivity;
@@ -100,12 +114,6 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
     }
 
     @Override
-    protected void onItemSelected(int index, SqueezerAlbum item) throws RemoteException {
-        play(item);
-        SqueezerActivity.show(this);
-    }
-
-    @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -116,7 +124,7 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
                 sortOrderStrings[AlbumsSortOrder.artflow.ordinal()] = getString(R.string.albums_sort_order_artflow);
                 sortOrderStrings[AlbumsSortOrder.__new.ordinal()] = getString(R.string.albums_sort_order_new);
                 int checkedItem = sortOrder.ordinal();
-                builder.setTitle(getString(R.string.choose_sort_order, getItemListAdapter()
+                builder.setTitle(getString(R.string.choose_sort_order, getItemAdapter()
                         .getQuantityString(2)));
                 builder.setSingleChoiceItems(sortOrderStrings, checkedItem,
                         new DialogInterface.OnClickListener() {
@@ -132,7 +140,7 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
                 builder.setView(filterForm);
 
                 final EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
-                editText.setHint(getString(R.string.filter_text_hint, getItemListAdapter()
+                editText.setHint(getString(R.string.filter_text_hint, getItemAdapter()
                         .getQuantityString(2)));
                 final Spinner genreSpinnerView = (Spinner) filterForm
                         .findViewById(R.id.genre_spinner);

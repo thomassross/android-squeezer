@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.itemlists;
 
 import android.app.AlertDialog;
@@ -42,7 +58,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 	public SqueezerGenre getGenre() {
 		return genre;
 	}
-	
+
 	public SqueezerYear getYear() {
 		return year;
 	}
@@ -100,15 +116,10 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 	protected void orderPage(int start) throws RemoteException {
 		getService().songs(start, sortOrder.name(), searchString, album, artist, year, genre);
 	}
-	
+
 	public void setSortOrder(SongsSortOrder sortOrder) {
 		this.sortOrder = sortOrder;
 		orderItems();
-	}
-
-	@Override
-	protected void onItemSelected(int index, SqueezerSong item) throws RemoteException {
-		insert(item);
 	}
 
 	@Override
@@ -117,7 +128,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
         getMenuInflater().inflate(R.menu.ordermenuitem, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
@@ -130,13 +141,13 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
 	@Override
 	public boolean onSearchRequested() {
 		showDialog(DIALOG_FILTER);
 		return false;
 	}
-	
+
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -147,7 +158,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 		    sortOrderStrings[SongsSortOrder.title.ordinal()] = getString(R.string.songs_sort_order_title);
 		    sortOrderStrings[SongsSortOrder.tracknum.ordinal()] = getString(R.string.songs_sort_order_tracknum);
 		    int checkedItem = sortOrder.ordinal();
-		    builder.setTitle(getString(R.string.choose_sort_order, getItemListAdapter().getQuantityString(2)));
+		    builder.setTitle(getString(R.string.choose_sort_order, getItemAdapter().getQuantityString(2)));
 		    builder.setSingleChoiceItems(sortOrderStrings, checkedItem, new DialogInterface.OnClickListener() {
 		            public void onClick(DialogInterface dialog, int indexSelected) {
 		               	setSortOrder(SongsSortOrder.values()[indexSelected]);
@@ -160,18 +171,18 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 			builder.setTitle(R.string.menu_item_filter);
 			builder.setView(filterForm);
 	        final EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
-	        editText.setHint(getString(R.string.filter_text_hint, getItemListAdapter().getQuantityString(2)));
+	        editText.setHint(getString(R.string.filter_text_hint, getItemAdapter().getQuantityString(2)));
 			final Spinner genreSpinnerView = (Spinner) filterForm.findViewById(R.id.genre_spinner);
 			final Spinner yearSpinnerView = (Spinner) filterForm.findViewById(R.id.year_spinner);
 
 	        genreSpinner = new GenreSpinner(this, this, genreSpinnerView);
 	        yearSpinner = new YearSpinner(this, this, yearSpinnerView);
-	        
+
 	        if (artist != null) {
 	        	((EditText)filterForm.findViewById(R.id.artist)).setText(artist.getName());
 	        	(filterForm.findViewById(R.id.artist_view)).setVisibility(View.VISIBLE);
 	        }
-	        if (album != null) { 
+	        if (album != null) {
 	        	((EditText) filterForm.findViewById(R.id.album)).setText(album.getName());
 	        	(filterForm.findViewById(R.id.album_view)).setVisibility(View.VISIBLE);
 	        }
@@ -189,7 +200,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 	                return false;
 	            }
 	        });
-	        
+
 	        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
                 	searchString = editText.getText().toString();
@@ -199,7 +210,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity i
 				}
 			});
 	        builder.setNegativeButton(android.R.string.cancel, null);
-	        
+
 			return builder.create();
         }
         return null;

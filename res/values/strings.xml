@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ Copyright (c) 2009 Brad Fitzpatrick <brad@danga.com>
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
 <resources>
     <string name="app_name">Squeezer</string>
     <string name="menu_item_players">Players</string>
@@ -7,10 +24,9 @@
     <string name="menu_item_about_label">About</string>
     <string name="activity_settings_name">Settings</string>
     <string name="settings_serveraddr_title">Server Address</string>
-    <string name="settings_serveraddr_format">In format host:port</string>
-    <string name="settings_serveraddr_summary">IP address of SqueezeCenter server, e.g. 10.0.0.5</string>
-    <string name="settings_maxrows_title">Maximum list size</string>
-    <string name="settings_maxrows_summary">Maximum number of items, which is automatically fetched from SqueezeServer</string>
+    <string name="settings_serveraddr_summary">IP address or name of Squeezebox Server, e.g. 10.0.0.5 \nUse format host:port to specify a non standard port.</string>
+    <string name="settings_autoconnect_title">Auto-connect</string>
+    <string name="settings_autoconnect_summary">Offer to enable WiFi, and on Wifi availability, try to connect.</string>
     <string name="menu_item_disconnect">Disconnect</string>
     <string name="menu_item_connect">Connect</string>
     <string name="menu_item_poweron">Power on</string>
@@ -30,6 +46,8 @@
     <string name="connecting_to_text">Connecting to SqueezeBox CLI at %s</string>
     <string name="connection_failed_text">Connection failed.  Check settings.</string>
     <string name="disconnected_text">Disconnected.</string>
+    <string name="wifi_disabled_text">Wifi is disabled</string>
+    <string name="enable_wifi_text">This will turn on Wi-Fi on your Android device. Please wait for an active Wi-Fi connection. \nTurn on Wifi now?</string>
     <string name="notification_playing_text">%s playing</string>
     <string name="notification_connected_text">%s connected</string>
     <string name="filter_text_hint">Search for %s</string>
@@ -54,13 +72,10 @@
     <string name="genre_label">Genre</string>
     <string name="year_label">Year</string>
     <string name="filter_label">Search text</string>
-    <string name="about_text">&lt;b&gt;Squeezer v%s (C) Brad Fitzpatrick&lt;/b&gt;
+    <string name="about_text">&lt;b&gt;Squeezer v%s (c) 2009, 2010, 2011 Kurt Aaholst, Nik Clayton, Brad Fitzpatrick&lt;/b&gt;
    
 &lt;p&gt;http://code.google.com/p/android-squeezer/&lt;/p&gt;
-&lt;p&gt;android-squeezer@googlegroups.com&lt;/p&gt;
-
-&lt;p&gt;Welcome to Squeezer!&lt;br/&gt;
-This project is very new and is undergoing active development. Patches and feature requests are welcome!&lt;/p&gt;</string>
+&lt;p&gt;android-squeezer@googlegroups.com&lt;/p&gt;</string>
 
 	<string name="CONTEXTMENU_BROWSE_SONGS">Browse songs</string>
 	<string name="CONTEXTMENU_BROWSE_ALBUMS">Browse albums</string>
@@ -125,11 +140,22 @@ This project is very new and is undergoing active development. Patches and featu
         <item quantity="other">playlists</item>
     </plurals>
 
+    <plurals name="radio">
+        <item quantity="one">radio station plugin</item>
+        <item quantity="other">radio station plugins</item>
+    </plurals>
+
+    <plurals name="application">
+        <item quantity="one">application</item>
+        <item quantity="other">applications</item>
+    </plurals>
+
 
     <string-array name="home_items">
         <item>Now playing</item>
         <item>My Music</item>
         <item>Internet Radio</item>
+        <item>My Apps</item>
         <item>Favorites</item>
         <item>Test albums</item>
         <item>Test songs</item>

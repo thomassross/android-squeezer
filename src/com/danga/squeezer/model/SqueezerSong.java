@@ -1,12 +1,31 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.model;
 
 import java.util.Map;
 
 import android.database.Cursor;
 import android.os.Parcel;
+import android.os.RemoteException;
+import android.util.Log;
 
 import com.danga.squeezer.Util;
 import com.danga.squeezer.framework.SqueezerArtworkItem;
+import com.danga.squeezer.service.ISqueezeService;
 import com.danga.squeezer.service.SongCache.Songs;
 
 public class SqueezerSong extends SqueezerArtworkItem {
@@ -46,6 +65,28 @@ public class SqueezerSong extends SqueezerArtworkItem {
         this.mArtworkPath = artworkPath;
     }
 
+	private boolean remote;
+	public boolean isRemote() { return remote; }
+	public void setRemote(boolean remote) { this.remote = remote; }
+
+
+	private String artwork_url;
+	public String getArtwork_url() { return artwork_url; }
+	public void setArtwork_url(String artworkUrl) { artwork_url = artworkUrl; }
+
+    public String getArtworkUrl(ISqueezeService service) {
+		if (getArtwork_track_id() != null) {
+			try {
+				if (service == null)
+					return null;
+				return service.getAlbumArtUrl(getArtwork_track_id());
+			} catch (RemoteException e) {
+				Log.e(getClass().getSimpleName(), "Error requesting album art url: " + e);
+			}
+		}
+		return getArtwork_url();
+    }
+
 	public SqueezerSong(Map<String, String> record) {
 		if (getId() == null) setId(record.get("track_id"));
 		if (getId() == null) setId(record.get("id"));
@@ -55,6 +96,8 @@ public class SqueezerSong extends SqueezerArtworkItem {
 		setYear(Util.parseDecimalIntOrZero(record.get("year")));
 		setArtist_id(record.get("artist_id"));
 		setAlbum_id(record.get("album_id"));
+		setRemote(Util.parseDecimalIntOrZero(record.get("remote")) != 0);
+		setArtwork_url(record.get("artwork_url"));
 		setArtwork_track_id(record.get("artwork_track_id"));
 	}
 

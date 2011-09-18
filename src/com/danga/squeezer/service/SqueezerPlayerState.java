@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2009 Brad Fitzpatrick <brad@danga.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.service;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,13 +25,12 @@ import com.danga.squeezer.model.SqueezerSong;
 public class SqueezerPlayerState {
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private final AtomicBoolean isPoweredOn = new AtomicBoolean(false);
-    
+
     private final AtomicReference<SqueezerSong> currentSong = new AtomicReference<SqueezerSong>();
-    private final AtomicReference<String> currentArtworkUrl = new AtomicReference<String>();
     private final AtomicReference<Integer> currentTimeSecond = new AtomicReference<Integer>();
     private final AtomicReference<Integer> currentSongDuration = new AtomicReference<Integer>();
 
-    
+
 	public boolean isPlaying() {
 		return isPlaying.get();
 	}
@@ -44,28 +59,9 @@ public class SqueezerPlayerState {
     	return this;
     }
     public boolean setCurrentSongUpdated(SqueezerSong newValue) {
-    	SqueezerSong currentValue = currentSong.get();
-		if (currentValue == null && newValue == null)
-			return false;
-		if (currentValue == null || !currentValue.equals(newValue)) {
-			currentSong.set(newValue);
-			return true;
-		}
-		return false;
+    	return Util.atomicSongUpdated(currentSong, newValue);
     }
 
-	
-	public String getCurrentArtworkUrl() {
-		return currentArtworkUrl.get();
-	}
-    public SqueezerPlayerState setCurrentArtworkUrl(String value) {
-    	currentArtworkUrl.set(value);
-    	return this;
-    }
-    public boolean currentArtworkUrlUpdated(String value) {
-    	return Util.atomicStringUpdated(currentArtworkUrl, value);
-    }
-	
 	public Integer getCurrentTimeSecond() {
 		return currentTimeSecond.get();
 	}
@@ -76,7 +72,7 @@ public class SqueezerPlayerState {
     	currentTimeSecond.set(value);
     	return this;
     }
-	
+
 	public Integer getCurrentSongDuration() {
 		return currentSongDuration.get();
 	}
@@ -94,5 +90,5 @@ public class SqueezerPlayerState {
         setCurrentTimeSecond(null);
         setCurrentSongDuration(null);
 	}
-    
+
 }

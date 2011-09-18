@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.itemlists;
 
 import java.util.List;
@@ -73,11 +89,6 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 		getService().artists(start, searchString, album, genre);
 	}
 
-	@Override
-	protected void onItemSelected(int index, SqueezerArtist item) throws RemoteException {
-		SqueezerAlbumListActivity.show(this, item);
-	}
-
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -90,7 +101,8 @@ public class SqueezerArtistListActivity extends SqueezerFilterableListActivity<S
 			builder.setView(filterForm);
 
 	        final EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
-	        editText.setHint(getString(R.string.filter_text_hint, getItemListAdapter().getQuantityString(2)));
+                editText.setHint(getString(R.string.filter_text_hint, getItemAdapter()
+                        .getQuantityString(2)));
 			filterForm.findViewById(R.id.year_view).setVisibility(View.GONE);
 			final Spinner genreSpinnerView = (Spinner) filterForm.findViewById(R.id.genre_spinner);
 	        genreSpinner = new GenreSpinner(this, this, genreSpinnerView);

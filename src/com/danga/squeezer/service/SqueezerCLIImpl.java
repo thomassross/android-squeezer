@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.danga.squeezer.service;
 
@@ -22,6 +37,8 @@ import com.danga.squeezer.model.SqueezerArtist;
 import com.danga.squeezer.model.SqueezerGenre;
 import com.danga.squeezer.model.SqueezerPlayer;
 import com.danga.squeezer.model.SqueezerPlaylist;
+import com.danga.squeezer.model.SqueezerPlugin;
+import com.danga.squeezer.model.SqueezerPluginItem;
 import com.danga.squeezer.model.SqueezerSong;
 import com.danga.squeezer.model.SqueezerYear;
 
@@ -29,17 +46,24 @@ class SqueezerCLIImpl {
     private static final String TAG = "SqueezerCLI";
 
     class ExtendedQueryFormatCmd {
-        boolean playerSpecific;
-        String cmd;
-        private final Set<String> taggedParameters;
-        private final SqueezeParserInfo[] parserInfos;
+        final boolean playerSpecific;
+        final boolean prefixed;
+        final String cmd;
+        final private Set<String> taggedParameters;
+        final private SqueezeParserInfo[] parserInfos;
 
-        private ExtendedQueryFormatCmd(boolean playerSpecific, String cmd,
+        private ExtendedQueryFormatCmd(boolean playerSpecific, boolean prefixed, String cmd,
                 Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
             this.playerSpecific = playerSpecific;
+            this.prefixed = prefixed;
             this.cmd = cmd;
             this.taggedParameters = taggedParameters;
             this.parserInfos = parserInfos;
+        }
+
+        private ExtendedQueryFormatCmd(boolean playerSpecific, String cmd,
+                Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
+            this(playerSpecific, false, cmd, taggedParameters, parserInfos);
         }
 
         public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
@@ -94,8 +118,9 @@ class SqueezerCLIImpl {
                                 players.add(player);
                             }
 
-                            public boolean processList(boolean rescan, int count, int start) {
-                                if (service.playerListCallback.get() != null)
+                            public boolean processList(boolean rescan, int count, int start,
+                                    Map<String, String> parameters) {
+                                if (service.playerListCallback.get() != null) {
                                     // If the player list activity is active,
                                     // pass the discovered players to it
                                     try {
@@ -105,14 +130,16 @@ class SqueezerCLIImpl {
                                         Log.e(TAG, e.toString());
                                         return false;
                                     }
-                                else
-                            if (start + players.size() >= count)
-                                // Otherwise set the last connected player as
-                                // the active player
-                                if (defaultPlayer != null)
-                                    service.changeActivePlayer(defaultPlayer);
-                            return true;
-                        }
+                                } else
+                                    if (start + players.size() >= count) {
+                                        // Otherwise set the last connected
+                                        // player as
+                                        // the active player
+                                        if (defaultPlayer != null)
+                                            service.changeActivePlayer(defaultPlayer);
+                                    }
+                                    return true;
+                                }
 
                             public void onItemsFinished() {
                                 // TODO Auto-generated method stub
@@ -134,7 +161,7 @@ class SqueezerCLIImpl {
                         "albums",
                         new HashSet<String>(Arrays.asList("search", "genre_id", "artist_id",
                                 "track_id", "year", "compilation", "sort", "tags", "charset")),
-                        new AlbumListHandler()
+                                new AlbumListHandler()
                 )
                 );
         list.add(
@@ -150,7 +177,7 @@ class SqueezerCLIImpl {
                         "genres",
                         new HashSet<String>(Arrays.asList("search", "artist_id", "album_id",
                                 "track_id", "year", "tags", "charset")),
-                        new GenreListHandler()
+                                new GenreListHandler()
                 )
                 );
         list.add(
@@ -158,7 +185,7 @@ class SqueezerCLIImpl {
                         "songs",
                         new HashSet<String>(Arrays.asList("genre_id", "artist_id", "album_id",
                                 "year", "search", "tags", "sort", "charset")),
-                        new SongListHandler()
+                                new SongListHandler()
                 )
                 );
         list.add(
@@ -183,7 +210,8 @@ class SqueezerCLIImpl {
                         new SqueezeParserInfo("albums_count", "album_id", new AlbumListHandler()),
                         new SqueezeParserInfo("contributors_count", "contributor_id",
                                 new ArtistListHandler()),
-                        new SqueezeParserInfo("tracks_count", "track_id", new SongListHandler())
+                                new SqueezeParserInfo("tracks_count", "track_id",
+                                        new SongListHandler())
                 )
                 );
         list.add(
@@ -194,6 +222,28 @@ class SqueezerCLIImpl {
                         new SqueezeParserInfo("playlist_tracks", "playlist index",
                                 new SongListHandler())
                 )
+                );
+        list.add(
+                new ExtendedQueryFormatCmd(
+                        "radios",
+                        new HashSet<String>(Arrays.asList("sort", "charset")),
+                        "icon",
+                        new PluginListHandler())
+                );
+        list.add(
+                new ExtendedQueryFormatCmd(
+                        "apps",
+                        new HashSet<String>(Arrays.asList("sort", "charset")),
+                        "icon",
+                        new PluginListHandler())
+                );
+        list.add(
+                new ExtendedQueryFormatCmd(
+                        true, true,
+                        "items",
+                        new HashSet<String>(Arrays.asList("item_id", "search", "want_url",
+                                "charset")),
+                        new SqueezeParserInfo(new PluginItemListHandler()))
                 );
 
         return list.toArray(new ExtendedQueryFormatCmd[] {});
@@ -311,6 +361,10 @@ class SqueezerCLIImpl {
         requestItems(service.connectionState.getActivePlayer().getId(), cmd, start, parameters);
     }
 
+    void requestPlayerItems(String cmd, int start) {
+        requestPlayerItems(cmd, start, null);
+    }
+
     /**
      * Data for
      * {@link SqueezerCLIImpl#parseSqueezerList(boolean, List, SqueezeParserInfo...)}
@@ -385,7 +439,7 @@ class SqueezerCLIImpl {
          * @param start Offset for the current list in total results.
          * @return
          */
-        boolean processList(boolean rescan, int count, int start);
+        boolean processList(boolean rescan, int count, int start, Map<String, String> parameters);
 
         /**
          * Called when all items requested have been retrieved and passed to
@@ -417,15 +471,17 @@ class SqueezerCLIImpl {
     void parseSqueezerList(ExtendedQueryFormatCmd cmd, List<String> tokens) {
         Log.v(TAG, "Parsing list: " + tokens);
 
-        int ofs = cmd.cmd.split(" ").length + (cmd.playerSpecific ? 1 : 0);
+        int ofs = cmd.cmd.split(" ").length + (cmd.playerSpecific ? 1 : 0) + (cmd.prefixed ? 1 : 0);
         int actionsCount = 0;
         String playerid = (cmd.playerSpecific ? tokens.get(0) + " " : "");
+        String prefix = (cmd.prefixed ? tokens.get(cmd.playerSpecific ? 1 : 0) + " " : "");
         int start = Util.parseDecimalIntOrZero(tokens.get(ofs));
         int itemsPerResponse = Util.parseDecimalIntOrZero(tokens.get(ofs + 1));
 
         int correlationid = 0;
         boolean rescan = false;
         Map<String, String> taggedParameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<String, String>();
         Set<String> countIdSet = new HashSet<String>();
         Map<String, SqueezeParserInfo> itemDelimeterMap = new HashMap<String, SqueezeParserInfo>();
         Map<String, Integer> counts = new HashMap<String, Integer>();
@@ -455,8 +511,8 @@ class SqueezerCLIImpl {
             else if (key.equals("correlationid"))
                 correlationid = Util.parseDecimalIntOrZero(value);
             else if (key.equals("actions")) // Apparently squeezer returns some
-                                            // commands which are included in
-                                            // the count of the current request
+                // commands which are included in
+                // the count of the current request
                 actionsCount++;
             if (countIdSet.contains(key))
                 counts.put(key, Util.parseDecimalIntOrZero(value));
@@ -474,11 +530,16 @@ class SqueezerCLIImpl {
                     record.put(key, value);
                 else if (cmd.taggedParameters.contains(key))
                     taggedParameters.put(key, token);
+                else
+                    parameters.put(key, value);
             }
         }
 
-        if (record != null)
+        if (record != null) {
             parserInfo.handler.add(record);
+            if (service.debugLogging)
+                Log.v(TAG, "record=" + record);
+        }
 
         processLists: if (checkCorrelation(cmd.cmd, correlationid)) {
             int end = start + itemsPerResponse;
@@ -488,7 +549,8 @@ class SqueezerCLIImpl {
                     Integer count = counts.get(parser.count_id);
                     int countValue = (count == null ? 0 : count);
                     if (count != null || start == 0) {
-                        if (!parser.handler.processList(rescan, countValue - actionsCount, start))
+                        if (!parser.handler.processList(rescan, countValue - actionsCount, start,
+                                parameters))
                             break processLists;
                         if (countValue > max)
                             max = countValue;
@@ -499,7 +561,7 @@ class SqueezerCLIImpl {
                     StringBuilder cmdline = new StringBuilder(cmd.cmd + " " + end + " " + count);
                     for (String parameter : taggedParameters.values())
                         cmdline.append(" " + parameter);
-                    sendCommand(playerid + cmdline.toString());
+                    sendCommand(playerid + prefix + cmdline.toString());
                 } else
                     parser.handler.onItemsFinished();
             }
@@ -523,7 +585,8 @@ class SqueezerCLIImpl {
             years.add(new SqueezerYear(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
             Log.v("YearListHandler", "processList(" + rescan + ", " + count + ", " + start
                     + ")");
 
@@ -580,7 +643,8 @@ class SqueezerCLIImpl {
             genres.add(new SqueezerGenre(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
             int i = service.genreListCallbacks.beginBroadcast();
             if (i == 0)
                 return false;
@@ -624,7 +688,8 @@ class SqueezerCLIImpl {
             artists.add(new SqueezerArtist(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
             int i = service.artistListCallbacks.beginBroadcast();
             if (i == 0)
                 return false;
@@ -666,7 +731,8 @@ class SqueezerCLIImpl {
             albums.add(new SqueezerAlbum(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
             int i = service.albumListCallbacks.beginBroadcast();
             if (i == 0)
                 return false;
@@ -708,7 +774,8 @@ class SqueezerCLIImpl {
             songs.add(new SqueezerSong(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
             int i = service.songListCallbacks.beginBroadcast();
             if (i == 0)
                 return false;
@@ -760,14 +827,89 @@ class SqueezerCLIImpl {
             playlists.add(new SqueezerPlaylist(record));
         }
 
-        public boolean processList(boolean rescan, int count, int start) {
-            if (service.playlistsCallback.get() != null)
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
+            if (service.playlistsCallback.get() != null) {
                 try {
                     service.playlistsCallback.get().onPlaylistsReceived(count, start, playlists);
                     return true;
                 } catch (RemoteException e) {
                     Log.e(TAG, e.toString());
                 }
+            }
+            return false;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    private class PluginListHandler implements SqueezerListHandler {
+        List<SqueezerPlugin> plugins;
+
+        public Class<? extends SqueezerItem> getDataType() {
+            return SqueezerPlaylist.class;
+        }
+
+        public void clear() {
+            plugins = new ArrayList<SqueezerPlugin>() {
+                private static final long serialVersionUID = -8342580963244363146L;
+            };
+        }
+
+        public void add(Map<String, String> record) {
+            plugins.add(new SqueezerPlugin(record));
+        }
+
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
+            if (service.pluginListCallback.get() != null) {
+                try {
+                    service.pluginListCallback.get().onPluginsReceived(count, start, plugins);
+                    return true;
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
+            }
+            return false;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    private class PluginItemListHandler implements SqueezerListHandler {
+        List<SqueezerPluginItem> pluginItems;
+
+        public Class<? extends SqueezerItem> getDataType() {
+            return SqueezerPlaylist.class;
+        }
+
+        public void clear() {
+            pluginItems = new ArrayList<SqueezerPluginItem>() {
+                private static final long serialVersionUID = -2162255134145627211L;
+            };
+        }
+
+        public void add(Map<String, String> record) {
+            pluginItems.add(new SqueezerPluginItem(record));
+        }
+
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
+            if (service.pluginItemListCallback.get() != null) {
+                try {
+                    service.pluginItemListCallback.get().onPluginItemsReceived(count, start,
+                            parameters, pluginItems);
+                    return true;
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
+            }
             return false;
         }
 

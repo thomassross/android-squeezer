@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011 Kurt Aaholst <kaaholst@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.danga.squeezer.itemlists;
 
 import android.app.AlertDialog;
@@ -41,6 +57,13 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 	@Override
 	public SqueezerItemView<SqueezerSong> createItemView() {
 		return new SqueezerSongView(this) {
+
+			@Override
+			public void onItemSelected(int index, SqueezerSong item) throws RemoteException {
+				getActivity().getService().playlistIndex(index);
+				getActivity().finish();
+			}
+
 			@Override
 			public void setupContextMenu(ContextMenu menu, int index, SqueezerSong item) {
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_PLAY_ITEM, 1, R.string.CONTEXTMENU_PLAY_ITEM);
@@ -51,7 +74,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 					menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_MOVE_DOWN, 4, R.string.PLAYLIST_CONTEXTMENU_MOVE_DOWN);
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_MOVE, 5, R.string.PLAYLIST_CONTEXTMENU_MOVE);
 			}
-			
+
 			@Override
 			public boolean doItemContext(MenuItem menuItem, int index, SqueezerSong selectedItem) throws RemoteException {
 				switch (menuItem.getItemId()) {
@@ -85,18 +108,12 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 		getService().currentPlaylist(start);
 	}
 
-	@Override
-	protected void onItemSelected(int index, SqueezerSong item) throws RemoteException {
-		getService().playlistIndex(index);
-		finish();
-	}
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.currentplaylistmenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
-	
+
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
@@ -162,7 +179,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 		        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 		               	int targetIndex = Util.parseDecimalInt(editText.getText().toString(), -1);
-		               	if (targetIndex > 0 && targetIndex <= getItemListAdapter().getCount()) {
+		               	if (targetIndex > 0 && targetIndex <= getItemAdapter().getCount()) {
 		               		try {
 								getService().playlistMove(fromIndex-1, targetIndex-1);
 								orderItems();
@@ -175,12 +192,12 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 			}
 			break;
         }
-        
+
         builder.setNegativeButton(android.R.string.cancel, null);
-        
+
         return builder.create();
     }
-    
+
     @Override
     protected void onPrepareDialog(int id, final Dialog dialog) {
         final EditText editText = (EditText) dialog.findViewById(R.id.edittext);
@@ -196,7 +213,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 		            public boolean onKey(View v, int keyCode, KeyEvent event) {
 		                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
 			               	int targetIndex = Util.parseDecimalInt(editText.getText().toString(), -1);
-			               	if (targetIndex > 0 && targetIndex <= getItemListAdapter().getCount()) {
+			               	if (targetIndex > 0 && targetIndex <= getItemAdapter().getCount()) {
 			               		try {
 									getService().playlistMove(fromIndex-1, targetIndex-1);
 									orderItems();
