@@ -399,6 +399,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         // Opens the database object in "read" mode, since no writes need to be
         // done.
+        // XXX: Seen a NullPointerException on the next line
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         /*
