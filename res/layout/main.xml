@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
- Copyright (c) 2009 Brad Fitzpatrick <brad@danga.com>
+ Copyright (c) 2009 Google Inc.  All Rights Reserved.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -99,11 +99,11 @@
 	            android:layout_marginBottom="2px"
 	            android:gravity="center">
 	
-	            <com.danga.squeezer.RepeatingImageButton android:id="@+id/prev" style="@android:style/MediaButton.Previous" />
+	            <uk.org.ngo.squeezer.RepeatingImageButton android:id="@+id/prev" style="@android:style/MediaButton.Previous" />
 	
 	            <ImageButton android:id="@+id/pause" style="@android:style/MediaButton.Play" />
 	
-	            <com.danga.squeezer.RepeatingImageButton android:id="@+id/next" style="@android:style/MediaButton.Next" />
+	            <uk.org.ngo.squeezer.RepeatingImageButton android:id="@+id/next" style="@android:style/MediaButton.Next" />
 	        </LinearLayout>
 	    </LinearLayout>
 	

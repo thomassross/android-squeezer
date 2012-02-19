@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        android:name="com.danga.squeezer.ArtistsListFragment"
+        android:name="uk.org.ngo.squeezer.ArtistsListFragment"
         android:id="@+id/list"
         android:layout_weight="1"
         android:layout_width="fill_parent"
