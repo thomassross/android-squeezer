@@ -8,3 +8,4 @@ build.properties
 src/uk.org.ngo/squeezer/IServiceCallback.java
 src/uk.org.ngo/squeezer/ISqueezeService.java
 src/uk.org.ngo/squeezer/R.java
+/ant.properties

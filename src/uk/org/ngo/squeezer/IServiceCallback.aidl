@@ -24,9 +24,8 @@ oneway interface IServiceCallback {
 
   // postConnect is only true for the very first callback after a new initial connect.
   void onConnectionChanged(boolean isConnected, boolean postConnect);
-  
+
   void onPlayStatusChanged(boolean isPlaying);
-  void onVolumeChange(int newVolume);
   void onTimeInSongChange(int secondsIn, int secondsTotal);
 }
 

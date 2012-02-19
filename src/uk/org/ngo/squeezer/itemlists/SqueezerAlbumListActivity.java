@@ -18,49 +18,60 @@ package uk.org.ngo.squeezer.itemlists;
 
 import java.util.List;
 
-import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.SqueezerItem;
 import uk.org.ngo.squeezer.framework.SqueezerItemView;
 import uk.org.ngo.squeezer.framework.SqueezerOrderableListActivity;
 import uk.org.ngo.squeezer.itemlists.GenreSpinner.GenreSpinnerCallback;
 import uk.org.ngo.squeezer.itemlists.YearSpinner.YearSpinnerCallback;
+import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerAlbumFilterDialog;
+import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerAlbumOrderDialog;
+import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerAlbumOrderDialog.AlbumsSortOrder;
 import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
+import uk.org.ngo.squeezer.model.SqueezerSong;
 import uk.org.ngo.squeezer.model.SqueezerYear;
 import uk.org.ngo.squeezer.service.SqueezerServerState;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.View.OnKeyListener;
-import android.widget.EditText;
 import android.widget.Spinner;
 
 public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<SqueezerAlbum>
         implements GenreSpinnerCallback, YearSpinnerCallback {
 
-    private AlbumsSortOrder sortOrder = AlbumsSortOrder.album;
-    private String searchString = null;
+	private AlbumsSortOrder sortOrder = AlbumsSortOrder.album;
+
+	private String searchString = null;
+    public String getSearchString() { return searchString; }
+    public void setSearchString(String searchString) { this.searchString = searchString; }
+
+	private SqueezerSong song;
+    public SqueezerSong getSong() { return song; }
+    public void setSong(SqueezerSong song) { this.song = song; }
+
     private SqueezerArtist artist;
-    private SqueezerYear year;
-    private SqueezerGenre genre;
+    public SqueezerArtist getArtist() { return artist; }
+    public void setArtist(SqueezerArtist artist) { this.artist = artist; }
+
+	private SqueezerYear year;
+    public SqueezerYear getYear() { return year; }
+    public void setYear(SqueezerYear year) { this.year = year; }
+
+	private SqueezerGenre genre;
+    public SqueezerGenre getGenre() { return genre; }
+    public void setGenre(SqueezerGenre genre) { this.genre = genre; }
 
     private GenreSpinner genreSpinner;
-    private YearSpinner yearSpinner;
-
-    public SqueezerGenre getGenre() {
-        return genre;
+    public void setGenreSpinner(Spinner spinner) {
+        genreSpinner = new GenreSpinner(this, this, spinner);
     }
 
-    public SqueezerYear getYear() {
-        return year;
+    private YearSpinner yearSpinner;
+    public void setYearSpinner(Spinner spinner) {
+        yearSpinner = new YearSpinner(this, this, spinner);
     }
 
     @Override
@@ -68,20 +79,23 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
         return new SqueezerAlbumView(this);
     }
 
-    @Override
-    public void prepareActivity(Bundle extras) {
-        if (extras != null)
-            for (String key : extras.keySet())
-                if (SqueezerArtist.class.getName().equals(key))
-                    artist = extras.getParcelable(key);
-                else if (SqueezerYear.class.getName().equals(key))
-                    year = extras.getParcelable(key);
-                else if (SqueezerGenre.class.getName().equals(key))
+	@Override
+	public void prepareActivity(Bundle extras) {
+		if (extras != null)
+			for (String key : extras.keySet()) {
+				if (SqueezerArtist.class.getName().equals(key)) {
+					artist = extras.getParcelable(key);
+				} else if (SqueezerYear.class.getName().equals(key)) {
+					year = extras.getParcelable(key);
+                } else if (SqueezerGenre.class.getName().equals(key)) {
                     genre = extras.getParcelable(key);
-                else
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
-    }
+                } else if (SqueezerSong.class.getName().equals(key)) {
+                    song = extras.getParcelable(key);
+				} else
+					Log.e(getTag(), "Unexpected extra value: " + key + "("
+							+ extras.get(key).getClass().getName() + ")");
+			}
+	}
 
     @Override
     protected void registerCallback() throws RemoteException {
@@ -101,94 +115,38 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
             yearSpinner.unregisterCallback();
     }
 
-    @Override
-    protected void orderPage(int start) throws RemoteException {
+	@Override
+	protected void orderPage(int start) throws RemoteException {
         getService().albums(start, sortOrder.name().replace("__", ""), searchString, artist, year,
-                genre);
+                genre, song);
+	}
+
+    public AlbumsSortOrder getSortOrder() {
+        return sortOrder;
     }
 
-    public void setSortOrder(AlbumsSortOrder sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setSortOrder(AlbumsSortOrder albumsSortOrder) {
+        this.sortOrder = albumsSortOrder;
         orderItems();
     }
 
     @Override
-    protected Dialog onCreateDialog(int id) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    };
 
-        switch (id) {
-            case DIALOG_ORDER:
-                String[] sortOrderStrings = new String[AlbumsSortOrder.values().length];
-                sortOrderStrings[AlbumsSortOrder.album.ordinal()] = getString(R.string.albums_sort_order_album);
-                sortOrderStrings[AlbumsSortOrder.artflow.ordinal()] = getString(R.string.albums_sort_order_artflow);
-                sortOrderStrings[AlbumsSortOrder.__new.ordinal()] = getString(R.string.albums_sort_order_new);
-                int checkedItem = sortOrder.ordinal();
-                builder.setTitle(getString(R.string.choose_sort_order, getItemAdapter()
-                        .getQuantityString(2)));
-                builder.setSingleChoiceItems(sortOrderStrings, checkedItem,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int indexSelected) {
-                                setSortOrder(AlbumsSortOrder.values()[indexSelected]);
-                                dialog.dismiss();
-                            }
-                        });
-                return builder.create();
-            case DIALOG_FILTER:
-                View filterForm = getLayoutInflater().inflate(R.layout.filter_dialog, null);
-                builder.setTitle(R.string.menu_item_filter);
-                builder.setView(filterForm);
+    public void showFilterDialog() {
+        SqueezerAlbumFilterDialog.addTo(this);
+    }
 
-                final EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
-                editText.setHint(getString(R.string.filter_text_hint, getItemAdapter()
-                        .getQuantityString(2)));
-                final Spinner genreSpinnerView = (Spinner) filterForm
-                        .findViewById(R.id.genre_spinner);
-                final Spinner yearSpinnerView = (Spinner) filterForm
-                        .findViewById(R.id.year_spinner);
-
-                if (artist != null) {
-                    ((EditText) filterForm.findViewById(R.id.artist)).setText(artist.getName());
-                    filterForm.findViewById(R.id.artist_view).setVisibility(View.VISIBLE);
-                }
-
-                genreSpinner = new GenreSpinner(this, this, genreSpinnerView);
-                yearSpinner = new YearSpinner(this, this, yearSpinnerView);
-
-                editText.setOnKeyListener(new OnKeyListener() {
-                    public boolean onKey(View v, int keyCode, KeyEvent event) {
-                        if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                                && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                            searchString = editText.getText().toString();
-                            genre = (SqueezerGenre) genreSpinnerView.getSelectedItem();
-                            year = (SqueezerYear) yearSpinnerView.getSelectedItem();
-                            orderItems();
-                            dismissDialog(DIALOG_FILTER);
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-
-                builder.setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                searchString = editText.getText().toString();
-                                genre = (SqueezerGenre) genreSpinnerView.getSelectedItem();
-                                year = (SqueezerYear) yearSpinnerView.getSelectedItem();
-                                orderItems();
-                            }
-                        });
-                builder.setNegativeButton(android.R.string.cancel, null);
-
-                return builder.create();
-        }
-        return null;
+    public void showOrderDialog() {
+        SqueezerAlbumOrderDialog.addTo(this);
     }
 
     public static void show(Context context, SqueezerItem... items) {
         final Intent intent = new Intent(context, SqueezerAlbumListActivity.class);
-        for (SqueezerItem item : items)
-            intent.putExtra(item.getClass().getName(), item);
+        for (SqueezerItem item: items)
+        	intent.putExtra(item.getClass().getName(), item);
         context.startActivity(intent);
     }
 
@@ -204,11 +162,5 @@ public class SqueezerAlbumListActivity extends SqueezerOrderableListActivity<Squ
 
         }
     };
-
-    private enum AlbumsSortOrder {
-        album,
-        artflow,
-        __new;
-    }
 
 }

@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlists;
 
 import java.util.List;
 
+import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.SqueezerItemAdapter;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
@@ -26,6 +27,7 @@ import uk.org.ngo.squeezer.service.SqueezerServerState;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.View;
 import android.widget.Spinner;
 
 public class GenreSpinner {
@@ -79,7 +81,19 @@ public class GenreSpinner {
 			callback.getUIThreadHandler().post(new Runnable() {
 				public void run() {
 					if (adapter == null) {
-						SqueezerGenreView itemView = new SqueezerGenreView(activity);
+                        SqueezerGenreView itemView = new SqueezerGenreView(activity) {
+                            @Override
+                            public View getAdapterView(View convertView, SqueezerGenre item) {
+                                return Util.getSpinnerItemView(getActivity(), convertView,
+                                        item.getName());
+                            }
+
+                            @Override
+                            public View getAdapterView(View convertView, String label) {
+                                return Util.getSpinnerItemView(getActivity(), convertView, label);
+                            };
+
+						};
 						adapter = new SqueezerItemAdapter<SqueezerGenre>(itemView, true);
 						spinner.setAdapter(adapter);
 					}
@@ -105,7 +119,8 @@ public class GenreSpinner {
     public interface GenreSpinnerCallback {
     	ISqueezeService getService();
     	Handler getUIThreadHandler();
-    	SqueezerGenre getGenre();
+        SqueezerGenre getGenre();
+        void setGenre(SqueezerGenre genre);
     }
 
 }

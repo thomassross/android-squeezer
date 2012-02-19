@@ -380,16 +380,13 @@ public class SqueezeService extends Service {
     }
 
     private void sendNewVolumeCallback(int newVolume) {
-        if (connectionState.getCallback() == null)
-            return;
-        try {
-            SqueezerPlayer player = connectionState.getActivePlayer();
-            if (player == null)
-                mVolumePanel.postVolumeChanged(newVolume, "");
-            else
-                mVolumePanel.postVolumeChanged(newVolume, player.getName());
-            connectionState.getCallback().onVolumeChange(newVolume);
-        } catch (RemoteException e) {
+        if (connectionState.getCallback() == null) return;
+
+        SqueezerPlayer player = connectionState.getActivePlayer();
+        if (player == null) {
+            mVolumePanel.postVolumeChanged(newVolume, "");
+        } else {
+            mVolumePanel.postVolumeChanged(newVolume, player.getName());
         }
     }
 
@@ -1054,15 +1051,11 @@ public class SqueezeService extends Service {
             cli.cancelRequests(SqueezerPlayer.class);
         }
 
-        /*
-         * Start an async fetch of the SqueezeboxServer's albums, which are
-         * matching the given parameters
-         */
-        public boolean albums(int start, String sortOrder, String searchString,
-                SqueezerArtist artist, SqueezerYear year, SqueezerGenre genre)
-                throws RemoteException {
-            if (!isConnected())
-                return false;
+        /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
+		public boolean albums(int start, String sortOrder, String searchString,
+                SqueezerArtist artist, SqueezerYear year, SqueezerGenre genre, SqueezerSong song)
+				throws RemoteException {
+            if (!isConnected()) return false;
             List<String> parameters = new ArrayList<String>();
             parameters.add("tags:" + ALBUMTAGS);
             parameters.add("sort:" + sortOrder);
@@ -1074,6 +1067,8 @@ public class SqueezeService extends Service {
                 parameters.add("year:" + year.getId());
             if (genre != null)
                 parameters.add("genre_id:" + genre.getId());
+            if (song != null)
+                parameters.add("track_id:" + song.getId());
             cli.requestItems("albums", start, parameters);
             return true;
         }

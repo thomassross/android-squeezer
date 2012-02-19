@@ -19,6 +19,9 @@ package uk.org.ngo.squeezer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import uk.org.ngo.squeezer.dialogs.AboutDialog;
+import uk.org.ngo.squeezer.dialogs.ConnectingDialog;
+import uk.org.ngo.squeezer.dialogs.EnableWifiDialog;
 import uk.org.ngo.squeezer.framework.SqueezerBaseActivity;
 import uk.org.ngo.squeezer.framework.SqueezerIconUpdater;
 import uk.org.ngo.squeezer.itemlists.SqueezerAlbumListActivity;
@@ -29,18 +32,11 @@ import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.model.SqueezerSong;
 import uk.org.ngo.squeezer.service.SqueezeService;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -48,10 +44,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
-import android.text.Html;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -66,15 +59,12 @@ import android.widget.Toast;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 public class SqueezerActivity extends SqueezerBaseActivity {
-    private static final int DIALOG_ABOUT = 0;
-    private static final int DIALOG_CONNECTING = 1;
-    private static final int DIALOG_ENABLE_WIFI = 2;
-
     protected static final int HOME_REQUESTCODE = 0;
 
     private final AtomicBoolean isConnected = new AtomicBoolean(false);
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private final AtomicReference<SqueezerSong> currentSong = new AtomicReference<SqueezerSong>();
+    private final AtomicBoolean connectInProgress = new AtomicBoolean(false);
 
     private TextView albumText;
     private TextView artistText;
@@ -109,9 +99,7 @@ public class SqueezerActivity extends SqueezerBaseActivity {
     };
 
     // Where we're connecting to.
-    private boolean connectInProgress = false;
-    private String connectingTo = null;
-    private ProgressDialog connectingDialog = null;
+    private ConnectingDialog connectingDialog = null;
 
     // Updating the seekbar
     private boolean updateSeekBar = true;
@@ -149,7 +137,7 @@ public class SqueezerActivity extends SqueezerBaseActivity {
             Log.v("SqueezerActivity", "Tracking page view 'SqueezerActivity");
             // Start the tracker in manual dispatch mode...
             tracker = GoogleAnalyticsTracker.getInstance();
-            tracker.startNewSession("UA-26056668-1", this);
+            tracker.startNewSession("UA-26457780-1", this);
             tracker.trackPageView("SqueezerActivity");
         }
 
@@ -286,67 +274,22 @@ public class SqueezerActivity extends SqueezerBaseActivity {
         if (getConfiguredCliIpPort() == null) SettingsActivity.show(this);
     }
 
-    /*
-     * Intercept hardware volume control keys to control Squeezeserver
-     * volume.
-     *
-     * Change the volume when the key is depressed.  Suppress the keyUp
-     * event, otherwise you get a notification beep as well as the volume
-     * changing.
-     */
-    @Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_VOLUME_UP:
-			changeVolumeBy(+5);
-			return true;
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
-			changeVolumeBy(-5);
-			return true;
-		}
-
-		return super.onKeyDown(keyCode, event);
-	}
-
-    @Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_VOLUME_UP:
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
-			return true;
-		}
-
-		return super.onKeyUp(keyCode, event);
-	}
-
-    private boolean changeVolumeBy(int delta) {
-        Log.v(getTag(), "Adjust volume by: " + delta);
-        if (getService() == null) {
-            return false;
-        }
-        try {
-            getService().adjustVolumeBy(delta);
-            return true;
-        } catch (RemoteException e) {
-        }
-        return false;
-    }
-
     // Should only be called the UI thread.
     private void setConnected(boolean connected, boolean postConnect) {
         Log.v(getTag(), "setConnected(" + connected + ", " + postConnect + ")");
         if (postConnect) {
-            connectInProgress = false;
-            Log.v(getTag(), "Post-connect; connectingDialog == " + connectingDialog);
+            connectInProgress.set(false);
             if (connectingDialog != null) {
-                Log.v(getTag(), "Dismissing...");
+                Log.d(getTag(), "Dismissing ConnectingDialog");
                 connectingDialog.dismiss();
-                if (!connected) {
-                    // TODO: Make this a dialog? Allow the user to correct the
-                    // server settings here?
-                  Toast.makeText(this, getText(R.string.connection_failed_text), Toast.LENGTH_LONG).show();
-                  return;
-                }
+            } else {
+                Log.d(getTag(), "Got connection failure, but ConnectingDialog wasn't showing");
+            }
+            connectingDialog = null;
+            if (!connected) {
+                // TODO: Make this a dialog? Allow the user to correct the
+                // server settings here?
+              Toast.makeText(this, getText(R.string.connection_failed_text), Toast.LENGTH_LONG).show();
             }
         }
 
@@ -407,13 +350,13 @@ public class SqueezerActivity extends SqueezerBaseActivity {
     	uiThreadHandler.post(new Runnable() {
     	    public void run() {
     	        updateUIFromServiceState();
-
-    	        // Assume they want to connect...
-                if (!isConnected()) {
-                    startVisibleConnection();
-                }
     	    }
     	});
+
+        // Assume they want to connect...
+        if (!isConnected()) {
+            startVisibleConnection();
+        }
 	}
 
     @Override
@@ -441,6 +384,7 @@ public class SqueezerActivity extends SqueezerBaseActivity {
         // Update the UI to reflect connection state.  Basically just for
         // the initial display, as changing the prev/next buttons to empty
         // doesn't seem to work in onCreate.  (LayoutInflator still running?)
+        Log.d(getTag(), "updateUIFromServiceState");
         setConnected(isConnected(), false);
 
         // TODO(bradfitz): remove this check once everything is converted into
@@ -584,6 +528,7 @@ public class SqueezerActivity extends SqueezerBaseActivity {
 
     @Override
     public void onPause() {
+        Log.d(getTag(), "onPause...");
         if (getService() != null) {
             try {
                 getService().unregisterCallback(serviceCallback);
@@ -635,74 +580,6 @@ public class SqueezerActivity extends SqueezerBaseActivity {
     }
 
     @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case DIALOG_ABOUT: {
-                final TextView message = (TextView) getLayoutInflater().inflate(
-                        R.layout.about_textview, null);
-
-                PackageManager pm = getPackageManager();
-                PackageInfo info;
-                String aboutTitle;
-                try {
-                    info = pm.getPackageInfo("uk.org.ngo.squeezer", 0);
-                    aboutTitle = getString(R.string.about_title, info.versionName);
-                } catch (NameNotFoundException e) {
-                    aboutTitle = "Package not found.";
-                }
-
-                message.setText(Html.fromHtml((String) getText(R.string.about_text)));
-                message.setAutoLinkMask(RESULT_OK);
-                message.setMovementMethod(ScrollingMovementMethod.getInstance());
-
-                return new AlertDialog.Builder(this)
-                        .setTitle(aboutTitle)
-                        .setView(message)
-                        .create();
-            }
-        case DIALOG_ENABLE_WIFI:
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.wifi_disabled_text);
-            builder.setMessage(R.string.enable_wifi_text);
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-                    if (!wifiManager.isWifiEnabled()) {
-                        Log.v(getTag(), "Enabling Wifi");
-                        wifiManager.setWifiEnabled(true);
-                    }
-                }
-            });
-            builder.setNegativeButton(android.R.string.cancel, null);
-            return builder.create();
-        }
-
-        case DIALOG_CONNECTING:
-            // Note: this only happens the first time.  onPrepareDialog is called on each connect.
-            connectingDialog = new ProgressDialog(this);
-            connectingDialog.setTitle(getText(R.string.connecting_text));
-            connectingDialog.setIndeterminate(true);
-            return connectingDialog;
-        }
-        return null;
-    }
-
-    @Override
-    protected void onPrepareDialog(int id, Dialog dialog) {
-        switch (id) {
-        case DIALOG_CONNECTING:
-            ProgressDialog connectingDialog = (ProgressDialog) dialog;
-            connectingDialog.setMessage(getString(R.string.connecting_to_text, connectingTo));
-            if (!connectInProgress) {
-                // Lose the race?  If Service/network is very fast.
-                connectingDialog.dismiss();
-            }
-            return;
-        }
-    }
-
-    @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         switch (item.getItemId()) {
       	case R.id.menu_item_settings:
@@ -739,7 +616,7 @@ public class SqueezerActivity extends SqueezerBaseActivity {
       		SqueezerPlayerListActivity.show(this);
       	    return true;
         case R.id.menu_item_about:
-            showDialog(DIALOG_ABOUT);
+            new AboutDialog().show(getSupportFragmentManager(), "AboutDialog");
             return true;
         }
         return super.onMenuItemSelected(featureId, item);
@@ -776,27 +653,39 @@ public class SqueezerActivity extends SqueezerBaseActivity {
     }
 
     private void startVisibleConnection() {
-        if (connectInProgress) return;
+        Log.v(getTag(), "startVisibleConnection..., connectInProgress: " + connectInProgress.get());
+        uiThreadHandler.post(new Runnable() {
+            public void run() {
+                String ipPort = getConfiguredCliIpPort();
+                if (ipPort == null)
+                    return;
 
-        String ipPort = getConfiguredCliIpPort();
-        if (ipPort == null) return;
+                if (isAutoConnect()) {
+                    WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                    if (!wifiManager.isWifiEnabled()) {
+                        new EnableWifiDialog().show(getSupportFragmentManager(), "EnableWifiDialog");
+                        return; // We will come back here when Wi-Fi is ready
+                    }
+                }
 
-        if (isAutoConnect()) {
-            WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            if (!wifiManager.isWifiEnabled()) {
-                showDialog(DIALOG_ENABLE_WIFI);
-                return; // We will come back here when Wi-Fi is ready
+                if (connectInProgress.get()) {
+                    Log.v(getTag(), "Connection is allready in progress, connecting aborted");
+                    return;
+                }
+                connectingDialog = ConnectingDialog.addTo(SqueezerActivity.this, ipPort);
+                if (connectingDialog != null) {
+                    Log.v(getTag(), "startConnect, ipPort: " + ipPort);
+                    connectInProgress.set(true);
+                    try {
+                        getService().startConnect(ipPort);
+                    } catch (RemoteException e) {
+                        Toast.makeText(SqueezerActivity.this, "startConnection error: " + e, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Log.v(getTag(), "Could not show the connect dialog, connecting aborted");
+                }
             }
-        }
-
-        connectInProgress = true;
-        connectingTo = ipPort;
-        showDialog(DIALOG_CONNECTING);
-        try {
-            getService().startConnect(ipPort);
-        } catch (RemoteException e) {
-            Toast.makeText(this, "startConnection error: " + e, Toast.LENGTH_LONG).show();
-        }
+        });
     }
 
 	public static void show(Context context) {
@@ -841,15 +730,6 @@ public class SqueezerActivity extends SqueezerBaseActivity {
                             updateSongInfoFromService();
                         }
                     });
-            }
-
-            public void onVolumeChange(final int newVolume) throws RemoteException {
-                Log.v(getTag(), "Volume = " + newVolume);
-//                uiThreadHandler.post(new Runnable() {
-//                    public void run() {
-//						  Do something here if necessary
-//                    }
-//                });
             }
 
             public void onPlayStatusChanged(boolean newStatus)

@@ -699,7 +699,7 @@ public class AlbumCacheProvider extends ContentProvider {
 
         try {
             mOrderedPages.add(page);
-            service.albums(page * mPageSize, "album", null, null, null, null);
+            service.albums(page * mPageSize, "album", null, null, null, null, null);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             mOrderedPages.remove(page);
