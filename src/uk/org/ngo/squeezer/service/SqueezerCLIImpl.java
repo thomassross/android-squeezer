@@ -26,78 +26,73 @@ import java.util.Map;
 import java.util.Set;
 
 import uk.org.ngo.squeezer.Preferences;
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.SqueezerItem;
 import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
+import uk.org.ngo.squeezer.model.SqueezerMusicFolderItem;
 import uk.org.ngo.squeezer.model.SqueezerPlayer;
 import uk.org.ngo.squeezer.model.SqueezerPlaylist;
 import uk.org.ngo.squeezer.model.SqueezerPlugin;
 import uk.org.ngo.squeezer.model.SqueezerPluginItem;
 import uk.org.ngo.squeezer.model.SqueezerSong;
 import uk.org.ngo.squeezer.model.SqueezerYear;
-
 import android.os.RemoteException;
 import android.util.Log;
-
-import uk.org.ngo.squeezer.R;
 
 class SqueezerCLIImpl {
     private static final String TAG = "SqueezerCLI";
 
-    class ExtendedQueryFormatCmd {
-        final boolean playerSpecific;
-        final boolean prefixed;
-        final String cmd;
-        final private Set<String> taggedParameters;
-        final private SqueezeParserInfo[] parserInfos;
+	class ExtendedQueryFormatCmd {
+		final boolean playerSpecific;
+		final boolean prefixed;
+		final String cmd;
+		final private Set<String> taggedParameters;
+		final private SqueezeParserInfo[] parserInfos;
 
-        private ExtendedQueryFormatCmd(boolean playerSpecific, boolean prefixed, String cmd,
-                Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
-            this.playerSpecific = playerSpecific;
-            this.prefixed = prefixed;
-            this.cmd = cmd;
-            this.taggedParameters = taggedParameters;
-            this.parserInfos = parserInfos;
-        }
+		private ExtendedQueryFormatCmd(boolean playerSpecific, boolean prefixed, String cmd, Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
+			this.playerSpecific = playerSpecific;
+			this.prefixed = prefixed;
+			this.cmd = cmd;
+			this.taggedParameters = taggedParameters;
+			this.parserInfos = parserInfos;
+		}
 
-        private ExtendedQueryFormatCmd(boolean playerSpecific, String cmd,
-                Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
-            this(playerSpecific, false, cmd, taggedParameters, parserInfos);
-        }
+		private ExtendedQueryFormatCmd(boolean playerSpecific, String cmd, Set<String> taggedParameters, SqueezeParserInfo... parserInfos) {
+			this(playerSpecific, false, cmd, taggedParameters, parserInfos);
+		}
 
-        public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
-                String itemDelimiter, SqueezerListHandler handler) {
-            this(false, cmd, taggedParameters, new SqueezeParserInfo(itemDelimiter, handler));
-        }
+		public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters, String itemDelimiter, SqueezerListHandler handler) {
+			this(false, cmd, taggedParameters, new SqueezeParserInfo(itemDelimiter, handler));
+		}
 
-        public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
-                SqueezerListHandler handler) {
-            this(false, cmd, taggedParameters, new SqueezeParserInfo(handler));
-        }
+		public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters, SqueezerListHandler handler) {
+			this(false, cmd, taggedParameters, new SqueezeParserInfo(handler));
+		}
 
-    }
+	}
 
-    final ExtendedQueryFormatCmd[] extQueryFormatCmds = initializeExtQueryFormatCmds();
-    final Map<String, ExtendedQueryFormatCmd> extQueryFormatCmdMap = initializeExtQueryFormatCmdMap();
+	final ExtendedQueryFormatCmd[] extQueryFormatCmds = initializeExtQueryFormatCmds();
+	final Map<String, ExtendedQueryFormatCmd> extQueryFormatCmdMap = initializeExtQueryFormatCmdMap();
 
-    private ExtendedQueryFormatCmd[] initializeExtQueryFormatCmds() {
-        List<ExtendedQueryFormatCmd> list = new ArrayList<ExtendedQueryFormatCmd>();
+	private ExtendedQueryFormatCmd[] initializeExtQueryFormatCmds() {
+		List<ExtendedQueryFormatCmd> list = new ArrayList<ExtendedQueryFormatCmd>();
 
-        list.add(
-                new ExtendedQueryFormatCmd(
-                        "players",
-                        new HashSet<String>(Arrays.asList("playerprefs", "charset")),
-                        "playerid",
-                        new SqueezerListHandler() {
-                            SqueezerPlayer defaultPlayer;
-                            String lastConnectedPlayer;
-                            private List<SqueezerPlayer> players;
+		list.add(
+			new ExtendedQueryFormatCmd(
+					"players",
+					new HashSet<String>(Arrays.asList("playerprefs", "charset")),
+					"playerid",
+		        	new SqueezerListHandler() {
+						SqueezerPlayer defaultPlayer;
+			        	String lastConnectedPlayer;
+		                private List<SqueezerPlayer> players;
 
-                            public Class<? extends SqueezerItem> getDataType() {
-                                return SqueezerPlayer.class;
-                            }
+		        		public Class<? extends SqueezerItem> getDataType() {
+		        			return SqueezerPlayer.class;
+		        		}
 
                             public void clear() {
                                 lastConnectedPlayer = service.preferences.getString(
@@ -247,40 +242,40 @@ class SqueezerCLIImpl {
                         new SqueezeParserInfo(new PluginItemListHandler()))
                 );
 
-        return list.toArray(new ExtendedQueryFormatCmd[] {});
-    }
+		return list.toArray(new ExtendedQueryFormatCmd[]{});
+	}
 
     private Map<String, ExtendedQueryFormatCmd> initializeExtQueryFormatCmdMap() {
         Map<String, ExtendedQueryFormatCmd> map = new HashMap<String, ExtendedQueryFormatCmd>();
-        for (ExtendedQueryFormatCmd cmd : extQueryFormatCmds)
-            map.put(cmd.cmd, cmd);
+        for (ExtendedQueryFormatCmd cmd: extQueryFormatCmds)
+        	map.put(cmd.cmd, cmd);
         return map;
-    }
+	}
 
-    private final SqueezeService service;
-    private int pageSize;
 
-    SqueezerCLIImpl(SqueezeService service) {
-        this.service = service;
-    }
+	private final SqueezeService service;
+	private int pageSize;
 
-    void initialize() {
-        pageSize = service.getResources().getInteger(R.integer.PageSize);
-    }
+	SqueezerCLIImpl(SqueezeService service) {
+		this.service = service;
+	}
 
-    // All requests are tagged with a correlation id, which can be used when
-    // asynchronous responses are received.
+	void initialize() {
+		pageSize = service.getResources().getInteger(R.integer.PageSize);
+	}
+
+
+	// All requests are tagged with a correlation id, which can be used when
+	// asynchronous responses are received.
     int _correlationid = 0;
 
     synchronized void sendCommand(String... commands) {
-        if (commands.length == 0)
-            return;
+        if (commands.length == 0) return;
         PrintWriter writer = service.connectionState.getSocketWriter();
-        if (writer == null)
-            return;
+        if (writer == null) return;
         if (commands.length == 1) {
             Log.v(TAG, "SENDING: " + commands[0]);
-            writer.println(commands[0] + " correlationid:" + _correlationid++);
+			writer.println(commands[0] + " correlationid:" + _correlationid++);
         } else {
             // Get it into one packet by deferring flushing...
             for (String command : commands)
@@ -296,9 +291,8 @@ class SqueezerCLIImpl {
     }
 
     boolean checkCorrelation(Integer registeredCorralationId, int currentCorrelationId) {
-        if (registeredCorralationId == null)
-            return true;
-        return (currentCorrelationId >= registeredCorralationId);
+    	if (registeredCorralationId == null) return true;
+    	return (currentCorrelationId >= registeredCorralationId);
     }
 
     // We register when asynchronous fetches are initiated, and when callbacks
@@ -308,124 +302,116 @@ class SqueezerCLIImpl {
     private final Map<Class<?>, Integer> typeCorrelationIds = new HashMap<Class<?>, Integer>();
 
     void cancelRequests(Class<?> clazz) {
-        typeCorrelationIds.put(clazz, _correlationid);
+		typeCorrelationIds.put(clazz, _correlationid);
     }
 
     private boolean checkCorrelation(String cmd, int correlationid) {
-        return checkCorrelation(cmdCorrelationIds.get(cmd), correlationid);
+    	return checkCorrelation(cmdCorrelationIds.get(cmd), correlationid);
     }
 
     private boolean checkCorrelation(Class<? extends SqueezerItem> type, int correlationid) {
-        return checkCorrelation(typeCorrelationIds.get(type), correlationid);
+    	return checkCorrelation(typeCorrelationIds.get(type), correlationid);
     }
 
     /**
      * Send an asynchronous request to SqueezeboxServer for the specified items.
      * <p>
-     * If start is zero, it means the the list is being reordered, which will
-     * make any pending replies, for the given items, obsolete.
+     * If start is zero, it means the the list is being reordered, which will make any pending
+     * replies, for the given items, obsolete.
      * <p>
-     * This will always order one item, to learn the number of items from the
-     * server. Remaining items will then be automatically ordered when the
-     * response arrives. See
-     * {@link #parseSqueezerList(boolean, String, String, List, SqueezerListHandler)}
-     * for details.
+     * This will always order one item, to learn the number of items from the server. Remaining
+     * items will then be automatically ordered when the response arrives. See
+     * {@link #parseSqueezerList(boolean, String, String, List, SqueezerListHandler)} for details.
      *
      * @param playerid Id of the current player or null
      * @param cmd Identifies the
      * @param start
      * @param parameters
      */
-    private void requestItems(String playerid, String cmd, int start, List<String> parameters) {
-        if (start == 0)
-            cmdCorrelationIds.put(cmd, _correlationid);
-        StringBuilder sb = new StringBuilder(cmd + " " + start + " " + (start == 0 ? 1 : pageSize));
-        if (playerid != null)
-            sb.insert(0, Util.encode(playerid) + " ");
-        if (parameters != null)
-            for (String parameter : parameters)
-                sb.append(" " + Util.encode(parameter));
-        sendCommand(sb.toString());
-    }
+	private void requestItems(String playerid, String cmd, int start, List<String> parameters) {
+		if (start == 0) cmdCorrelationIds.put(cmd, _correlationid);
+		StringBuilder sb = new StringBuilder(cmd + " " + start + " "  + (start == 0 ? 1 : pageSize));
+		if (playerid != null) sb.insert(0, Util.encode(playerid) + " ");
+		if (parameters != null)
+			for (String parameter: parameters)
+				sb.append(" " + Util.encode(parameter));
+		sendCommand(sb.toString());
+	}
 
-    void requestItems(String cmd, int start, List<String> parameters) {
-        requestItems(null, cmd, start, parameters);
-    }
+	void requestItems(String cmd, int start, List<String> parameters) {
+		requestItems(null, cmd, start, parameters);
+	}
 
-    void requestItems(String cmd, int start) {
-        requestItems(cmd, start, null);
-    }
+	void requestItems(String cmd, int start) {
+		requestItems(cmd, start, null);
+	}
 
-    void requestPlayerItems(String cmd, int start, List<String> parameters) {
-        if (service.connectionState.getActivePlayer() == null)
+	void requestPlayerItems(String cmd, int start, List<String> parameters) {
+        if (service.connectionState.getActivePlayer() == null) {
             return;
+        }
         requestItems(service.connectionState.getActivePlayer().getId(), cmd, start, parameters);
-    }
+	}
 
-    void requestPlayerItems(String cmd, int start) {
-        requestPlayerItems(cmd, start, null);
-    }
+	void requestPlayerItems(String cmd, int start) {
+		requestPlayerItems(cmd, start, null);
+	}
 
-    /**
-     * Data for
-     * {@link SqueezerCLIImpl#parseSqueezerList(boolean, List, SqueezeParserInfo...)}
+
+
+	/**
+     * Data for {@link SqueezerCLIImpl#parseSqueezerList(boolean, List, SqueezeParserInfo...)}
      *
      * @author kaa
      */
     private static class SqueezeParserInfo {
-        private final String item_delimiter;
-        private final String count_id;
-        private final SqueezerListHandler handler;
+    	private final String item_delimiter;
+    	private final String count_id;
+    	private final SqueezerListHandler handler;
 
-        /**
-         * @param countId The label for the tag which contains the total number
-         *            of results, normally "count".
-         * @param itemDelimiter As defined for each extended query format
-         *            command in the squeezeserver CLI documentation.
-         * @param handler Callback to receive the parsed data.
-         */
-        public SqueezeParserInfo(String countId, String itemDelimiter, SqueezerListHandler handler) {
-            count_id = countId;
-            item_delimiter = itemDelimiter;
-            this.handler = handler;
-        }
+    	/**
+    	 * @param countId The label for the tag which contains the total number of results, normally "count".
+    	 * @param itemDelimiter As defined for each extended query format command in the squeezeserver CLI documentation.
+    	 * @param handler Callback to receive the parsed data.
+    	 */
+    	public SqueezeParserInfo(String countId, String itemDelimiter, SqueezerListHandler handler) {
+			count_id = countId;
+			item_delimiter = itemDelimiter;
+			this.handler = handler;
+		}
 
-        public SqueezeParserInfo(String itemDelimiter, SqueezerListHandler handler) {
-            this("count", itemDelimiter, handler);
-        }
+    	public SqueezeParserInfo(String itemDelimiter, SqueezerListHandler handler) {
+    		this("count", itemDelimiter, handler);
+    	}
 
-        public SqueezeParserInfo(SqueezerListHandler handler) {
-            this("id", handler);
-        }
+    	public SqueezeParserInfo(SqueezerListHandler handler) {
+    		this("id", handler);
+    	}
     }
 
     /**
      * <p>
-     * Implement this and give it to
-     * {@link SqueezerCLIImpl#parseSqueezerList(List, SqueezerListHandler)} for
-     * each extended query format command you wish to support.
+     * Implement this and give it to {@link SqueezerCLIImpl#parseSqueezerList(List, SqueezerListHandler)} for each
+     * extended query format command you wish to support.
      * </p>
-     *
      * @author Kurt Aaholst
      */
-    private static interface SqueezerListHandler {
-        /**
-         * @return The type of item this handler can handle
-         */
-        Class<? extends SqueezerItem> getDataType();
+	private static interface SqueezerListHandler {
+		/**
+		 * @return The type of item this handler can handle
+		 */
+		Class<? extends SqueezerItem> getDataType();
 
-        /**
-         * Prepare for parsing an extended query format response
-         */
-        void clear();
+		/**
+		 * Prepare for parsing an extended query format response
+		 */
+		void clear();
 
-        /**
-         * Called for each item received in the current reply. Just store this
-         * internally.
-         *
-         * @param record
-         */
-        void add(Map<String, String> record);
+		/**
+		 * Called for each item received in the current reply. Just store this internally.
+		 * @param record
+		 */
+		void add(Map<String, String> record);
 
         /**
          * Called when the current reply is completely parsed. Pass the
@@ -479,20 +465,20 @@ class SqueezerCLIImpl {
         int start = Util.parseDecimalIntOrZero(tokens.get(ofs));
         int itemsPerResponse = Util.parseDecimalIntOrZero(tokens.get(ofs + 1));
 
-        int correlationid = 0;
-        boolean rescan = false;
-        Map<String, String> taggedParameters = new HashMap<String, String>();
-        Map<String, String> parameters = new HashMap<String, String>();
-        Set<String> countIdSet = new HashSet<String>();
-        Map<String, SqueezeParserInfo> itemDelimeterMap = new HashMap<String, SqueezeParserInfo>();
-        Map<String, Integer> counts = new HashMap<String, Integer>();
-        Map<String, String> record = null;
+		int correlationid = 0;
+		boolean rescan = false;
+		Map<String, String> taggedParameters = new HashMap<String, String>();
+		Map<String, String> parameters = new HashMap<String, String>();
+		Set<String> countIdSet = new HashSet<String>();
+		Map<String, SqueezeParserInfo> itemDelimeterMap = new HashMap<String, SqueezeParserInfo>();
+		Map<String, Integer> counts = new HashMap<String, Integer>();
+		Map<String, String> record = null;
 
-        for (SqueezeParserInfo parserInfo : cmd.parserInfos) {
-            parserInfo.handler.clear();
-            countIdSet.add(parserInfo.count_id);
-            itemDelimeterMap.put(parserInfo.item_delimiter, parserInfo);
-        }
+		for (SqueezeParserInfo parserInfo: cmd.parserInfos) {
+			parserInfo.handler.clear();
+			countIdSet.add(parserInfo.count_id);
+			itemDelimeterMap.put(parserInfo.item_delimiter, parserInfo);
+		}
 
         SqueezeParserInfo parserInfo = null;
         for (int idx = ofs + 2; idx < tokens.size(); idx++) {
@@ -536,11 +522,11 @@ class SqueezerCLIImpl {
             }
         }
 
-        if (record != null) {
-            parserInfo.handler.add(record);
-            if (service.debugLogging)
-                Log.v(TAG, "record=" + record);
-        }
+		if (record != null) {
+			parserInfo.handler.add(record);
+			if (service.debugLogging)
+				Log.v(TAG, "record=" + record);
+		}
 
         processLists: if (checkCorrelation(cmd.cmd, correlationid)) {
             int end = start + itemsPerResponse;
@@ -569,12 +555,14 @@ class SqueezerCLIImpl {
         }
     }
 
-    private class YearListHandler implements SqueezerListHandler {
-        List<SqueezerYear> years;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerYear.class;
-        }
+    private class YearListHandler implements SqueezerListHandler {
+		List<SqueezerYear> years;
+
+
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerYear.class;
+		}
 
         public void clear() {
             years = new ArrayList<SqueezerYear>() {
@@ -582,9 +570,9 @@ class SqueezerCLIImpl {
             };
         }
 
-        public void add(Map<String, String> record) {
-            years.add(new SqueezerYear(record));
-        }
+		public void add(Map<String, String> record) {
+			years.add(new SqueezerYear(record));
+		}
 
         public boolean processList(boolean rescan, int count, int start,
                 Map<String, String> parameters) {
@@ -628,11 +616,11 @@ class SqueezerCLIImpl {
     }
 
     private class GenreListHandler implements SqueezerListHandler {
-        List<SqueezerGenre> genres;
+		List<SqueezerGenre> genres;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerGenre.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerGenre.class;
+		}
 
         public void clear() {
             genres = new ArrayList<SqueezerGenre>() {
@@ -640,9 +628,9 @@ class SqueezerCLIImpl {
             };
         }
 
-        public void add(Map<String, String> record) {
-            genres.add(new SqueezerGenre(record));
-        }
+		public void add(Map<String, String> record) {
+			genres.add(new SqueezerGenre(record));
+		}
 
         public boolean processList(boolean rescan, int count, int start,
                 Map<String, String> parameters) {
@@ -669,25 +657,25 @@ class SqueezerCLIImpl {
 
         }
 
-    }
+	}
 
-    private class ArtistListHandler implements SqueezerListHandler {
-        List<SqueezerArtist> artists;
+	private class ArtistListHandler implements SqueezerListHandler {
+		List<SqueezerArtist> artists;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerArtist.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerArtist.class;
+		}
 
         public void clear() {
             artists = new ArrayList<SqueezerArtist>() {
                 private static final long serialVersionUID = 3995870292581536540L;
             };
 
-        }
+		}
 
-        public void add(Map<String, String> record) {
-            artists.add(new SqueezerArtist(record));
-        }
+		public void add(Map<String, String> record) {
+			artists.add(new SqueezerArtist(record));
+		}
 
         public boolean processList(boolean rescan, int count, int start,
                 Map<String, String> parameters) {
@@ -715,12 +703,12 @@ class SqueezerCLIImpl {
         }
     }
 
-    private class AlbumListHandler implements SqueezerListHandler {
-        List<SqueezerAlbum> albums;
+	private class AlbumListHandler implements SqueezerListHandler {
+		List<SqueezerAlbum> albums;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerAlbum.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerAlbum.class;
+		}
 
         public void clear() {
             albums = new ArrayList<SqueezerAlbum>() {
@@ -728,9 +716,9 @@ class SqueezerCLIImpl {
             };
         }
 
-        public void add(Map<String, String> record) {
-            albums.add(new SqueezerAlbum(record));
-        }
+		public void add(Map<String, String> record) {
+			albums.add(new SqueezerAlbum(record));
+		}
 
         public boolean processList(boolean rescan, int count, int start,
                 Map<String, String> parameters) {
@@ -750,6 +738,44 @@ class SqueezerCLIImpl {
             }
             service.albumListCallbacks.finishBroadcast();
             return true;
+        }
+
+        public void onItemsFinished() {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    private class MusicFolderListHandler implements SqueezerListHandler {
+        List<SqueezerMusicFolderItem> musicFolders;
+
+        public Class<? extends SqueezerItem> getDataType() {
+            return SqueezerMusicFolderItem.class;
+        }
+
+        public void clear() {
+            musicFolders = new ArrayList<SqueezerMusicFolderItem>() {
+                private static final long serialVersionUID = 3167368005259913925L;
+            };
+        }
+
+        public void add(Map<String, String> record) {
+            musicFolders.add(new SqueezerMusicFolderItem(record));
+        }
+
+        public boolean processList(boolean rescan, int count, int start,
+                Map<String, String> parameters) {
+            if (service.musicFolderListCallback.get() != null) {
+                try {
+                    service.musicFolderListCallback.get().onMusicFoldersReceived(count, start,
+                            musicFolders);
+                    return true;
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
+            }
+
+            return false;
         }
 
         public void onItemsFinished() {
@@ -812,34 +838,31 @@ class SqueezerCLIImpl {
     }
 
     private class PlaylistsHandler implements SqueezerListHandler {
-        List<SqueezerPlaylist> playlists;
+		List<SqueezerPlaylist> playlists;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerPlaylist.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerPlaylist.class;
+		}
 
-        public void clear() {
-            playlists = new ArrayList<SqueezerPlaylist>() {
-                private static final long serialVersionUID = 3636348382591470060L;
-            };
-        }
+		public void clear() {
+			playlists = new ArrayList<SqueezerPlaylist>(){ private static final long serialVersionUID = 3636348382591470060L; };
+		}
 
-        public void add(Map<String, String> record) {
-            playlists.add(new SqueezerPlaylist(record));
-        }
+		public void add(Map<String, String> record) {
+			playlists.add(new SqueezerPlaylist(record));
+		}
 
-        public boolean processList(boolean rescan, int count, int start,
-                Map<String, String> parameters) {
-            if (service.playlistsCallback.get() != null) {
-                try {
-                    service.playlistsCallback.get().onPlaylistsReceived(count, start, playlists);
-                    return true;
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
-            return false;
-        }
+		public boolean processList(boolean rescan, int count, int start, Map<String, String> parameters) {
+			if (service.playlistsCallback.get() != null) {
+				try {
+					service.playlistsCallback.get().onPlaylistsReceived(count, start, playlists);
+					return true;
+				} catch (RemoteException e) {
+					Log.e(TAG, e.toString());
+				}
+			}
+			return false;
+		}
 
         public void onItemsFinished() {
             // TODO Auto-generated method stub
@@ -848,11 +871,11 @@ class SqueezerCLIImpl {
     }
 
     private class PluginListHandler implements SqueezerListHandler {
-        List<SqueezerPlugin> plugins;
+		List<SqueezerPlugin> plugins;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerPlaylist.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerPlaylist.class;
+		}
 
         public void clear() {
             plugins = new ArrayList<SqueezerPlugin>() {
@@ -860,22 +883,21 @@ class SqueezerCLIImpl {
             };
         }
 
-        public void add(Map<String, String> record) {
-            plugins.add(new SqueezerPlugin(record));
-        }
+		public void add(Map<String, String> record) {
+			plugins.add(new SqueezerPlugin(record));
+		}
 
-        public boolean processList(boolean rescan, int count, int start,
-                Map<String, String> parameters) {
-            if (service.pluginListCallback.get() != null) {
-                try {
-                    service.pluginListCallback.get().onPluginsReceived(count, start, plugins);
-                    return true;
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
-            return false;
-        }
+		public boolean processList(boolean rescan, int count, int start, Map<String, String> parameters) {
+			if (service.pluginListCallback.get() != null) {
+				try {
+					service.pluginListCallback.get().onPluginsReceived(count, start, plugins);
+					return true;
+				} catch (RemoteException e) {
+					Log.e(TAG, e.toString());
+				}
+			}
+			return false;
+		}
 
         public void onItemsFinished() {
             // TODO Auto-generated method stub
@@ -884,11 +906,11 @@ class SqueezerCLIImpl {
     }
 
     private class PluginItemListHandler implements SqueezerListHandler {
-        List<SqueezerPluginItem> pluginItems;
+		List<SqueezerPluginItem> pluginItems;
 
-        public Class<? extends SqueezerItem> getDataType() {
-            return SqueezerPlaylist.class;
-        }
+		public Class<? extends SqueezerItem> getDataType() {
+			return SqueezerPlaylist.class;
+		}
 
         public void clear() {
             pluginItems = new ArrayList<SqueezerPluginItem>() {
@@ -896,23 +918,21 @@ class SqueezerCLIImpl {
             };
         }
 
-        public void add(Map<String, String> record) {
-            pluginItems.add(new SqueezerPluginItem(record));
-        }
+		public void add(Map<String, String> record) {
+			pluginItems.add(new SqueezerPluginItem(record));
+		}
 
-        public boolean processList(boolean rescan, int count, int start,
-                Map<String, String> parameters) {
-            if (service.pluginItemListCallback.get() != null) {
-                try {
-                    service.pluginItemListCallback.get().onPluginItemsReceived(count, start,
-                            parameters, pluginItems);
-                    return true;
-                } catch (RemoteException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
-            return false;
-        }
+		public boolean processList(boolean rescan, int count, int start, Map<String, String> parameters) {
+			if (service.pluginItemListCallback.get() != null) {
+				try {
+					service.pluginItemListCallback.get().onPluginItemsReceived(count, start, parameters, pluginItems);
+					return true;
+				} catch (RemoteException e) {
+					Log.e(TAG, e.toString());
+				}
+			}
+			return false;
+		}
 
         public void onItemsFinished() {
             // TODO Auto-generated method stub

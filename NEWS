@@ -1,8 +1,26 @@
+0.7
+===
+
+*   Added support for browsing the Squeezeserver's music folder (if the server
+    includes this feature).
+
+*   Added support for scanning the local network to find compatible Squeezeservers,
+    as an alternative to entering IP addresses by hand.
+
+*   Fixed a crash caused by pressing the "back" key while the "Connecting..."
+    dialog was showing.
+
+*   Fixed a crash when renaming or deleting playlists.
+
+*   Fixed a bug where duplicated items might appear on the menu.
+
+
 0.6.2
 =====
 
 *   Fix crashes on orientation change, and assorted Honeycomb crashes after incorrect
     API selection.
+
 
 0.6.1
 =====
@@ -10,7 +28,7 @@
 *   Included higher resolution icons for devices with a higher display density,
     such as the Galaxy Nexus.
 
-*   Fixed a rare crash when releasing the WiFi lock.
+*   Fixed a rare crash when releasing the Wi-Fi lock.
 
 *   The hardware volume controls now work from all activities, not just the Now
     Playing activity.  This fixes issue 20

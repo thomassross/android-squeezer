@@ -20,6 +20,7 @@ import java.util.List;
 
 import uk.org.ngo.squeezer.framework.SqueezerItem;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
+import uk.org.ngo.squeezer.framework.SqueezerPlaylistItem;
 import uk.org.ngo.squeezer.itemlists.IServiceAlbumListCallback;
 import uk.org.ngo.squeezer.itemlists.IServiceArtistListCallback;
 import uk.org.ngo.squeezer.itemlists.IServiceGenreListCallback;
@@ -51,34 +52,33 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class SqueezerSearchActivity extends SqueezerItemListActivity {
-    private TextView loadingLabel;
-    private ExpandableListView resultsExpandableListView;
-    private SqueezerSearchAdapter searchResultsAdapter;
-    private String searchString;
+	private TextView loadingLabel;
+	private ExpandableListView resultsExpandableListView;
+	private SqueezerSearchAdapter searchResultsAdapter;
+	private String searchString;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.search_layout);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.search_layout);
 
-        ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
-        loadingLabel = (TextView) findViewById(R.id.loading_label);
-        final EditText searchCriteriaText = (EditText) findViewById(R.id.search_input);
+		ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+		loadingLabel = (TextView) findViewById(R.id.loading_label);
+		final EditText searchCriteriaText = (EditText) findViewById(R.id.search_input);
 
-        searchResultsAdapter = new SqueezerSearchAdapter(this);
-        resultsExpandableListView = (ExpandableListView) findViewById(R.id.search_expandable_list);
-        resultsExpandableListView.setAdapter(searchResultsAdapter);
+		searchResultsAdapter = new SqueezerSearchAdapter(this);
+		resultsExpandableListView = (ExpandableListView) findViewById(R.id.search_expandable_list);
+		resultsExpandableListView.setAdapter( searchResultsAdapter );
 
-        searchCriteriaText.setOnKeyListener(new OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN)
-                        && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    doSearch(searchCriteriaText.getText().toString());
-                    return true;
-                }
-                return false;
-            }
-        });
+		searchCriteriaText.setOnKeyListener(new OnKeyListener() {
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+					doSearch(searchCriteriaText.getText().toString());
+					return true;
+				}
+				return false;
+			}
+		});
 
         searchButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -87,55 +87,56 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
             }
         });
 
-        resultsExpandableListView.setOnChildClickListener(new OnChildClickListener() {
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
-                    int childPosition, long id) {
-                SqueezerItem item = searchResultsAdapter.getChild(groupPosition, childPosition);
-                if (item != null && item.getId() != null)
-                    try {
-                        if (item instanceof SqueezerAlbum) {
-                            play(item);
-                            SqueezerActivity.show(SqueezerSearchActivity.this);
-                        } else
-                            SqueezerAlbumListActivity.show(SqueezerSearchActivity.this, item);
-                    } catch (RemoteException e) {
-                        Log.e(getTag(), "Error from default action for search result '" + item
-                                + "': " + e);
-                    }
-                return true;
-            }
-        });
+        resultsExpandableListView.setOnChildClickListener( new OnChildClickListener() {
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                SqueezerPlaylistItem item = searchResultsAdapter.getChild(groupPosition,
+                        childPosition);
+				if (item != null && item.getId() != null) {
+					try {
+						if (item instanceof SqueezerAlbum) {
+							play(item);
+							SqueezerActivity.show(SqueezerSearchActivity.this);
+						} else
+							SqueezerAlbumListActivity.show(SqueezerSearchActivity.this, item);
+					} catch (RemoteException e) {
+						Log.e(getTag(), "Error from default action for search result '" + item
+								+ "': " + e);
+					}
+				}
+				return true;
+			}
+		});
 
         resultsExpandableListView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-                ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListContextMenuInfo) menuInfo;
-                long packedPosition = contextMenuInfo.packedPosition;
-                if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                    int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-                    int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-                    searchResultsAdapter.setupContextMenu(menu, groupPosition, childPosition);
-                }
-            }
-        });
+			public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+				ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListContextMenuInfo) menuInfo;
+				long packedPosition = contextMenuInfo.packedPosition;
+				if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+					int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+					int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+					searchResultsAdapter.setupContextMenu(menu, groupPosition, childPosition);
+				}
+			}
+		});
 
         resultsExpandableListView.setOnScrollListener(this);
-    };
+	};
 
-    @Override
-    protected void registerCallback() throws RemoteException {
-        getService().registerArtistListCallback(artistsCallback);
-        getService().registerAlbumListCallback(albumsCallback);
-        getService().registerGenreListCallback(genresCallback);
-        getService().registerSongListCallback(songsCallback);
-    }
+	@Override
+	protected void registerCallback() throws RemoteException {
+		getService().registerArtistListCallback(artistsCallback);
+		getService().registerAlbumListCallback(albumsCallback);
+		getService().registerGenreListCallback(genresCallback);
+		getService().registerSongListCallback(songsCallback);
+	}
 
-    @Override
-    protected void unregisterCallback() throws RemoteException {
-        getService().unregisterArtistListCallback(artistsCallback);
-        getService().unregisterAlbumListCallback(albumsCallback);
-        getService().unregisterGenreListCallback(genresCallback);
-        getService().unregisterSongListCallback(songsCallback);
-    }
+	@Override
+	protected void unregisterCallback() throws RemoteException {
+		getService().unregisterArtistListCallback(artistsCallback);
+		getService().unregisterAlbumListCallback(albumsCallback);
+		getService().unregisterGenreListCallback(genresCallback);
+		getService().unregisterSongListCallback(songsCallback);
+	}
 
     @Override
     public final boolean onContextItemSelected(MenuItem menuItem) {
@@ -157,13 +158,13 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
         return false;
     }
 
-    @Override
-    protected void onServiceConnected() throws RemoteException {
-        registerCallback();
-        doSearch();
-    }
+	@Override
+	protected void onServiceConnected() throws RemoteException {
+		registerCallback();
+		doSearch();
+	}
 
-    @Override
+	@Override
     public void onPause() {
         if (getService() != null)
             try {
@@ -174,45 +175,45 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
         super.onPause();
     }
 
-    static void show(Context context) {
-        final Intent intent = new Intent(context, SqueezerSearchActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	static void show(Context context) {
+		final Intent intent = new Intent(context, SqueezerSearchActivity.class)
+				.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
-    @Override
-    protected void orderPage(int start) {
-        try {
-            getService().search(start, searchString);
-        } catch (RemoteException e) {
-            Log.e(getTag(), "Error performing search: " + e);
-        }
-    }
 
-    private void doSearch(String searchString) {
-        if (searchString != null && searchString.length() > 0 && getService() != null) {
-            this.searchString = searchString;
-            reorderItems();
-            resultsExpandableListView.setVisibility(View.GONE);
-            loadingLabel.setVisibility(View.VISIBLE);
-            searchResultsAdapter.clear();
-        }
-    }
+	@Override
+	protected void orderPage(int start) {
+		try {
+			getService().search(start, searchString);
+		} catch (RemoteException e) {
+			Log.e(getTag(), "Error performing search: " + e);
+		}
+	}
 
-    private void doSearch() {
-        doSearch(searchString);
-    }
+	private void doSearch(String searchString) {
+		if (searchString != null && searchString.length() > 0 && getService() != null) {
+			this.searchString = searchString;
+			reorderItems();
+			resultsExpandableListView.setVisibility(View.GONE);
+			loadingLabel.setVisibility(View.VISIBLE);
+			searchResultsAdapter.clear();
+		}
+	}
 
-    private <T extends SqueezerItem> void onItemsReceived(final int count, final int start,
-            final List<T> items) {
-        getUIThreadHandler().post(new Runnable() {
-            public void run() {
-                searchResultsAdapter.updateItems(count, start, items);
-                loadingLabel.setVisibility(View.GONE);
-                resultsExpandableListView.setVisibility(View.VISIBLE);
-            }
-        });
-    }
+	private void doSearch() {
+		doSearch(searchString);
+	}
+
+	private <T extends SqueezerItem> void onItemsReceived(final int count, final int start, final List<T> items) {
+		getUIThreadHandler().post(new Runnable() {
+			public void run() {
+				searchResultsAdapter.updateItems(count, start, items);
+				loadingLabel.setVisibility(View.GONE);
+				resultsExpandableListView.setVisibility(View.VISIBLE);
+			}
+		});
+	}
 
 
     private final IServiceArtistListCallback artistsCallback = new IServiceArtistListCallback.Stub() {

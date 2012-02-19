@@ -27,18 +27,14 @@ import android.os.Parcel;
 
 public class SqueezerAlbum extends SqueezerArtworkItem {
 
-    private String name;
-    private String mArtworkPath;
-
     @Override
-    public String getName() {
-        return name;
+    public String getPlaylistTag() {
+        return "album_id";
     }
 
-    public SqueezerAlbum setName(String name) {
-        this.name = name;
-        return this;
-    }
+	private String name;
+	@Override public String getName() { return name; }
+	public SqueezerAlbum setName(String name) { this.name = name; return this; }
 
     private String artist;
 
@@ -60,6 +56,8 @@ public class SqueezerAlbum extends SqueezerArtworkItem {
         this.year = year;
     }
 
+    private String mArtworkPath;
+
     public String getArtworkPath() {
         return mArtworkPath;
     }
@@ -68,18 +66,18 @@ public class SqueezerAlbum extends SqueezerArtworkItem {
         this.mArtworkPath = artworkPath;
     }
 
-    public SqueezerAlbum(String albumId, String album) {
-        setId(albumId);
-        setName(album);
-    }
+	public SqueezerAlbum(String albumId, String album) {
+		setId(albumId);
+		setName(album);
+	}
 
-    public SqueezerAlbum(Map<String, String> record) {
-        setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
-        setName(record.get("album"));
-        setArtist(record.get("artist"));
-        setYear(Util.parseDecimalIntOrZero(record.get("year")));
-        setArtwork_track_id(record.get("artwork_track_id"));
-    }
+	public SqueezerAlbum(Map<String, String> record) {
+		setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
+		setName(record.get("album"));
+		setArtist(record.get("artist"));
+		setYear(Util.parseDecimalIntOrZero(record.get("year")));
+		setArtwork_track_id(record.get("artwork_track_id"));
+	}
 
     /**
      * Construct from a cursor.
@@ -113,30 +111,31 @@ public class SqueezerAlbum extends SqueezerArtworkItem {
             return new SqueezerAlbum[size];
         }
 
-        public SqueezerAlbum createFromParcel(Parcel source) {
-            return new SqueezerAlbum(source);
-        }
-    };
+		public SqueezerAlbum createFromParcel(Parcel source) {
+			return new SqueezerAlbum(source);
+		}
+	};
 
-    private SqueezerAlbum(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-        artist = source.readString();
-        year = source.readInt();
-        setArtwork_track_id(source.readString());
-    }
+	private SqueezerAlbum(Parcel source) {
+		setId(source.readString());
+		name = source.readString();
+		artist = source.readString();
+		year = source.readInt();
+		setArtwork_track_id(source.readString());
+	}
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(artist);
-        dest.writeInt(year);
-        dest.writeString(getArtwork_track_id());
-    }
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(getId());
+		dest.writeString(name);
+		dest.writeString(artist);
+		dest.writeInt(year);
+		dest.writeString(getArtwork_track_id());
+	}
 
-    @Override
-    public String toString() {
-        return "id=" + getId() + ", name=" + name + ", artist=" + artist + ", year=" + year;
-    }
+
+	@Override
+	public String toString() {
+		return "id=" + getId() + ", name=" + name + ", artist=" + artist + ", year=" + year;
+	}
 
 }

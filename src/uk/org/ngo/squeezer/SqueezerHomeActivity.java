@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer;
 
 import uk.org.ngo.squeezer.framework.SqueezerBaseActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerRadioListActivity;
+import uk.org.ngo.squeezer.menu.MenuFragment;
 import uk.org.ngo.squeezer.menu.SqueezerMenuFragment;
 import uk.org.ngo.squeezer.service.AlbumCache;
 import uk.org.ngo.squeezer.service.ProviderUri;
@@ -40,7 +41,7 @@ public class SqueezerHomeActivity extends SqueezerBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_list);
         listView = (ListView) findViewById(R.id.item_list);
-        SqueezerMenuFragment.addTo(this);
+        MenuFragment.add(this, SqueezerMenuFragment.class);
         setHomeMenu();
     }
 
@@ -49,17 +50,18 @@ public class SqueezerHomeActivity extends SqueezerBaseActivity {
     }
 
 	private void setHomeMenu() {
-		int[] icons = new int[] { R.drawable.icon_nowplaying,
-				R.drawable.icon_mymusic, R.drawable.icon_internet_radio,
-				// R.drawable.icon_my_apps, R.drawable.icon_favorites,
-                R.drawable.icon_ml_albums, R.drawable.icon_ml_songs,
-                R.drawable.icon_ml_artist, R.drawable.icon_ml_genres,
-                R.drawable.icon_ml_years
+		int[] icons = new int[] {
+                     R.drawable.ic_now_playing, R.drawable.ic_my_music,
+                     R.drawable.ic_internet_radio,
+                     // R.drawable.ic_my_apps, R.drawable.ic_favorites,
+                     R.drawable.ic_albums, R.drawable.ic_songs,
+                     R.drawable.ic_artists, R.drawable.ic_genres,
+                     R.drawable.ic_years
             };
         listView.setAdapter(new IconRowAdapter(this, getResources().getStringArray(
                 R.array.home_items), icons));
         listView.setOnItemClickListener(onHomeItemClick);
-	}
+    }
 
     private final OnItemClickListener onHomeItemClick = new OnItemClickListener() {
         private static final int NOW_PLAYING = 0;
@@ -120,12 +122,11 @@ public class SqueezerHomeActivity extends SqueezerBaseActivity {
         }
     };
 
-    public static void show(Context context) {
+	public static void show(Context context) {
         final Intent intent = new Intent(context, SqueezerHomeActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        		.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        		.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         context.startActivity(intent);
     }
-
 
 }

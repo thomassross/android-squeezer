@@ -20,6 +20,7 @@ package uk.org.ngo.squeezer;
 import java.util.Arrays;
 
 import uk.org.ngo.squeezer.framework.SqueezerBaseActivity;
+import uk.org.ngo.squeezer.menu.MenuFragment;
 import uk.org.ngo.squeezer.menu.SqueezerMenuFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -32,8 +33,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 public class SqueezerRandomplayActivity extends SqueezerBaseActivity {
-	private static final String TAG = SqueezerRandomplayActivity.class.getName();
-
     private ListView listView;
 
     @Override
@@ -41,7 +40,7 @@ public class SqueezerRandomplayActivity extends SqueezerBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_list);
         listView = (ListView) findViewById(R.id.item_list);
-        SqueezerMenuFragment.addTo(this);
+        MenuFragment.add(this, SqueezerMenuFragment.class);
         setRandomplayMenu();
     }
 
@@ -53,8 +52,8 @@ public class SqueezerRandomplayActivity extends SqueezerBaseActivity {
 	private void setRandomplayMenu() {
 		String[] values = getResources().getStringArray(R.array.randomplay_items);
 		int[] icons = new int[values.length];
-		Arrays.fill(icons, R.drawable.icon_ml_random);
-		icons[icons.length -1] = R.drawable.icon_ml_genres;
+        Arrays.fill(icons, R.drawable.ic_random);
+        icons[icons.length - 1] = R.drawable.ic_genres;
 		listView.setAdapter(new IconRowAdapter(this, values, icons));
 		listView.setOnItemClickListener(onRandomplayItemClick);
 	}

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import uk.org.ngo.squeezer.framework.SqueezerItem;
 import uk.org.ngo.squeezer.framework.SqueezerItemAdapter;
+import uk.org.ngo.squeezer.framework.SqueezerPlaylistItem;
 import uk.org.ngo.squeezer.itemlists.SqueezerAlbumView;
 import uk.org.ngo.squeezer.itemlists.SqueezerArtistView;
 import uk.org.ngo.squeezer.itemlists.SqueezerGenreView;
@@ -30,20 +31,19 @@ import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
 import uk.org.ngo.squeezer.model.SqueezerSong;
-
+import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import uk.org.ngo.squeezer.R;
-
 public class SqueezerSearchAdapter extends BaseExpandableListAdapter {
-	private final int[] groupIcons = { R.drawable.icon_ml_songs, R.drawable.icon_ml_albums, R.drawable.icon_ml_artist, R.drawable.icon_ml_genres};
+    private final int[] groupIcons = {
+            R.drawable.ic_songs, R.drawable.ic_albums, R.drawable.ic_artists, R.drawable.ic_genres
+    };
 
 	private SqueezerSearchActivity activity;
 
@@ -102,8 +102,8 @@ public class SqueezerSearchAdapter extends BaseExpandableListAdapter {
 		childAdapters[groupPosition].doItemContext(menuItem, childPosition);
 	}
 
-	public SqueezerItem getChild(int groupPosition, int childPosition) {
-		return childAdapters[groupPosition].getItem(childPosition);
+    public SqueezerPlaylistItem getChild(int groupPosition, int childPosition) {
+        return (SqueezerPlaylistItem) childAdapters[groupPosition].getItem(childPosition);
 	}
 
 	public long getChildId(int groupPosition, int childPosition) {
@@ -130,17 +130,27 @@ public class SqueezerSearchAdapter extends BaseExpandableListAdapter {
 		return groupPosition;
 	}
 
-	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-		View row = activity.getLayoutInflater().inflate(R.layout.group_item, null);
+    public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+            ViewGroup parent) {
+        View row = activity.getLayoutInflater().inflate(R.layout.group_item, null);
 
-		TextView label = (TextView) row.findViewById(R.id.label);
-		label.setText(childAdapters[groupPosition].getHeader());
+        TextView label = (TextView) row.findViewById(R.id.label);
+        label.setText(childAdapters[groupPosition].getHeader());
 
-		ImageView icon = (ImageView) row.findViewById(R.id.icon);
-		icon.setImageResource(groupIcons[groupPosition]);
+        // Build the icon to display next to the text.
+        //
+        // Take the normal icon (at 48dp) and scale it to 28dp, or 58% of its
+        // original size. Then set it as the left-most compound drawable.
 
-		return (row);
-	}
+        Drawable icon = Squeezer.getContext().getResources().getDrawable(groupIcons[groupPosition]);
+        int w = icon.getIntrinsicWidth();
+        int h = icon.getIntrinsicHeight();
+        icon.setBounds(0, 0, (int) Math.ceil(w * 0.58), (int) Math.ceil(h * 0.58));
+
+        label.setCompoundDrawables(icon, null, null, null);
+
+        return (row);
+    }
 
 	public boolean hasStableIds() {
 		return false;

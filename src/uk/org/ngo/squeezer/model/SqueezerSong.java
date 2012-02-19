@@ -29,6 +29,11 @@ import android.util.Log;
 
 public class SqueezerSong extends SqueezerArtworkItem {
 
+    @Override
+    public String getPlaylistTag() {
+        return "track_id";
+    }
+
 	private String name;
     private String mArtworkPath;
 
@@ -52,7 +57,6 @@ public class SqueezerSong extends SqueezerArtworkItem {
 	public void setArtist_id(String artist_id) { this.artist_id = artist_id; }
 
 	private String album_id;
-
 	public String getAlbum_id() { return album_id; }
 	public void setAlbum_id(String album_id) { this.album_id = album_id; }
 
