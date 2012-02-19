@@ -4,25 +4,18 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="10px"
-    android:paddingRight="10px"
-    android:paddingTop="8px"
-    android:paddingBottom="8px">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
-  <TextView android:id="@+id/text1"
-      android:paddingLeft="10px"
-      android:paddingRight="10px"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-   />
-   
-   <TextView android:id="@+id/text2"
-      android:paddingLeft="10px"
-      android:paddingRight="10px"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@android:id/text1"
-      android:textAppearance="?android:attr/textAppearanceSmall"
-    />
+    <TextView android:id="@+id/text1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView android:id="@+id/text2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 </LinearLayout>
