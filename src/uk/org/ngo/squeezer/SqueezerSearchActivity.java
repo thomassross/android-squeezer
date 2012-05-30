@@ -35,17 +35,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnKeyListener;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -107,18 +102,6 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
 			}
 		});
 
-        resultsExpandableListView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-			public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-				ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListContextMenuInfo) menuInfo;
-				long packedPosition = contextMenuInfo.packedPosition;
-				if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-					int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-					int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-					searchResultsAdapter.setupContextMenu(menu, groupPosition, childPosition);
-				}
-			}
-		});
-
         resultsExpandableListView.setOnScrollListener(this);
 	};
 
@@ -136,25 +119,6 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
 		getService().unregisterAlbumListCallback(albumsCallback);
 		getService().unregisterGenreListCallback(genresCallback);
 		getService().unregisterSongListCallback(songsCallback);
-	}
-
-	@Override
-	public final boolean onContextItemSelected(MenuItem menuItem) {
-		if (getService() != null) {
-			ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListContextMenuInfo) menuItem.getMenuInfo();
-			long packedPosition = contextMenuInfo.packedPosition;
-			int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-			int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-			if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-				try {
-					searchResultsAdapter.doItemContext(menuItem, groupPosition, childPosition);
-				} catch (RemoteException e) {
-					SqueezerItem item = searchResultsAdapter.getChild(groupPosition, childPosition);
-					Log.e(getTag(), "Error executing context menu action '" + contextMenuInfo + "' for '"	+ item + "': " + e);
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override

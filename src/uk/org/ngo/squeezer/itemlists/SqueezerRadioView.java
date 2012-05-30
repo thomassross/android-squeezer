@@ -16,12 +16,11 @@
 
 package uk.org.ngo.squeezer.itemlists;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerPlugin;
 import android.os.RemoteException;
-import android.view.ContextMenu;
-
-import uk.org.ngo.squeezer.R;
+import android.view.Menu;
 
 public class SqueezerRadioView extends SqueezerPluginView {
 
@@ -37,7 +36,7 @@ public class SqueezerRadioView extends SqueezerPluginView {
 		SqueezerPluginItemListActivity.show(getActivity(), item);
 	}
 
-	public void setupContextMenu(ContextMenu menu, int index, SqueezerPlugin item) {
+	public void setupContextMenu(Menu menu, int index, SqueezerPlugin item) {
 	}
 
 }

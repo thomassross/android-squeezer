@@ -20,8 +20,6 @@ import uk.org.ngo.squeezer.NowPlayingActivity;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.model.SqueezerPluginItem;
 import android.os.RemoteException;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,24 +29,23 @@ import android.widget.Toast;
 
 public class SqueezerPluginItemView extends SqueezerIconicItemView<SqueezerPluginItem> {
 	private final SqueezerPluginItemListActivity activity;
-	private final LayoutInflater layoutInflater;
 
 	public SqueezerPluginItemView(SqueezerPluginItemListActivity activity) {
 		super(activity);
 		this.activity = activity;
-		layoutInflater = activity.getLayoutInflater();
 	}
 
 	@Override
-	public View getAdapterView(View convertView, SqueezerPluginItem item) {
+	public View getAdapterView(View convertView, int index, SqueezerPluginItem item) {
 		ViewHolder viewHolder;
 
 		if (convertView == null || convertView.getTag() == null) {
-            convertView = layoutInflater.inflate(R.layout.icon_large_row_layout, null);
+            convertView = getLayoutInflater().inflate(R.layout.icon_large_row_layout, null);
 
             viewHolder = new ViewHolder();
 			viewHolder.label = (TextView) convertView.findViewById(R.id.label);
 			viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
+            viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.contextMenu);
 
 			convertView.setTag(viewHolder);
         } else {
@@ -57,13 +54,15 @@ public class SqueezerPluginItemView extends SqueezerIconicItemView<SqueezerPlugi
 
 		viewHolder.label.setText(item.getName());
 		updateIcon(viewHolder.icon, item, item.getImage());
+		setupContextMenu(viewHolder.contextMenu, index, item);
 
 		return convertView;
 	}
 
 	private static class ViewHolder {
 		TextView label;
-		ImageView icon;
+        ImageView icon;
+        ImageView contextMenu;
 	}
 
 	public String getQuantityString(int quantity) {
@@ -79,9 +78,8 @@ public class SqueezerPluginItemView extends SqueezerIconicItemView<SqueezerPlugi
 		}
 	}
 
-	public void setupContextMenu(ContextMenu menu, int index, SqueezerPluginItem item) {
+	public void setupContextMenu(Menu menu, int index, SqueezerPluginItem item) {
 		if (!item.isHasitems()) {
-			menu.setHeaderTitle(item.getName());
 			menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 1, R.string.CONTEXTMENU_PLAY_ITEM);
 			menu.add(Menu.NONE, CONTEXTMENU_ADD_ITEM, 2, R.string.CONTEXTMENU_ADD_ITEM);
 			menu.add(Menu.NONE, CONTEXTMENU_INSERT_ITEM, 3, R.string.CONTEXTMENU_INSERT_ITEM);

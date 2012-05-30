@@ -17,44 +17,30 @@
 package uk.org.ngo.squeezer.actionbarcompat;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import uk.org.ngo.squeezer.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.InflateException;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnKeyListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import uk.org.ngo.squeezer.R;
-import uk.org.ngo.squeezer.Util;
 
 /**
  * A class that implements the action bar pattern for pre-Honeycomb devices.
@@ -65,7 +51,7 @@ public class ActionBarHelperBase extends ActionBarHelper {
     private static final String MENU_ATTR_SHOW_AS_ACTION = "showAsAction";
 
     private Map<Integer, View> mActionBarItems = new HashMap<Integer, View>();
-    private List<MenuItem> mOverflowItems = new ArrayList<MenuItem>();
+    private SimpleMenu mOverflowMenu;
     private Menu mSimpleMenu;
     private ViewGroup mActionBarCompat;
     protected Drawable mHomeIcon;
@@ -87,7 +73,8 @@ public class ActionBarHelperBase extends ActionBarHelper {
                 R.layout.actionbar_compat);
         setupActionBar();
 
-        mSimpleMenu = new SimpleMenu(this);
+        mSimpleMenu = new ActionBarMenu(this);
+        mOverflowMenu = new SimpleMenu(mActivity);
         mActivity.onCreatePanelMenu(Window.FEATURE_OPTIONS_PANEL, mSimpleMenu);
         mActivity.onPrepareOptionsMenu(mSimpleMenu);
         for (int i = 0; i < mSimpleMenu.size(); i++) {
@@ -96,11 +83,11 @@ public class ActionBarHelperBase extends ActionBarHelper {
                 if (item.isActionBar())
                     mActionBarItems.put(item.getItemId(), addActionItemCompatFromMenuItem(item));
                 else
-                    mOverflowItems.add(item);
+                    mOverflowMenu.add(item);
             }
         }
         
-        if (mOverflowItems.size() > 0) {
+        if (mOverflowMenu.size() > 0) {
             // Add overflow button
             final ImageButton actionButton = new ImageButton(mActivity, null, R.attr.actionbarCompatItemStyle);
             actionButton.setLayoutParams(new ViewGroup.LayoutParams(
@@ -110,99 +97,15 @@ public class ActionBarHelperBase extends ActionBarHelper {
             actionButton.setScaleType(ImageView.ScaleType.CENTER);
             actionButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    setupOverflowMenu(actionButton);
+                    PopupMenuAdapter.show(actionButton, mActivity, mOverflowMenu, new PopupMenuAdapter.PopupMenuListener() {
+                        public void onMenuItemSelected(MenuItem menuItem) {
+                          mActivity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, menuItem);
+                        }
+                    });
                 }
             });
             mActionBarCompat.addView(actionButton);
         }
-    }
-    
-    /**
-     * Setup the overflow menu.
-     * 
-     * @param actionButton The action bar button which invoked the overflow menu
-     */
-    private void setupOverflowMenu(final ImageButton actionButton) {
-        final OverflowAdapter items = new OverflowAdapter();
-        View convertView = null;
-        int width = 0;
-        for (MenuItem item: mOverflowItems) {
-            if (item.isVisible()) {
-                items.add(item);
-                convertView = items.getView(items.getCount()-1, null, null); // Apparently we can't reuse view, when measure is called, ... strange
-                convertView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-                width = Math.max(width, convertView.getMeasuredWidth());
-            }
-        }
-        
-        //TODO Android complains that listView is leaked on orientation change with the overflow menu showing
-        final ListView listView = (ListView) mActivity.getLayoutInflater().inflate(R.layout.overflowmenu_compat, null, false);
-        final PopupWindow popupWindow = new PopupWindow(listView, width, LayoutParams.WRAP_CONTENT, true);
-        listView.setAdapter(items);
-        listView.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN && (event.getX() < 0 || event.getY() < 0 || event.getY() > listView.getHeight())) {
-                    popupWindow.dismiss();
-                    return true;
-                }
-                return false;
-            }
-        });
-        listView.setOnKeyListener(new OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_BACK)) {
-                    popupWindow.dismiss();
-                    return true;
-                }
-                return false;
-            }
-        });
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                popupWindow.dismiss();
-                mActivity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, items.getItem(position));
-            }
-        });
-        popupWindow.showAsDropDown(actionButton);
-    }
-
-    /**
-     * An adapter for the items in the overflow menu.
-     */
-    private class OverflowAdapter extends BaseAdapter {
-        final List<MenuItem> items = new ArrayList<MenuItem>();
-
-        public OverflowAdapter add(MenuItem item) {
-            items.add(item);
-            return this;
-        }
-
-        public int getCount() {
-            return items.size();
-        }
-
-        public MenuItem getItem(int position) {
-            return items.get(position);
-        }
-
-        public long getItemId(int position) {
-            return items.get(position).getItemId();
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View itemView = Util.getListItemView(mActivity.getLayoutInflater(), R.layout.list_item, convertView, items.get(position).getTitle());
-            itemView.setEnabled(items.get(position).isEnabled());
-            return itemView;
-        }
-        
-        @Override
-        public boolean areAllItemsEnabled() { return false; }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return items.get(position).isEnabled();
-        }
-        
     }
 
     /**
@@ -219,9 +122,7 @@ public class ActionBarHelperBase extends ActionBarHelper {
         springLayoutParams.weight = 1;
 
         // Add Home button
-        SimpleMenu tempMenu = new SimpleMenu(this);
-        SimpleMenuItem homeItem = new SimpleMenuItem(
-                tempMenu, android.R.id.home, 0, mActivity.getString(R.string.app_name));
+        SimpleMenuItem homeItem = new SimpleMenuItem(mActivity, android.R.id.home, 0, mActivity.getString(R.string.app_name));
         homeItem.setIcon(mHomeIcon != null ? mHomeIcon : mActivity.getResources().getDrawable(mActivity.getApplicationInfo().icon));
         addActionItemCompatFromMenuItem(homeItem);
 

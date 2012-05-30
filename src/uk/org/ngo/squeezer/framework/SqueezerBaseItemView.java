@@ -21,13 +21,20 @@ import java.lang.reflect.Field;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.ReflectUtil;
 import uk.org.ngo.squeezer.Util;
+import uk.org.ngo.squeezer.actionbarcompat.PopupMenuAdapter;
+import uk.org.ngo.squeezer.actionbarcompat.SimpleMenu;
 import uk.org.ngo.squeezer.itemlists.SqueezerAlbumListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerArtistListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerSongListActivity;
 import android.os.Parcelable.Creator;
 import android.os.RemoteException;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements SqueezerItemView<T> {
 	protected static final int CONTEXTMENU_BROWSE_SONGS = 0;
@@ -41,19 +48,29 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
 	protected static final int CONTEXTMENU_BROWSE_ARTIST_SONGS = 8;
 
 	private final SqueezerItemListActivity activity;
+    private final LayoutInflater layoutInflater;
 	private SqueezerItemAdapter<T> adapter;
 	private Class<T> itemClass;
 	private Creator<T> creator;
 
 	public SqueezerBaseItemView(SqueezerItemListActivity activity) {
 		this.activity = activity;
+        layoutInflater = activity.getLayoutInflater();
 	}
+
+    protected String getTag() {
+        return getClass().getSimpleName();
+    }
 
 	public SqueezerItemListActivity getActivity() {
 		return activity;
 	}
 
-	public SqueezerItemAdapter<T> getAdapter() {
+	public LayoutInflater getLayoutInflater() {
+        return layoutInflater;
+    }
+
+    public SqueezerItemAdapter<T> getAdapter() {
 		return adapter;
 	}
 
@@ -89,13 +106,40 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
 		return creator;
 	}
 
-	public View getAdapterView(View convertView, T item) {
-		return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.list_item, convertView, item.getName());
-	}
+    public View getAdapterView(View convertView, int index, T item) {
+        return getDefaultAdapterView(convertView, index, item);
+    }
+
+    public View getDefaultAdapterView(View convertView, final int index, T item) {
+        ViewHolder viewHolder;
+
+        if (convertView == null || convertView.getTag() == null) {
+            convertView = layoutInflater.inflate(R.layout.list_row, null);
+
+            viewHolder = new ViewHolder();
+            viewHolder.label = (TextView) convertView.findViewById(R.id.label);
+            viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.contextMenu);
+
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        viewHolder.label.setText(item.getName());
+        setupContextMenu(viewHolder.contextMenu, index, item);
+
+        return convertView;
+    }
 
 	public View getAdapterView(View convertView, String label) {
-		return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.list_item, convertView, label);
+		return Util.getListItemView(layoutInflater, R.layout.list_item, convertView, label);
 	}
+
+    private static class ViewHolder {
+        TextView label;
+        ImageView contextMenu;
+    }
+
 
 	/**
 	 * The default context menu handler handles some common actions.
@@ -124,5 +168,34 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
 		}
 		return false;
 	}
+
+	/**
+	 * Setup the handler for the context menu
+	 * @param button
+	 * @param index
+	 * @param item
+	 */
+    protected void setupContextMenu(final View button, final int index, final T item) {
+        button.setVisibility(View.VISIBLE);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showContextMenu(button, index, item);
+            }
+        });
+    }
+    
+    private void showContextMenu(final View button, final int index, final T selectedItem) {
+        Menu contextMenu = new SimpleMenu(activity);
+        setupContextMenu(contextMenu, index, selectedItem);
+        PopupMenuAdapter.show(button, activity, contextMenu, new PopupMenuAdapter.PopupMenuListener() {
+            public void onMenuItemSelected(MenuItem menuItem) {
+                try {
+                    doItemContext(menuItem, index, selectedItem);
+                } catch (RemoteException e) {
+                    Log.e(getTag(), "Error performing context menu action '"+ menuItem + "' for '" + selectedItem + "': " + e);
+                }
+            }
+        });
+    }
 
 }

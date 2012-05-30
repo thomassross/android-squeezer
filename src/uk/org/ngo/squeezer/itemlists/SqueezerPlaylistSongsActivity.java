@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -67,7 +66,7 @@ public class SqueezerPlaylistSongsActivity extends SqueezerAbstractSongListActiv
 	public SqueezerItemView<SqueezerSong> createItemView() {
 		return new SqueezerSongView(this) {
 			@Override
-			public void setupContextMenu(ContextMenu menu, int index, SqueezerSong item) {
+			public void setupContextMenu(Menu menu, int index, SqueezerSong item) {
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_PLAY_ITEM, 1, R.string.CONTEXTMENU_PLAY_ITEM);
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_ADD_ITEM, 2, R.string.CONTEXTMENU_ADD_ITEM);
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_INSERT_ITEM, 3, R.string.CONTEXTMENU_INSERT_ITEM);

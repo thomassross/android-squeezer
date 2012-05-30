@@ -20,7 +20,6 @@ import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerPlugin;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,19 +28,17 @@ import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public abstract class SqueezerPluginView extends SqueezerIconicItemView<SqueezerPlugin> {
-	private final LayoutInflater layoutInflater;
 
 	public SqueezerPluginView(SqueezerItemListActivity activity) {
 		super(activity);
-		layoutInflater = activity.getLayoutInflater();
 	}
 
 	@Override
-	public View getAdapterView(View convertView, SqueezerPlugin item) {
+	public View getAdapterView(View convertView, int index, SqueezerPlugin item) {
 		ViewHolder viewHolder;
 
 		if (convertView == null || convertView.getTag() == null) {
-			convertView = layoutInflater.inflate(R.layout.icon_large_row_layout, null);
+			convertView = getLayoutInflater().inflate(R.layout.icon_large_row_layout, null);
 			viewHolder = new ViewHolder();
 			viewHolder.label = (TextView) convertView.findViewById(R.id.label);
 			viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);

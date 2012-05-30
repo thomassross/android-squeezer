@@ -16,14 +16,12 @@
 
 package uk.org.ngo.squeezer.itemlists;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.SqueezerBaseItemView;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerYear;
 import android.os.RemoteException;
-import android.view.ContextMenu;
 import android.view.Menu;
-
-import uk.org.ngo.squeezer.R;
 
 public class SqueezerYearView extends SqueezerBaseItemView<SqueezerYear> {
 
@@ -39,8 +37,7 @@ public class SqueezerYearView extends SqueezerBaseItemView<SqueezerYear> {
 		SqueezerAlbumListActivity.show(getActivity(), item);
 	}
 
-	public void setupContextMenu(ContextMenu menu, int index, SqueezerYear item) {
-		menu.setHeaderTitle(item.getId());
+	public void setupContextMenu(Menu menu, int index, SqueezerYear item) {
 		menu.add(Menu.NONE, CONTEXTMENU_BROWSE_SONGS, 0, R.string.CONTEXTMENU_BROWSE_SONGS);
 		menu.add(Menu.NONE, CONTEXTMENU_BROWSE_ALBUMS, 1, R.string.CONTEXTMENU_BROWSE_ALBUMS);
 		menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 3, R.string.CONTEXTMENU_PLAY_ITEM);

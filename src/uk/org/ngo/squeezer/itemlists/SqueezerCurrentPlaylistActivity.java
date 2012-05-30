@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -52,7 +51,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 			}
 
 			@Override
-			public void setupContextMenu(ContextMenu menu, int index, SqueezerSong item) {
+			public void setupContextMenu(Menu menu, int index, SqueezerSong item) {
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_PLAY_ITEM, 1, R.string.CONTEXTMENU_PLAY_ITEM);
 				menu.add(Menu.NONE, PLAYLIST_CONTEXTMENU_REMOVE_ITEM, 2, R.string.PLAYLIST_CONTEXTMENU_REMOVE_ITEM);
 				if (index > 0)

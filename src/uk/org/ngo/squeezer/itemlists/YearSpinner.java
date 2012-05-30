@@ -83,12 +83,12 @@ public class YearSpinner {
 					if (adapter == null) {
 						SqueezerYearView itemView = new SqueezerYearView(activity) {
 							@Override
-							public View getAdapterView(View convertView, SqueezerYear item) {
-								return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.spinner_item, convertView, item.getName());
+							public View getAdapterView(View convertView, int index, SqueezerYear item) {
+								return Util.getListItemView(getLayoutInflater(), R.layout.spinner_item, convertView, item.getName());
 							}
 							@Override
 							public View getAdapterView(View convertView, String label) {
-								return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.spinner_item, convertView, label);
+								return Util.getListItemView(getLayoutInflater(), R.layout.spinner_item, convertView, label);
 							};
 						};
 						adapter = new SqueezerItemAdapter<SqueezerYear>(itemView, true);

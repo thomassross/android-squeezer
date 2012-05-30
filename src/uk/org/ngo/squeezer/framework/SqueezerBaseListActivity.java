@@ -23,12 +23,8 @@ import uk.org.ngo.squeezer.R;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -79,13 +75,6 @@ public abstract class SqueezerBaseListActivity<T extends SqueezerItem> extends S
     		}
     	});
 
-		listView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-			public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-				AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) menuInfo;
-				getItemAdapter().setupContextMenu(menu, adapterMenuInfo.position);
-			}
-		});
-
 		listView.setOnScrollListener(this);
 
 		prepareActivity(getIntent().getExtras());
@@ -102,21 +91,6 @@ public abstract class SqueezerBaseListActivity<T extends SqueezerItem> extends S
 	 * @param extras Optionally use this information to setup the activity. (may be null)
 	 */
 	public void prepareActivity(Bundle extras) {
-	}
-
-	@Override
-	public final boolean onContextItemSelected(MenuItem menuItem) {
-		AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) menuItem.getMenuInfo();
-		final T selectedItem = getItemAdapter().getItem(menuInfo.position);
-
-		if (getService() != null) {
-			try {
-				return itemView.doItemContext(menuItem, menuInfo.position, selectedItem);
-			} catch (RemoteException e) {
-                Log.e(getTag(), "Error context menu action '"+ menuInfo + "' for '" + selectedItem + "': " + e);
-			}
-		}
-		return false;
 	}
 
 	@Override

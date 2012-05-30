@@ -17,36 +17,32 @@
 package uk.org.ngo.squeezer.itemlists;
 
 import uk.org.ngo.squeezer.NowPlayingActivity;
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import android.os.RemoteException;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import uk.org.ngo.squeezer.R;
-
 public class SqueezerAlbumView extends SqueezerAlbumArtView<SqueezerAlbum> {
-	private final LayoutInflater layoutInflater;
 
 	public SqueezerAlbumView(SqueezerItemListActivity activity) {
 		super(activity);
-		layoutInflater = activity.getLayoutInflater();
 	}
 
 	@Override
-	public View getAdapterView(View convertView, SqueezerAlbum item) {
+	public View getAdapterView(View convertView, int index, SqueezerAlbum item) {
 		ViewHolder viewHolder;
 
 		if (convertView == null || convertView.getTag() == null) {
-			convertView = layoutInflater.inflate(R.layout.icon_two_line_layout, null);
+			convertView = getLayoutInflater().inflate(R.layout.icon_two_line_layout, null);
 			viewHolder = new ViewHolder();
 			viewHolder.label1 = (TextView) convertView.findViewById(R.id.text1);
 			viewHolder.label2 = (TextView) convertView.findViewById(R.id.text2);
 			viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
+			viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.contextMenu);
 			convertView.setTag(viewHolder);
 		} else
 			viewHolder = (ViewHolder) convertView.getTag();
@@ -59,7 +55,8 @@ public class SqueezerAlbumView extends SqueezerAlbumArtView<SqueezerAlbum> {
 		}
 		viewHolder.label2.setText(text2);
 		updateAlbumArt(viewHolder.icon, item);
-
+		setupContextMenu(viewHolder.contextMenu, index, item);
+		
 		return convertView;
 	}
 
@@ -68,8 +65,7 @@ public class SqueezerAlbumView extends SqueezerAlbumArtView<SqueezerAlbum> {
 		NowPlayingActivity.show(getActivity());
 	}
 
-	public void setupContextMenu(ContextMenu menu, int index, SqueezerAlbum item) {
-		menu.setHeaderTitle(item.getName());
+	public void setupContextMenu(Menu menu, int index, SqueezerAlbum item) {
 		menu.add(Menu.NONE, CONTEXTMENU_BROWSE_SONGS, 0, R.string.CONTEXTMENU_BROWSE_SONGS);
 		menu.add(Menu.NONE, CONTEXTMENU_BROWSE_ARTISTS, 2, R.string.CONTEXTMENU_BROWSE_ARTISTS);
 		menu.add(Menu.NONE, CONTEXTMENU_PLAY_ITEM, 3, R.string.CONTEXTMENU_PLAY_ITEM);
@@ -83,7 +79,8 @@ public class SqueezerAlbumView extends SqueezerAlbumArtView<SqueezerAlbum> {
     private static class ViewHolder {
 		TextView label1;
 		TextView label2;
-		ImageView icon;
+        ImageView icon;
+        ImageView contextMenu;
 	}
 
 }

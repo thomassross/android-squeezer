@@ -111,6 +111,15 @@ public class Util {
         }
     }
 
+    /**
+     * Build a simple view with only a label for a list entry.
+     * 
+     * @param layoutInflater
+     * @param id Resource id with the layout to inflate
+     * @param convertView View which may be reused
+     * @param label The text to display in the view
+     * @return The view to display in the list
+     */
     public static View getListItemView(LayoutInflater layoutInflater, int id, View convertView,
             CharSequence label) {
         TextView view;

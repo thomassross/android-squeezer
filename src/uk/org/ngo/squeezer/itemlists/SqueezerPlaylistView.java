@@ -23,7 +23,6 @@ import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerPlaylistsDeleteDialog;
 import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerPlaylistsRenameDialog;
 import uk.org.ngo.squeezer.model.SqueezerPlaylist;
 import android.os.RemoteException;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -50,8 +49,7 @@ public class SqueezerPlaylistView extends SqueezerBaseItemView<SqueezerPlaylist>
 		NowPlayingActivity.show(getActivity());
 	}
 
-	public void setupContextMenu(ContextMenu menu, int index, SqueezerPlaylist item) {
-		menu.setHeaderTitle(item.getName());
+	public void setupContextMenu(Menu menu, int index, SqueezerPlaylist item) {
 		menu.add(Menu.NONE, PLAYLISTS_CONTEXTMENU_DELETE_ITEM, 0, R.string.menu_item_delete);
 		menu.add(Menu.NONE, PLAYLISTS_CONTEXTMENU_RENAME_ITEM, 1, R.string.menu_item_rename);
 		menu.add(Menu.NONE, PLAYLISTS_CONTEXTMENU_BROWSE_SONGS, 2, R.string.CONTEXTMENU_BROWSE_SONGS);

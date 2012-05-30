@@ -27,6 +27,7 @@
 >
    <ImageView
       android:id="@+id/icon"
+      android:contentDescription="@string/app_name"
       android:layout_width="48dp"
       android:layout_height="48dp"
       android:maxWidth="48dp"
@@ -37,10 +38,20 @@
    <TextView
       android:id="@+id/label"
       android:paddingLeft="8dp"
-      android:paddingRight="8dp"
-      android:layout_width="wrap_content"
+      android:paddingRight="0dp"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
+      android:layout_weight="1"
       android:textAppearance="?android:attr/textAppearanceMedium"
+   />
+	<ImageView android:id="@+id/contextMenu"
+      android:contentDescription="@string/app_name"
+      android:visibility="gone"
+      android:src="@drawable/ic_action_overflow"
+      android:paddingRight="8dp"
+      android:paddingLeft="16dp"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
    />
 </LinearLayout>
