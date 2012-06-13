@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.actionbarcompat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.ActionProvider;
@@ -31,9 +32,7 @@ import android.view.View;
  * implementation.
  */
 class SimpleMenuItem implements MenuItem {
-
-    private SimpleMenu mMenu;
-
+    private final Context mContext;
     private final int mId;
     private final int mOrder;
     private CharSequence mTitle;
@@ -44,8 +43,8 @@ class SimpleMenuItem implements MenuItem {
     private boolean mVisible = true;
     private Integer showAsAction;
 
-    public SimpleMenuItem(SimpleMenu menu, int id, int order, CharSequence title) {
-        mMenu = menu;
+    public SimpleMenuItem(Context context, int id, int order, CharSequence title) {
+        mContext = context;
         mId = id;
         mOrder = order;
         mTitle = title;
@@ -65,7 +64,7 @@ class SimpleMenuItem implements MenuItem {
     }
 
     public MenuItem setTitle(int titleRes) {
-        return setTitle(mMenu.getContext().getString(titleRes));
+        return setTitle(mContext.getString(titleRes));
     }
 
     public CharSequence getTitle() {
@@ -99,7 +98,7 @@ class SimpleMenuItem implements MenuItem {
         }
 
         if (mIconResId != 0) {
-            return mMenu.getResources().getDrawable(mIconResId);
+            return mContext.getResources().getDrawable(mIconResId);
         }
 
         return null;
@@ -107,7 +106,6 @@ class SimpleMenuItem implements MenuItem {
 
     public MenuItem setEnabled(boolean enabled) {
         mEnabled = enabled;
-        mMenu.getActionBarHelper().setEnabled(this, enabled);
         return this;
     }
 
@@ -214,7 +212,6 @@ class SimpleMenuItem implements MenuItem {
 
     public MenuItem setVisible(boolean b) {
         mVisible = b;
-        mMenu.getActionBarHelper().setVisible(this, b);
         return this;
     }
 

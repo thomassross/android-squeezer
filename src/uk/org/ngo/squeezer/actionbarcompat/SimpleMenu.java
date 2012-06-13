@@ -33,19 +33,16 @@ import java.util.ArrayList;
  * <code>com.android.internal.view.menu.MenuBuilder</code> in AOSP for a more complete
  * implementation.
  */
-class SimpleMenu implements Menu {
+public class SimpleMenu implements Menu {
+    final private Context mContext;
+    final private Resources mResources;
 
-    private ActionBarHelperBase mActionBarHelper;
-    private Context mContext;
-    private Resources mResources;
+    final private ArrayList<MenuItem> mItems;
 
-    private ArrayList<SimpleMenuItem> mItems;
-
-    public SimpleMenu(ActionBarHelperBase actionBarHelper) {
-        mActionBarHelper = actionBarHelper;
-        mContext = actionBarHelper.mActivity;
+    public SimpleMenu(Context context) {
+        mContext = context;
         mResources = mContext.getResources();
-        mItems = new ArrayList<SimpleMenuItem>();
+        mItems = new ArrayList<MenuItem>();
     }
 
     public Context getContext() {
@@ -54,10 +51,6 @@ class SimpleMenu implements Menu {
 
     public Resources getResources() {
         return mResources;
-    }
-
-    public ActionBarHelperBase getActionBarHelper() {
-        return mActionBarHelper;
     }
 
     public MenuItem add(CharSequence title) {
@@ -80,8 +73,14 @@ class SimpleMenu implements Menu {
      * Adds an item to the menu.  The other add methods funnel to this.
      */
     private MenuItem addInternal(int itemId, int order, CharSequence title) {
-        final SimpleMenuItem item = new SimpleMenuItem(this, itemId, order, title);
-        mItems.add(findInsertIndex(mItems, order), item);
+        return add(new SimpleMenuItem(mContext, itemId, order, title));
+    }
+
+    /**
+     * Adds an item to the menu.  The other add methods funnel to this.
+     */
+    public MenuItem add(MenuItem item) {
+        mItems.add(findInsertIndex(mItems, item.getOrder()), item);
         return item;
     }
 
@@ -100,7 +99,7 @@ class SimpleMenu implements Menu {
         final int size = size();
 
         for (int i = 0; i < size; i++) {
-            SimpleMenuItem item = mItems.get(i);
+            MenuItem item = mItems.get(i);
             if (item.getItemId() == id) {
                 return i;
             }
@@ -127,7 +126,7 @@ class SimpleMenu implements Menu {
     public MenuItem findItem(int id) {
         final int size = size();
         for (int i = 0; i < size; i++) {
-            SimpleMenuItem item = mItems.get(i);
+            MenuItem item = mItems.get(i);
             if (item.getItemId() == id) {
                 return item;
             }

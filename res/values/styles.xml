@@ -29,7 +29,7 @@
     </style>
 
     <style name="ActionBarCompat">
-        <item name="android:background">#000</item>
+        <item name="android:background">#444</item>
     </style>
 
     <style name="ActionBarCompatItemBase">

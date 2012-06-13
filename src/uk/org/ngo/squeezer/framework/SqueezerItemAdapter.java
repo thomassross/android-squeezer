@@ -20,10 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import uk.org.ngo.squeezer.R;
-import android.os.RemoteException;
 import android.util.SparseArray;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -114,7 +111,7 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         T item = getItem(position);
         if (item != null)
-            return itemView.getAdapterView(convertView, item);
+            return itemView.getAdapterView(convertView, position, item);
 
         return itemView.getAdapterView(convertView,
                 (position == 0 && emptyItem ? "" : loadingText));
@@ -126,17 +123,6 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter {
 
 	public SqueezerItemListActivity getActivity() {
 		return itemView.getActivity();
-	}
-
-	public void setupContextMenu(ContextMenu menu, int position) {
-		final T selectedItem = getItem(position);
-		if (selectedItem != null && selectedItem.getId() != null) {
-			itemView.setupContextMenu(menu, position, selectedItem);
-		}
-	}
-
-	public boolean doItemContext(MenuItem menuItem, int position) throws RemoteException {
-		return itemView.doItemContext(menuItem, position, getItem(position));
 	}
 
 	public SqueezerItemView<T> getItemView() {

@@ -83,12 +83,12 @@ public class GenreSpinner {
 					if (adapter == null) {
 						SqueezerGenreView itemView = new SqueezerGenreView(activity) {
 							@Override
-							public View getAdapterView(View convertView, SqueezerGenre item) {
-								return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.spinner_item, convertView, item.getName());
+							public View getAdapterView(View convertView, int index, SqueezerGenre item) {
+								return Util.getListItemView(getLayoutInflater(), R.layout.spinner_item, convertView, item.getName());
 							}
 							@Override
 							public View getAdapterView(View convertView, String label) {
-								return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.spinner_item, convertView, label);
+								return Util.getListItemView(getLayoutInflater(), R.layout.spinner_item, convertView, label);
 							};
 
 						};

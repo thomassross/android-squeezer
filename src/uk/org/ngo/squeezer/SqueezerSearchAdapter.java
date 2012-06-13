@@ -32,9 +32,6 @@ import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
 import uk.org.ngo.squeezer.model.SqueezerSong;
 import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -56,14 +53,14 @@ public class SqueezerSearchAdapter extends BaseExpandableListAdapter {
 		SqueezerItemAdapter<?>[] adapters = {
 			new SqueezerItemAdapter<SqueezerSong>(new SqueezerSongView(activity) {
 				@Override
-				public View getAdapterView(View convertView, SqueezerSong item) {
-					return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.list_item, convertView, item.getName());
+				public View getAdapterView(View convertView, int index, SqueezerSong item) {
+					return getDefaultAdapterView(convertView, index, item);
 				}
 			}),
 			new SqueezerItemAdapter<SqueezerAlbum>(new SqueezerAlbumView(activity) {
 				@Override
-				public View getAdapterView(View convertView, SqueezerAlbum item) {
-					return Util.getListItemView(getActivity().getLayoutInflater(), R.layout.list_item, convertView, item.getName());
+				public View getAdapterView(View convertView, int index, SqueezerAlbum item) {
+					return getDefaultAdapterView(convertView, index, item);
 				}
 			}),
 			new SqueezerItemAdapter<SqueezerArtist>(new SqueezerArtistView(activity)),
@@ -92,14 +89,6 @@ public class SqueezerSearchAdapter extends BaseExpandableListAdapter {
 		for (SqueezerItemAdapter<? extends SqueezerItem> itemAdapter: childAdapters)
 			if (itemAdapter.getCount() > count) count = itemAdapter.getCount();
 		return count;
-	}
-
-	public void setupContextMenu(ContextMenu menu, int groupPosition, int childPosition) {
-		childAdapters[groupPosition].setupContextMenu(menu, childPosition);
-	}
-
-	public void doItemContext(MenuItem menuItem, int groupPosition, int childPosition) throws RemoteException {
-		childAdapters[groupPosition].doItemContext(menuItem, childPosition);
 	}
 
     public SqueezerPlaylistItem getChild(int groupPosition, int childPosition) {

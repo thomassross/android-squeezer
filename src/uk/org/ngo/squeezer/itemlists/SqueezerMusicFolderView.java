@@ -21,8 +21,6 @@ import uk.org.ngo.squeezer.framework.SqueezerBaseItemView;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerMusicFolderItem;
 import android.os.RemoteException;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
@@ -43,25 +41,24 @@ public class SqueezerMusicFolderView extends SqueezerBaseItemView<SqueezerMusicF
     // server.
 
     private final static String TAG = "SqueezerMusicFolderView";
-    private final LayoutInflater mLayoutInflater;
 
     SqueezerItemListActivity mContext;
 
     public SqueezerMusicFolderView(SqueezerItemListActivity activity) {
         super(activity);
         mContext = activity;
-        mLayoutInflater = activity.getLayoutInflater();
     }
 
     @Override
-    public View getAdapterView(View convertView, SqueezerMusicFolderItem item) {
+    public View getAdapterView(View convertView, int index, SqueezerMusicFolderItem item) {
         ViewHolder viewHolder;
 
         if (convertView == null || convertView.getTag() == null) {
-            convertView = mLayoutInflater.inflate(R.layout.icon_large_row_layout, null);
+            convertView = getLayoutInflater().inflate(R.layout.icon_large_row_layout, null);
             viewHolder = new ViewHolder();
             viewHolder.label = (TextView) convertView.findViewById(R.id.label);
             viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
+            viewHolder.contextMenu = (ImageView) convertView.findViewById(R.id.contextMenu);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -81,6 +78,8 @@ public class SqueezerMusicFolderView extends SqueezerBaseItemView<SqueezerMusicF
 
         viewHolder.icon.setImageResource(icon_resource);
 
+        setupContextMenu(viewHolder.contextMenu, index, item);
+
         return convertView;
     }
 
@@ -97,11 +96,10 @@ public class SqueezerMusicFolderView extends SqueezerBaseItemView<SqueezerMusicF
     };
 
     // XXX: Make this a menu resource.
-    public void setupContextMenu(ContextMenu menu, int index, SqueezerMusicFolderItem item) {
-        menu.setHeaderTitle(item.getName());
-        menu.add(Menu.NONE, R.id.play_now, Menu.NONE, R.string.CONTEXTMENU_PLAY_ITEM);
-        menu.add(Menu.NONE, R.id.add_to_playlist, Menu.NONE, R.string.CONTEXTMENU_ADD_ITEM);
-        menu.add(Menu.NONE, R.id.play_next, Menu.NONE, R.string.CONTEXTMENU_INSERT_ITEM);
+    public void setupContextMenu(Menu menu, int index, SqueezerMusicFolderItem item) {
+        menu.add(Menu.NONE, R.id.play_now, 3, R.string.CONTEXTMENU_PLAY_ITEM);
+        menu.add(Menu.NONE, R.id.add_to_playlist, 4, R.string.CONTEXTMENU_ADD_ITEM);
+        menu.add(Menu.NONE, R.id.play_next, 5, R.string.CONTEXTMENU_INSERT_ITEM);
     };
 
     public String getQuantityString(int quantity) {
@@ -109,7 +107,9 @@ public class SqueezerMusicFolderView extends SqueezerBaseItemView<SqueezerMusicF
     }
 
     private static class ViewHolder {
+        public ImageView contextMenu;
         TextView label;
         ImageView icon;
     }
+
 }

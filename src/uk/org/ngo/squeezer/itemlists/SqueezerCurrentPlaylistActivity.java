@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -51,7 +50,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerAbstractSongListAct
 			}
 
             @Override
-            public void setupContextMenu(ContextMenu menu, int index, SqueezerSong item) {
+            public void setupContextMenu(Menu menu, int index, SqueezerSong item) {
                 super.setupContextMenu(menu, index, item);
 
                 menu.setGroupVisible(R.id.group_playlist, true);

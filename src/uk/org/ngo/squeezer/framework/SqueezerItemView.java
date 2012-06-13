@@ -21,10 +21,10 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Parcelable.Creator;
 import android.os.RemoteException;
-import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 
@@ -44,22 +44,26 @@ public interface SqueezerItemView<T extends SqueezerItem> {
 	 */
 	SqueezerItemListActivity getActivity();
 
+    /**
+     * @return The layout inflater used in this view logic
+     */
+    LayoutInflater getLayoutInflater();
+
 	/**
 	 * @return {@link Resources#getQuantityString(int, int)}
 	 */
 	String getQuantityString(int quantity);
 
-	/**
-	 * <p>Called by {@link Adapter#getView(int, View, ViewGroup)}
-	 *
-	 * @param convertView
-	 * @param item
-	 * @return
-	 */
-	View getAdapterView(View convertView, T item);
+    /**
+     * Called by {@link Adapter#getView(int, View, ViewGroup)}
+     * 
+     * @param convertView
+     * @param item
+     * @return
+     */
+    View getAdapterView(View convertView, int index, T item);
 
     /**
-     * <p>
      * Called by {@link Adapter#getView(int, View, ViewGroup)}
      * 
      * @param convertView
@@ -92,12 +96,13 @@ public interface SqueezerItemView<T extends SqueezerItem> {
 	 */
 	void onItemSelected(int index, T item) throws RemoteException;
 
-	/**
-	 * <p>Setup the context menu for the current {@link SqueezerItem} implementation
-	 * <p>Leave this empty if there shall be no context menu.
-	 * @see OnCreateContextMenuListener#onCreateContextMenu(ContextMenu, View, android.view.ContextMenu.ContextMenuInfo)
-	 */
-	void setupContextMenu(ContextMenu menu, int index, T item);
+    /**
+     * Setup the context menu for the current {@link SqueezerItem}
+     * implementation
+     * <p>
+     * Leave this empty if there shall be no context menu.
+     */
+    void setupContextMenu(Menu menu, int index, T item);
 
 	/**
 	 * Perform the selected action from the context menu for the selected item.
