@@ -60,7 +60,7 @@
    <ImageView android:id="@+id/contextMenu"
       android:contentDescription="@string/app_name"
       android:visibility="gone"
-      android:src="@drawable/ic_action_overflow"
+      android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"
       android:paddingRight="8dp"
       android:paddingLeft="16dp"
       android:layout_width="wrap_content"
