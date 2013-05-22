@@ -63,7 +63,7 @@ public class SqueezerMusicFolderListActivity extends SqueezerBaseListActivity<Sq
     @Override
     protected SqueezerItemAdapter<SqueezerMusicFolderItem> createItemListAdapter(
             SqueezerItemView<SqueezerMusicFolderItem> itemView) {
-        return new SqueezerItemAdapter<SqueezerMusicFolderItem>(itemView);
+        return new SqueezerItemAdapter<SqueezerMusicFolderItem>(this, itemView);
     };
 
     /**
@@ -97,7 +97,7 @@ public class SqueezerMusicFolderListActivity extends SqueezerBaseListActivity<Sq
      * @param start Where in the list of folders to start fetching.
      */
     @Override
-    protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
         if (mFolder == null) {
             // No specific item, fetch from the beginning.
             getService().musicFolders(start, null);

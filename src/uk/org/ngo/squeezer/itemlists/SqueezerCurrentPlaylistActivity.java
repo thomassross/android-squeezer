@@ -20,6 +20,7 @@ import java.util.List;
 
 import uk.org.ngo.squeezer.IServiceMusicChangedCallback;
 import uk.org.ngo.squeezer.R;
+import uk.org.ngo.squeezer.framework.OrderPages;
 import uk.org.ngo.squeezer.framework.SqueezerBaseListActivity;
 import uk.org.ngo.squeezer.framework.SqueezerItemAdapter;
 import uk.org.ngo.squeezer.framework.SqueezerItemListAdapter;
@@ -57,9 +58,10 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerBaseListActivity<Sq
      * A list adapter that highlights the view that's currently playing.
      */
     private class HighlightingListAdapter extends SqueezerItemListAdapter<SqueezerSong> {
-        public HighlightingListAdapter(SqueezerItemView<SqueezerSong> itemView,
+        public HighlightingListAdapter(OrderPages orderPages,
+                SqueezerItemView<SqueezerSong> itemView,
                 ImageFetcher imageFetcher) {
-            super(itemView, imageFetcher);
+            super(orderPages, itemView, imageFetcher);
         }
 
         @Override
@@ -87,7 +89,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerBaseListActivity<Sq
     @Override
     protected SqueezerItemAdapter<SqueezerSong> createItemListAdapter(
             SqueezerItemView<SqueezerSong> itemView) {
-        return new HighlightingListAdapter(itemView, mImageFetcher);
+        return new HighlightingListAdapter(this, itemView, mImageFetcher);
     }
 
     @Override
@@ -151,7 +153,7 @@ public class SqueezerCurrentPlaylistActivity extends SqueezerBaseListActivity<Sq
     }
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().currentPlaylist(start);
 	}
 

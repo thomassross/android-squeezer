@@ -48,7 +48,7 @@ public class SqueezerPlayerListActivity extends SqueezerBaseListActivity<Squeeze
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().players(start);
 	}
 

@@ -155,6 +155,20 @@ interface ISqueezeService {
         void unregisterMusicFolderListCallback(IServiceMusicFolderListCallback callback);
 
         // Song list
+        /**
+         * Start an async fetch of the SqueezeboxServer's songs.
+         * 
+         * @param start 0 based index of the results to return.
+         * @param sortOrder The order in which results should be returned.
+         * @param searchString If not null, results are restricted to those where the song title
+         *            contains this substring.
+         * @param album If not null, results are restricted to just this album.
+         * @param artist If not null, results are restricted to just this artist.
+         * @param year If not null, results are restricted to just this year.
+         * @param genre If not null, results are restricted to just this genre.
+         * @return <code>true</code> if the request was sent, <code>false</code> if the service is
+         *         not connected.
+         */
         boolean songs(int start, String sortOrder, String searchString, in SqueezerAlbum album, in SqueezerArtist artist, in SqueezerYear year, in SqueezerGenre genre);
         boolean currentPlaylist(int start);
         boolean playlistSongs(int start, in SqueezerPlaylist playlist);

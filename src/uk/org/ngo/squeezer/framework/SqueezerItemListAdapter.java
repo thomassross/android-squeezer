@@ -20,7 +20,7 @@ import uk.org.ngo.squeezer.util.ImageFetcher;
 
 /**
  * Specialization of {@link SqueezerItemAdapter} to be used in
- * {@link SqueezerBaseListActivity}.
+ * {@link ListFragment}.
  * <p>
  * Only difference is that the activity's title is automatically updated to
  * reflect the number of items being shown.
@@ -34,8 +34,9 @@ public class SqueezerItemListAdapter<T extends SqueezerItem> extends SqueezerIte
      * Calls
      * {@link SqueezerItemAdapter#SqueezerBaseAdapter(SqueezerItemView, ImageFetcher)}
      */
-    public SqueezerItemListAdapter(SqueezerItemView<T> itemView, ImageFetcher imageFetcher) {
-        super(itemView, imageFetcher);
+    public SqueezerItemListAdapter(OrderPages orderPages, SqueezerItemView<T> itemView,
+            ImageFetcher imageFetcher) {
+        super(orderPages, itemView, imageFetcher);
     }
 
 	@Override

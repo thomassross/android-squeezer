@@ -21,12 +21,9 @@ import java.util.List;
 import uk.org.ngo.squeezer.framework.SqueezerBaseListActivity;
 import uk.org.ngo.squeezer.framework.SqueezerItemView;
 import uk.org.ngo.squeezer.model.SqueezerYear;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
-
-import uk.org.ngo.squeezer.itemlists.IServiceYearListCallback;
 
 public class SqueezerYearListActivity extends SqueezerBaseListActivity<SqueezerYear>{
 
@@ -46,7 +43,7 @@ public class SqueezerYearListActivity extends SqueezerBaseListActivity<SqueezerY
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().years(start);
 	}
 

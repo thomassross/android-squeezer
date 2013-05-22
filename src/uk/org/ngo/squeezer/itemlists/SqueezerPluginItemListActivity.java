@@ -112,7 +112,7 @@ public class SqueezerPluginItemListActivity extends SqueezerBaseListActivity<Squ
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().pluginItems(start, plugin, parent, search);
 	}
 

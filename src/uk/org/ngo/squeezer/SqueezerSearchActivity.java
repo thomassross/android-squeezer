@@ -151,7 +151,7 @@ public class SqueezerSearchActivity extends SqueezerItemListActivity {
     }
 
 	@Override
-	protected void orderPage(int start) {
+    public void orderPage(int start) {
 		try {
 			getService().search(start, searchString);
 		} catch (RemoteException e) {

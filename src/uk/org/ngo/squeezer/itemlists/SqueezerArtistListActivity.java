@@ -94,7 +94,7 @@ public class SqueezerArtistListActivity extends SqueezerBaseListActivity<Squeeze
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().artists(start, getSearchString(), album, genre);
 	}
 

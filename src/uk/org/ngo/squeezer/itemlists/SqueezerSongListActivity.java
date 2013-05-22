@@ -133,7 +133,7 @@ public class SqueezerSongListActivity extends SqueezerAbstractSongListActivity
 	}
 
     @Override
-    protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
         getService().songs(start, sortOrder.name(), getSearchString(), album, artist, getYear(),
                 genre);
     }

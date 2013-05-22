@@ -1315,7 +1315,6 @@ public class SqueezeService extends Service {
             cli.cancelRequests(SqueezerMusicFolderItem.class);
         }
 
-        /* Start an async fetch of the SqueezeboxServer's songs */
         @Override
         public boolean songs(int start, String sortOrder, String searchString, SqueezerAlbum album,
 				SqueezerArtist artist, SqueezerYear year, SqueezerGenre genre) throws RemoteException {

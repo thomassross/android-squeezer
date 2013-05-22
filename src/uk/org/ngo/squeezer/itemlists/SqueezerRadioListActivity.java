@@ -38,7 +38,7 @@ public class SqueezerRadioListActivity extends SqueezerPluginListActivity{
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().radios(start);
 	}
 

@@ -125,7 +125,7 @@ public class SqueezerPlaylistSongsActivity extends SqueezerAbstractSongListActiv
     }
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().playlistSongs(start, playlist);
 	}
 

@@ -40,7 +40,7 @@ import android.widget.AbsListView.OnScrollListener;
  * 
  * @author Kurt Aaholst
  */
-public abstract class SqueezerItemListActivity extends SqueezerBaseActivity {
+public abstract class SqueezerItemListActivity extends SqueezerBaseActivity implements OrderPages {
     private static final String TAG = SqueezerItemListActivity.class.getName();
 
     /** The list is being actively scrolled by the user */
@@ -74,7 +74,7 @@ public abstract class SqueezerItemListActivity extends SqueezerBaseActivity {
      * @throws RemoteException
      * @param start Position in list to start the fetch. Pass this on to {@link SqueezeService}
      */
-	protected abstract void orderPage(int start) throws RemoteException;
+    public abstract void orderPage(int start) throws RemoteException;
 
 	private final Set<Integer> orderedPages = new HashSet<Integer>();
 

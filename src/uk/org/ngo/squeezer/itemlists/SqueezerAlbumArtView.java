@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlists;
 
 
 import uk.org.ngo.squeezer.R;
+import uk.org.ngo.squeezer.fragment.SongListFragment;
 import uk.org.ngo.squeezer.framework.SqueezerArtworkItem;
 import uk.org.ngo.squeezer.framework.SqueezerBaseItemView;
 import uk.org.ngo.squeezer.framework.SqueezerItem;
@@ -47,6 +48,11 @@ public abstract class SqueezerAlbumArtView<T extends SqueezerArtworkItem> extend
 		super(activity);
         mLayoutInflater = activity.getLayoutInflater();
 	}
+
+    public SqueezerAlbumArtView(SongListFragment songListFragment) {
+        super(songListFragment);
+        mLayoutInflater = songListFragment.getLayoutInflater(null);
+    }
 
     @Override
     public View getAdapterView(View convertView, T item, ImageFetcher imageFetcher) {

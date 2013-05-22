@@ -20,12 +20,16 @@ import java.lang.reflect.Field;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.ReflectUtil;
+import uk.org.ngo.squeezer.fragment.SongListFragment;
+import uk.org.ngo.squeezer.itemlists.AlbumListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerAlbumListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerArtistListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerSongListActivity;
+import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 import android.os.Parcelable.Creator;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -45,7 +49,7 @@ import android.widget.Toast;
 public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements SqueezerItemView<T> {
     protected static final int CONTEXTMENU_BROWSE_ALBUMS = 1;
 
-    private final SqueezerItemListActivity mActivity;
+    private final SqueezerBaseActivity mActivity;
     private final LayoutInflater mLayoutInflater;
 
     private SqueezerItemAdapter<T> mAdapter;
@@ -57,7 +61,12 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
         mLayoutInflater = activity.getLayoutInflater();
     }
 
-    public SqueezerItemListActivity getActivity() {
+    public SqueezerBaseItemView(SongListFragment songListFragment) {
+        this.mActivity = (SqueezerBaseActivity) songListFragment.getActivity();
+        mLayoutInflater = songListFragment.getLayoutInflater(null);
+    }
+
+    public SqueezerBaseActivity getActivity() {
         return mActivity;
     }
 
@@ -119,6 +128,7 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
         viewHolder.text1.setText(item.getName());
 
         viewHolder.btnContextMenu.setVisibility(View.VISIBLE);
+        Log.v(SqueezerBaseItemView.class.getSimpleName(), "Setting context menu");
         viewHolder.btnContextMenu.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 v.showContextMenu();
@@ -180,7 +190,13 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
             throws RemoteException {
         switch (menuItem.getItemId()) {
             case R.id.browse_songs:
-                SqueezerSongListActivity.show(mActivity, selectedItem);
+                Log.v(getTag(), "R.id.browse_songs");
+                if (selectedItem instanceof SqueezerAlbum) {
+                    Log.v(getTag(), "Launching AlbumListActivity");
+                    AlbumListActivity.show(mActivity, (SqueezerAlbum) selectedItem);
+                } else {
+                    SqueezerSongListActivity.show(mActivity, selectedItem);
+                }
                 return true;
 
             case CONTEXTMENU_BROWSE_ALBUMS:

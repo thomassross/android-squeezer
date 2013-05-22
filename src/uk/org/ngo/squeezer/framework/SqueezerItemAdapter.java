@@ -37,7 +37,7 @@ import android.widget.BaseAdapter;
  * SqueezeServer data type. The data type is defined by the generic type
  * argument, and must be an extension of {@link SqueezerItem}.
  * <p>
- * If you need an adapter for a {@link SqueezerBaseListActivity}, then use
+ * If you need an adapter for a {@link ListFragment}, then use
  * {@link SqueezerItemListAdapter} instead.
  * <p>
  * Normally there is no need to extend this (or {@link SqueezerItemListAdapter}),
@@ -83,19 +83,24 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
     /** ImageFetcher for thumbnails */
     private ImageFetcher mImageFetcher;
 
+    /** Something that implements the OrderPages interface so the adapter can request more content. */
+    OrderPages mOrderPages;
+
 	public int getPageSize() { return pageSize; }
 
     /**
-     * Creates a new adapter. Initially the item list is populated with items
-     * displaying the localized "loading" text. Call
-     * {@link #update(int, int, int, List)} as items arrives from SqueezeServer.
+     * Creates a new adapter. Initially the item list is populated with items displaying the
+     * localized "loading" text. Call {@link #update(int, int, int, List)} as items arrives from
+     * SqueezeServer.
      * 
+     * @param orderPages Soemthing that implements {@link OrderPages}.
      * @param itemView The {@link SqueezerItemView} to use with this adapter
      * @param emptyItem If set the list of items shall start with an empty item
      * @param imageFetcher ImageFetcher to use for loading thumbnails
      */
-    public SqueezerItemAdapter(SqueezerItemView<T> itemView, boolean emptyItem,
-            ImageFetcher imageFetcher) {
+    public SqueezerItemAdapter(OrderPages orderPages, SqueezerItemView<T> itemView,
+            boolean emptyItem, ImageFetcher imageFetcher) {
+        mOrderPages = orderPages;
         mItemView = itemView;
         mEmptyItem = emptyItem;
         mImageFetcher = imageFetcher;
@@ -109,8 +114,9 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
      * {@link #SqueezerBaseAdapter(SqueezerItemView, boolean, ImageFetcher)},
      * with emptyItem = false
      */
-    public SqueezerItemAdapter(SqueezerItemView<T> itemView, ImageFetcher imageFetcher) {
-        this(itemView, false, imageFetcher);
+    public SqueezerItemAdapter(OrderPages orderPages, SqueezerItemView<T> itemView,
+            ImageFetcher imageFetcher) {
+        this(orderPages, itemView, false, imageFetcher);
     }
 
     /**
@@ -118,8 +124,8 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
      * {@link #SqueezerBaseAdapter(SqueezerItemView, boolean, ImageFetcher)},
      * with emptyItem = false and a null ImageFetcher.
      */
-    public SqueezerItemAdapter(SqueezerItemView<T> itemView) {
-        this(itemView, false, null);
+    public SqueezerItemAdapter(OrderPages orderPages, SqueezerItemView<T> itemView) {
+        this(orderPages, itemView, false, null);
     }
 
     private int pageNumber(int position) {
@@ -156,7 +162,7 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
         return mItemView.getQuantityString(size);
     }
 
-    public SqueezerItemListActivity getActivity() {
+    public SqueezerBaseActivity getActivity() {
         return mItemView.getActivity();
     }
 
@@ -221,7 +227,7 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
 		T item = getPage(position)[position % pageSize];
 		if (item == null) {
 			if (mEmptyItem) position--;
-			getActivity().maybeOrderPage(pageNumber(position) * pageSize);
+            mOrderPages.maybeOrderPage(pageNumber(position) * pageSize);
 		}
 		return item;
 	}

@@ -43,7 +43,11 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Spinner;
 
-
+/**
+ * Shows one row per album, optionally filtered to only include albums that
+ * match particular criteria.
+ *
+ */
 public class SqueezerAlbumListActivity extends SqueezerBaseListActivity<SqueezerAlbum>
         implements GenreSpinnerCallback, YearSpinnerCallback,
         SqueezerFilterableListActivity, SqueezerOrderableListActivity {
@@ -128,7 +132,7 @@ public class SqueezerAlbumListActivity extends SqueezerBaseListActivity<Squeezer
 	}
 
     @Override
-    protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
         if (sortOrder == null) {
             try {
                 sortOrder = AlbumsSortOrder.valueOf(getService().preferredAlbumSort());
@@ -169,6 +173,15 @@ public class SqueezerAlbumListActivity extends SqueezerBaseListActivity<Squeezer
         show(context, null, items);
     }
 
+    /**
+     * Start the activity to list albums in sortOrder, optionally filtered to match the
+     * characteristics of the provided items.
+     * 
+     * @param context
+     * @param sortOrder
+     * @param items 0-n SqueezerItems, the results will be constrained to only include albums with
+     *            characteristics that match the items (e.g., all albums by a particular artist).
+     */
     public static void show(Context context, AlbumsSortOrder sortOrder, SqueezerItem... items) {
         final Intent intent = new Intent(context, SqueezerAlbumListActivity.class);
         if (sortOrder != null)

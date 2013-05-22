@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlists;
 
 
 import uk.org.ngo.squeezer.R;
+import uk.org.ngo.squeezer.fragment.SongListFragment;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
@@ -42,6 +43,10 @@ public class SqueezerSongView extends SqueezerAlbumArtView<SqueezerSong> {
 
     public SqueezerSongView(SqueezerItemListActivity activity) {
         super(activity);
+    }
+
+    public SqueezerSongView(SongListFragment songListFragment) {
+        super(songListFragment);
     }
 
     @Override

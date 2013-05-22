@@ -92,7 +92,8 @@ public class YearSpinner {
                                 return Util.getSpinnerItemView(getActivity(), convertView, label);
 							};
 						};
-                        adapter = new SqueezerItemAdapter<SqueezerYear>(itemView, true, null);
+                        adapter = new SqueezerItemAdapter<SqueezerYear>(activity, itemView, true,
+                                null);
 						spinner.setAdapter(adapter);
 					}
 					adapter.update(count, start, list);

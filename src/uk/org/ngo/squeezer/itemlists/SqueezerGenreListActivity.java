@@ -21,12 +21,9 @@ import java.util.List;
 import uk.org.ngo.squeezer.framework.SqueezerBaseListActivity;
 import uk.org.ngo.squeezer.framework.SqueezerItemView;
 import uk.org.ngo.squeezer.model.SqueezerGenre;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
-
-import uk.org.ngo.squeezer.itemlists.IServiceGenreListCallback;
 
 public class SqueezerGenreListActivity extends SqueezerBaseListActivity<SqueezerGenre>{
 
@@ -46,7 +43,7 @@ public class SqueezerGenreListActivity extends SqueezerBaseListActivity<Squeezer
 	}
 
 	@Override
-	protected void orderPage(int start) throws RemoteException {
+    public void orderPage(int start) throws RemoteException {
 		getService().genres(start);
 	}
 
