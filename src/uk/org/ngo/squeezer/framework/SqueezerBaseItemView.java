@@ -128,7 +128,6 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
         viewHolder.text1.setText(item.getName());
 
         viewHolder.btnContextMenu.setVisibility(View.VISIBLE);
-        Log.v(SqueezerBaseItemView.class.getSimpleName(), "Setting context menu");
         viewHolder.btnContextMenu.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 v.showContextMenu();

@@ -31,11 +31,15 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AbsListView.RecyclerListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -64,7 +68,17 @@ public class SongListFragment extends ListFragment implements OrderPages {
 
     private QueryParameters mQueryParameters;
 
+    private SqueezerItemAdapter<SqueezerSong> itemAdapter;
+
+    private ImageFetcher mImageFetcher;
+
+    private SongsSortOrder sortOrder = SongsSortOrder.title;
+
+    private ISqueezeService mService = null;
+
     private final Handler uiThreadHandler = new UiThreadHandler(this);
+
+    private ListView mListView;
 
     // TODO: Maybe the fragment should use getActivity() and get the
     // handler from the containing activity?
@@ -83,9 +97,6 @@ public class SongListFragment extends ListFragment implements OrderPages {
         return uiThreadHandler;
     }
 
-    private SongsSortOrder sortOrder = SongsSortOrder.title;
-
-    private ISqueezeService mService = null;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -102,8 +113,6 @@ public class SongListFragment extends ListFragment implements OrderPages {
             mService = null;
         };
     };
-
-    private ListView mListView;
 
     /**
      * Interface for responding to clicks on songs.
@@ -158,6 +167,8 @@ public class SongListFragment extends ListFragment implements OrderPages {
 
         mListView = getListView();
 
+        registerForContextMenu(mListView);
+
         mListView.setOnScrollListener(new ScrollListener());
         mListView.setRecyclerListener(new RecyclerListener() {
             @Override
@@ -174,18 +185,48 @@ public class SongListFragment extends ListFragment implements OrderPages {
         mQueryParameters = ((GetQueryParameters) mActivity).getQueryParameters();
     }
 
+    /**
+     * Creates the context menu, deferring to the {@link SqueezerItemAdapter.onCreateContextMenu} to
+     * determine what the context menu should look like for these items.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        getItemAdapter().onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    /**
+     * Handles context menu selections by passing them to {@link SqueezerItemAdapter.doItemContext}.
+     */
+    @Override
+    public final boolean onContextItemSelected(MenuItem menuItem) {
+        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) menuItem.getMenuInfo();
+
+        if (mService != null) {
+            try {
+                return getItemAdapter().doItemContext(menuItem, menuInfo.position);
+            } catch (RemoteException e) {
+                Log.e(getTag(), "Error context menu action '" + menuInfo + "' for '"
+                        + menuInfo.position + "': " + e);
+            }
+        }
+
+        return super.onContextItemSelected(menuItem);
+    }
+
     protected void onServiceConnected() throws RemoteException {
-        Log.v(TAG, "Service bound");
         registerCallback();
         orderItems();
     }
 
     @Override
     public void onDestroy() {
-        // TODO Auto-generated method stub
         super.onDestroy();
 
         if (serviceConnection != null) {
+            try {
+                unregisterCallback();
+            } catch (RemoteException e) {
+            }
             mActivity.unbindService(serviceConnection);
         }
     }
@@ -204,18 +245,20 @@ public class SongListFragment extends ListFragment implements OrderPages {
         }
     };
 
-    private Object itemAdapter;
 
-    private ImageFetcher mImageFetcher;
-
-    private Object itemView;
-
+    /**
+     * Generic handler for new items from the server.
+     * <p>
+     * Updates the list adapter with the items that have been received.
+     * 
+     * @param count How many items to add.
+     * @param start Where in the list to add them.
+     * @param items The items to add.
+     */
     public void onItemsReceived(final int count, final int start, final List<SqueezerSong> items) {
         getUIThreadHandler().post(new Runnable() {
             @Override
             public void run() {
-                getListView().setVisibility(View.VISIBLE);
-                // loadingProgress.setVisibility(View.GONE);
                 getItemAdapter().update(count, start, items);
             }
         });
@@ -279,6 +322,8 @@ public class SongListFragment extends ListFragment implements OrderPages {
                 orderPage(pagePosition);
             } catch (final RemoteException e) {
                 Log.e(getTag(), "Error ordering items (" + pagePosition + "): " + e);
+                // XXX: Maybe call orderedPages.remove(pagePosition) here, since the
+                // page is not found.
             }
         }
     }
@@ -294,6 +339,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
      */
     public void reorderItems() {
         orderedPages.clear();
+        // XXX: Maybe call getItemAdapter().clear() here?
         maybeOrderPage(0);
     }
 
@@ -324,12 +370,11 @@ public class SongListFragment extends ListFragment implements OrderPages {
             }
         }
 
-        // Do not use: is not called when the scroll completes, appears to be
+        // Deliberately left empty -- it is not called when the scroll completes, it appears to be
         // called multiple time during a scroll, including during flinging.
         @Override
         public void onScroll(final AbsListView view, final int firstVisibleItem, final int visibleItemCount,
                 final int totalItemCount) {
-
         }
 
         @Override

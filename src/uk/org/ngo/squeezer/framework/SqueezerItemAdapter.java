@@ -93,7 +93,7 @@ public class SqueezerItemAdapter<T extends SqueezerItem> extends BaseAdapter imp
      * localized "loading" text. Call {@link #update(int, int, int, List)} as items arrives from
      * SqueezeServer.
      * 
-     * @param orderPages Soemthing that implements {@link OrderPages}.
+     * @param orderPages Something that implements {@link OrderPages}.
      * @param itemView The {@link SqueezerItemView} to use with this adapter
      * @param emptyItem If set the list of items shall start with an empty item
      * @param imageFetcher ImageFetcher to use for loading thumbnails
