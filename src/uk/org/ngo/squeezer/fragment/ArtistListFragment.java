@@ -10,14 +10,11 @@ import uk.org.ngo.squeezer.framework.OrderPages;
 import uk.org.ngo.squeezer.framework.SqueezerItemAdapter;
 import uk.org.ngo.squeezer.framework.SqueezerItemListAdapter;
 import uk.org.ngo.squeezer.framework.SqueezerItemView;
-import uk.org.ngo.squeezer.itemlists.IServiceSongListCallback;
-import uk.org.ngo.squeezer.itemlists.SqueezerSongView;
-import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerSongOrderDialog.SongsSortOrder;
-import uk.org.ngo.squeezer.model.QueryParameters;
-import uk.org.ngo.squeezer.model.SqueezerSong;
+import uk.org.ngo.squeezer.itemlists.IServiceArtistListCallback;
+import uk.org.ngo.squeezer.itemlists.SqueezerArtistView;
+import uk.org.ngo.squeezer.model.SqueezerArtist;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -43,17 +40,11 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+public class ArtistListFragment extends ListFragment implements OrderPages {
+    private static final String TAG = ArtistListFragment.class.getSimpleName();
 
-/**
- * List all the songs that meet a particular criteria.
- *
- * For example, all songs by a particular artist, or on a particular album.
- */
-public class SongListFragment extends ListFragment implements OrderPages {
-    private static final String TAG = SongListFragment.class.getSimpleName();
-
-    private SqueezerItemView<SqueezerSong> mItemView;
-    private OnSongSelectedListener mListener;
+    private SqueezerItemView<SqueezerArtist> mItemView;
+    private OnArtistSelectedListener mListener;
 
     private final Set<Integer> orderedPages = new HashSet<Integer>();
 
@@ -63,13 +54,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
     /** The activity hosting this fragment. */
     private Activity mActivity;
 
-    private QueryParameters mQueryParameters;
-
-    private SqueezerItemAdapter<SqueezerSong> itemAdapter;
-
-    private ImageFetcher mImageFetcher;
-
-    private SongsSortOrder sortOrder = SongsSortOrder.title;
+    private SqueezerItemAdapter<SqueezerArtist> itemAdapter;
 
     private ISqueezeService mService = null;
 
@@ -99,7 +84,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
             Log.v(TAG, "ServiceConnection.onServiceConnected()");
             mService = ISqueezeService.Stub.asInterface(binder);
             try {
-                SongListFragment.this.onServiceConnected();
+                ArtistListFragment.this.onServiceConnected();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in onServiceConnected: " + e);
             }
@@ -111,27 +96,15 @@ public class SongListFragment extends ListFragment implements OrderPages {
     };
 
     /**
-     * Interface for responding to clicks on songs.
+     * Interface for responding to selected artists.
      * <p>
      * Activities that host this fragment must implement this interface.
      */
-    public interface OnSongSelectedListener {
+    public interface OnArtistSelectedListener {
         /**
-         * The user has selected a song.
+         * The user has selected an artist.
          */
-        public void onSongSelected(SqueezerSong song);
-    }
-    
-    /**
-     * Interface for requesting query parameters.
-     * <p>
-     * Activities that host this fragment must implement this interface.
-     */
-    public interface GetQueryParameters {
-        /**
-         * Return the query parameters.
-         */
-        public QueryParameters getQueryParameters();
+        public void onArtistSelected(SqueezerArtist artist);
     }
 
     @Override
@@ -141,10 +114,10 @@ public class SongListFragment extends ListFragment implements OrderPages {
         mActivity = activity;
 
         try {
-            mListener = (OnSongSelectedListener) activity;
+            mListener = (OnArtistSelectedListener) activity;
         } catch (final ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnSongSelectedListener");
+                    + " must implement OnArtistSelectedListener");
         }
     }
 
@@ -178,7 +151,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
         });
 
         mListView.setOnScrollListener(new ScrollListener());
-        mQueryParameters = ((GetQueryParameters) mActivity).getQueryParameters();
+        // mQueryParameters = ((GetQueryParameters) mActivity).getQueryParameters();
     }
 
     /**
@@ -228,19 +201,18 @@ public class SongListFragment extends ListFragment implements OrderPages {
     }
 
     protected void registerCallback() throws RemoteException {
-        mService.registerSongListCallback(songListCallback);
+        mService.registerArtistListCallback(artistListCallback);
     }
 
     protected void unregisterCallback() throws RemoteException {
-        mService.unregisterSongListCallback(songListCallback);
+        mService.unregisterArtistListCallback(artistListCallback);
     }
 
-    private final IServiceSongListCallback songListCallback = new IServiceSongListCallback.Stub() {
-        public void onSongsReceived(int count, int start, List<SqueezerSong> items) {
+    private final IServiceArtistListCallback artistListCallback = new IServiceArtistListCallback.Stub() {
+        public void onArtistsReceived(int count, int start, List<SqueezerArtist> items) {
             onItemsReceived(count, start, items);
         }
     };
-
 
     /**
      * Generic handler for new items from the server.
@@ -251,7 +223,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
      * @param start Where in the list to add them.
      * @param items The items to add.
      */
-    public void onItemsReceived(final int count, final int start, final List<SqueezerSong> items) {
+    public void onItemsReceived(final int count, final int start, final List<SqueezerArtist> items) {
         getUIThreadHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -263,25 +235,25 @@ public class SongListFragment extends ListFragment implements OrderPages {
     /**
      * @return The current {@link SqueezerItemAdapter}, creating it if necessary.
      */
-    public SqueezerItemAdapter<SqueezerSong> getItemAdapter() {
-        return (SqueezerItemAdapter<SqueezerSong>) (itemAdapter == null ? (itemAdapter = createItemListAdapter(getItemView()))
+    public SqueezerItemAdapter<SqueezerArtist> getItemAdapter() {
+        return (SqueezerItemAdapter<SqueezerArtist>) (itemAdapter == null ? (itemAdapter = createItemListAdapter(getItemView()))
                 : itemAdapter);
     }
 
-    protected SqueezerItemAdapter<SqueezerSong> createItemListAdapter(
-            SqueezerItemView<SqueezerSong> itemView) {
-        return new SqueezerItemListAdapter<SqueezerSong>(this, itemView, mImageFetcher);
+    protected SqueezerItemAdapter<SqueezerArtist> createItemListAdapter(
+            SqueezerItemView<SqueezerArtist> itemView) {
+        return new SqueezerItemListAdapter<SqueezerArtist>(this, itemView, null);
     }
 
     /**
      * @return The current {@link SqueezerItemView}, creating it if necessary
      */
-    public SqueezerItemView<SqueezerSong> getItemView() {
+    public SqueezerItemView<SqueezerArtist> getItemView() {
         return mItemView == null ? (mItemView = createItemView()) : mItemView;
     }
 
-    public SqueezerItemView<SqueezerSong> createItemView() {
-        return new SqueezerSongView(this);
+    public SqueezerItemView<SqueezerArtist> createItemView() {
+        return new SqueezerArtistView(this);
     }
 
     /**
@@ -325,9 +297,7 @@ public class SongListFragment extends ListFragment implements OrderPages {
     }
 
     public void orderPage(int start) throws RemoteException {
-        mService.songs(start, sortOrder.name(), mQueryParameters.searchString,
-                mQueryParameters.album, mQueryParameters.artist, mQueryParameters.year,
-                mQueryParameters.genre);
+        mService.artists(start, getSearchString(), mAlbum, mGenre);
     }
 
     /**
@@ -360,8 +330,8 @@ public class SongListFragment extends ListFragment implements OrderPages {
          * Subclasses must call this.
          */
         public ScrollListener() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR &&
-                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR
+                    && Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
                 mTouchListener = new TouchListener(this);
             }
         }
@@ -369,8 +339,8 @@ public class SongListFragment extends ListFragment implements OrderPages {
         // Deliberately left empty -- it is not called when the scroll completes, it appears to be
         // called multiple time during a scroll, including during flinging.
         @Override
-        public void onScroll(final AbsListView view, final int firstVisibleItem, final int visibleItemCount,
-                final int totalItemCount) {
+        public void onScroll(final AbsListView view, final int firstVisibleItem,
+                final int visibleItemCount, final int totalItemCount) {
         }
 
         @Override
@@ -412,21 +382,18 @@ public class SongListFragment extends ListFragment implements OrderPages {
         /**
          * Work around a bug in (at least) API levels 7 and 8.
          * <p>
-         * The bug manifests itself like so: after completing a TOUCH_SCROLL the
-         * system does not deliver a SCROLL_STATE_IDLE message to any attached
-         * listeners.
+         * The bug manifests itself like so: after completing a TOUCH_SCROLL the system does not
+         * deliver a SCROLL_STATE_IDLE message to any attached listeners.
          * <p>
-         * In addition, if the user does TOUCH_SCROLL, IDLE, TOUCH_SCROLL you
-         * would expect to receive three messages. You don't -- you get the
-         * first TOUCH_SCROLL, no IDLE message, and then the second touch
-         * doesn't generate a second TOUCH_SCROLL message.
+         * In addition, if the user does TOUCH_SCROLL, IDLE, TOUCH_SCROLL you would expect to
+         * receive three messages. You don't -- you get the first TOUCH_SCROLL, no IDLE message, and
+         * then the second touch doesn't generate a second TOUCH_SCROLL message.
          * <p>
          * This state clears when the user flings the list.
          * <p>
-         * The simplest work around for this app is to track the user's finger,
-         * and if the previous state was TOUCH_SCROLL then pretend that they
-         * finished with a FLING and an IDLE event was triggered. This serves to
-         * unstick the message pipeline.
+         * The simplest work around for this app is to track the user's finger, and if the previous
+         * state was TOUCH_SCROLL then pretend that they finished with a FLING and an IDLE event was
+         * triggered. This serves to unstick the message pipeline.
          */
         protected class TouchListener implements View.OnTouchListener {
             private final OnScrollListener mOnScrollListener;

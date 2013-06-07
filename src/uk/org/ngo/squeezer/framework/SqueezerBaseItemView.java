@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.ReflectUtil;
-import uk.org.ngo.squeezer.fragment.SongListFragment;
 import uk.org.ngo.squeezer.itemlists.AlbumListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerAlbumListActivity;
 import uk.org.ngo.squeezer.itemlists.SqueezerArtistListActivity;
@@ -29,6 +28,7 @@ import uk.org.ngo.squeezer.model.SqueezerAlbum;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 import android.os.Parcelable.Creator;
 import android.os.RemoteException;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -61,9 +61,9 @@ public abstract class SqueezerBaseItemView<T extends SqueezerItem> implements Sq
         mLayoutInflater = activity.getLayoutInflater();
     }
 
-    public SqueezerBaseItemView(SongListFragment songListFragment) {
-        this.mActivity = (SqueezerBaseActivity) songListFragment.getActivity();
-        mLayoutInflater = songListFragment.getLayoutInflater(null);
+    public SqueezerBaseItemView(ListFragment listFragment) {
+        this.mActivity = (SqueezerBaseActivity) listFragment.getActivity();
+        mLayoutInflater = listFragment.getLayoutInflater(null);
     }
 
     public SqueezerBaseActivity getActivity() {

@@ -21,7 +21,6 @@ import uk.org.ngo.squeezer.fragment.SongListFragment;
 import uk.org.ngo.squeezer.framework.SqueezerBaseActivity;
 import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerSongFilterDialog;
 import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerSongOrderDialog;
-import uk.org.ngo.squeezer.itemlists.dialogs.SqueezerSongOrderDialog.SongsSortOrder;
 import uk.org.ngo.squeezer.menu.MenuFragment;
 import uk.org.ngo.squeezer.menu.SqueezerFilterMenuItemFragment;
 import uk.org.ngo.squeezer.menu.SqueezerOrderMenuItemFragment;
@@ -43,7 +42,6 @@ import android.widget.TextView;
  * <p>
  * Hosts a {@link SongListFragment} to do the listing, provides a wrapper UI that includes
  * additional information about the album.
- * 
  */
 public class AlbumListActivity extends SqueezerBaseActivity
  implements
@@ -52,15 +50,9 @@ public class AlbumListActivity extends SqueezerBaseActivity
         SqueezerFilterMenuItemFragment.SqueezerFilterableListActivity,
         SqueezerOrderMenuItemFragment.SqueezerOrderableListActivity {
 
-    private SongsSortOrder sortOrder = SongsSortOrder.title;
-
-    private SqueezerAlbum album;
-    public SqueezerAlbum getAlbum() { return album; }
-    public void setAlbum(SqueezerAlbum album) { this.album = album; }
-
-    private SqueezerSongView songViewLogic;
-
     private QueryParameters mQueryParameters = new QueryParameters();
+
+    /** The album being displayed. */
     private SqueezerAlbum mAlbum;
 
     /** An ImageFetcher for loading thumbnails. */
@@ -69,10 +61,26 @@ public class AlbumListActivity extends SqueezerBaseActivity
     /** ImageCache parameters for the album art. */
     private ImageCacheParams mImageCacheParams;
 
+    /** ImageView that shows album artwork. */
     private ImageView mIconView;
 
+    /** First line of album information text. */
     private TextView mText1;
+
+    /** Second line of album information text. */
     private TextView mText2;
+
+    /**
+     * Shows the activity displaying a single album's details.
+     * 
+     * @param context
+     * @param album The album to show.
+     */
+    public static void show(Context context, SqueezerAlbum album) {
+        final Intent intent = new Intent(context, AlbumListActivity.class);
+        intent.putExtra(SqueezerAlbum.class.getName(), album);
+        context.startActivity(intent);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,11 +92,13 @@ public class AlbumListActivity extends SqueezerBaseActivity
         Bundle extras = getIntent().getExtras();
         mAlbum = extras.getParcelable(SqueezerAlbum.class.getName());
         mQueryParameters.album = mAlbum;
-        sortOrder = SongsSortOrder.tracknum;
 
         MenuFragment.add(this, SqueezerFilterMenuItemFragment.class);
         MenuFragment.add(this, SqueezerOrderMenuItemFragment.class);
 
+        // XXX: Until this is fixed the context menus won't be correct -- SqueezerSongView
+        // uses this to control aspects of the context menu. This should probably be moved
+        // in to SongListFragment.
         // songViewLogic.setBrowseByAlbum(album != null);
         // songViewLogic.setBrowseByArtist(artist != null);
 
@@ -118,21 +128,15 @@ public class AlbumListActivity extends SqueezerBaseActivity
         mImageFetcher.addImageCache(getSupportFragmentManager(), mImageCacheParams);
     }
 
-    /**
-     * Show the activity displaying a single album's details.
-     * 
-     * @param context
-     * @param album The album to show.
-     */
-    public static void show(Context context, SqueezerAlbum album) {
-        final Intent intent = new Intent(context, AlbumListActivity.class);
-        intent.putExtra(SqueezerAlbum.class.getName(), album);
-        context.startActivity(intent);
-    }
 
     /** OnSongSelectedListener methods. */
 
     public void onSongSelected(SqueezerSong song) {
+        // XXX: Currently this does nothing, because the click logic is in SqueezerSongView.
+        // That -- and the other views -- need to be modified to take an On*Selected listener
+        // as a parameter, so that the activity can figure out what the right thing to do is
+        // (which might change depending on which other fragments are active).
+
         // Intent i = new Intent(Intent.ACTION_VIEW, songUri);
         // startActivity(i);
     }

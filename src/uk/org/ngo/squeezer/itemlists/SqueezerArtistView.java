@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.itemlists;
 
 import uk.org.ngo.squeezer.R;
+import uk.org.ngo.squeezer.fragment.ArtistListFragment;
 import uk.org.ngo.squeezer.framework.SqueezerBaseItemView;
 import uk.org.ngo.squeezer.framework.SqueezerItemListActivity;
 import uk.org.ngo.squeezer.model.SqueezerArtist;
@@ -31,6 +32,10 @@ public class SqueezerArtistView extends SqueezerBaseItemView<SqueezerArtist> {
 	public SqueezerArtistView(SqueezerItemListActivity activity) {
 		super(activity);
 	}
+
+    public SqueezerArtistView(ArtistListFragment fragment) {
+        super(fragment);
+    }
 
 	public void onItemSelected(int index, SqueezerArtist item) throws RemoteException {
 		SqueezerAlbumListActivity.show(getActivity(), item);

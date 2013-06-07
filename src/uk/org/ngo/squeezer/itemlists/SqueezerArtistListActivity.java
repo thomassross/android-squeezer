@@ -79,7 +79,7 @@ public class SqueezerArtistListActivity extends SqueezerBaseListActivity<Squeeze
                             + extras.get(key).getClass().getName() + ")");
             }
         }
-    };
+    }
 
 	@Override
 	protected void registerCallback() throws RemoteException {
