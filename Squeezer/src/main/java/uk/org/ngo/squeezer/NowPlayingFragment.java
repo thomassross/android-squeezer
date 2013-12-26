@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer;
 
+import org.michaelevans.colorart.library.ColorArt;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -25,7 +27,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -39,6 +44,7 @@ import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -77,6 +83,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
 import uk.org.ngo.squeezer.util.ImageCache.ImageCacheParams;
 import uk.org.ngo.squeezer.util.ImageFetcher;
+import uk.org.ngo.squeezer.util.ImageWorker;
 
 public class NowPlayingFragment extends Fragment implements
         HasUiThread, View.OnCreateContextMenuListener {
@@ -128,6 +135,15 @@ public class NowPlayingFragment extends Fragment implements
     private ImageView albumArt;
 
     private SeekBar seekBar;
+
+    /** The default drawable for the background of the root view. */
+    private Drawable mDefaultRootViewBackground;
+
+    /**
+     * Maps the integer IDs of TextViews in the layout to their default ColorStateList values,
+     * so that the defaults can be used if loading a bitmap fails.
+     */
+    private SparseArray<ColorStateList> mDefaultTextViewColors = new SparseArray<ColorStateList>();
 
     /**
      * Volume control panel.
@@ -259,21 +275,25 @@ public class NowPlayingFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View v;
+        View rootView;
 
         if (mFullHeightLayout) {
-            v = inflater.inflate(R.layout.now_playing_fragment_full, container, false);
+            rootView = inflater.inflate(R.layout.now_playing_fragment_full, container, false);
 
-            artistText = (TextView) v.findViewById(R.id.artistname);
-            nextButton = (ImageButton) v.findViewById(R.id.next);
-            prevButton = (ImageButton) v.findViewById(R.id.prev);
-            shuffleButton = (ImageButton) v.findViewById(R.id.shuffle);
-            repeatButton = (ImageButton) v.findViewById(R.id.repeat);
-            currentTime = (TextView) v.findViewById(R.id.currenttime);
-            totalTime = (TextView) v.findViewById(R.id.totaltime);
-            seekBar = (SeekBar) v.findViewById(R.id.seekbar);
+            artistText = (TextView) rootView.findViewById(R.id.artistname);
+            nextButton = (ImageButton) rootView.findViewById(R.id.next);
+            prevButton = (ImageButton) rootView.findViewById(R.id.prev);
+            shuffleButton = (ImageButton) rootView.findViewById(R.id.shuffle);
+            repeatButton = (ImageButton) rootView.findViewById(R.id.repeat);
+            currentTime = (TextView) rootView.findViewById(R.id.currenttime);
+            totalTime = (TextView) rootView.findViewById(R.id.totaltime);
+            seekBar = (SeekBar) rootView.findViewById(R.id.seekbar);
 
-            btnContextMenu = (ImageView) v.findViewById(R.id.context_menu);
+            mDefaultTextViewColors.put(R.id.artistname, artistText.getTextColors());
+            mDefaultTextViewColors.put(R.id.currenttime, currentTime.getTextColors());
+            mDefaultTextViewColors.put(R.id.totaltime, totalTime.getTextColors());
+
+            btnContextMenu = (ImageView) rootView.findViewById(R.id.context_menu);
             btnContextMenu.setOnCreateContextMenuListener(this);
             btnContextMenu.setOnClickListener(new OnClickListener() {
                 @Override
@@ -290,7 +310,7 @@ public class NowPlayingFragment extends Fragment implements
             mImageFetcher = new ImageFetcher(mActivity,
                     Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels));
         } else {
-            v = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
+            rootView = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
 
             // Get an ImageFetcher to scale artwork to the size of the icon view.
             Resources resources = getResources();
@@ -307,10 +327,14 @@ public class NowPlayingFragment extends Fragment implements
         mImageCacheParams = new ImageCacheParams(mActivity, "artwork");
         mImageCacheParams.setMemCacheSizePercent(mActivity, 0.12f);
 
-        albumArt = (ImageView) v.findViewById(R.id.album);
-        trackText = (TextView) v.findViewById(R.id.trackname);
-        albumText = (TextView) v.findViewById(R.id.albumname);
-        playPauseButton = (ImageButton) v.findViewById(R.id.pause);
+        albumArt = (ImageView) rootView.findViewById(R.id.album);
+        trackText = (TextView) rootView.findViewById(R.id.trackname);
+        albumText = (TextView) rootView.findViewById(R.id.albumname);
+        playPauseButton = (ImageButton) rootView.findViewById(R.id.pause);
+
+        mDefaultRootViewBackground = rootView.getBackground();
+        mDefaultTextViewColors.put(R.id.trackname, trackText.getTextColors());
+        mDefaultTextViewColors.put(R.id.albumname, albumText.getTextColors());
 
         // Marquee effect on TextViews only works if they're focused.
         trackText.requestFocus();
@@ -424,14 +448,14 @@ public class NowPlayingFragment extends Fragment implements
             });
         } else {
             // Clicking on the layout goes to NowPlayingActivity.
-            v.setOnClickListener(new OnClickListener() {
+            rootView.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     NowPlayingActivity.show(mActivity);
                 }
             });
         }
 
-        return v;
+        return rootView;
     }
 
     /**
@@ -701,6 +725,7 @@ public class NowPlayingFragment extends Fragment implements
                         ? R.drawable.icon_iradio_noart
                         : R.drawable.icon_album_noart);
             }
+            mImageWorkerCallback.onImageReady(null);
             return;
         }
 
@@ -709,7 +734,7 @@ public class NowPlayingFragment extends Fragment implements
             return;
         }
 
-        mImageFetcher.loadImage(song.getArtworkUrl(mService), albumArt);
+        mImageFetcher.loadImage(song.getArtworkUrl(mService), albumArt, mImageWorkerCallback);
     }
 
     private boolean setSecondsElapsed(int seconds) {
@@ -1235,6 +1260,45 @@ public class NowPlayingFragment extends Fragment implements
         public void onVolumeChanged(final int newVolume, final Player player)
                 throws RemoteException {
             mVolumePanel.postVolumeChanged(newVolume, player == null ? "" : player.getName());
+        }
+    };
+
+    /** Callback when the album artwork load attempt has finished. */
+    private final ImageWorker.ImageWorkerCallback mImageWorkerCallback
+            = new ImageWorker.ImageWorkerCallback() {
+        /**
+         * Use {@link org.michaelevans.colorart.library.ColorArt} to figure out appropriate colours
+         * for the UI.
+         * <p/>
+         * Use the default colours if loading the bitmap failed.
+         *
+         * @param bitmap The bitmap that was loaded in to the ImageView (may be null if loading the
+         */
+        @Override
+        public void onImageReady(Bitmap bitmap) {
+            if (bitmap != null) {
+                ColorArt colorArt = new ColorArt(bitmap);
+
+                trackText.setTextColor(colorArt.getPrimaryColor());
+                albumText.setTextColor(colorArt.getSecondaryColor());
+                getView().setBackgroundColor(colorArt.getBackgroundColor());
+
+                if (mFullHeightLayout) {
+                    artistText.setTextColor(colorArt.getDetailColor());
+                    currentTime.setTextColor(colorArt.getDetailColor());
+                    totalTime.setTextColor(colorArt.getDetailColor());
+                }
+            } else {
+                trackText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.trackname));
+                albumText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.albumname));
+                getView().setBackgroundDrawable(mDefaultRootViewBackground);
+
+                if (mFullHeightLayout) {
+                    artistText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.artistname));
+                    currentTime.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.currenttime));
+                    totalTime.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.totaltime));
+                }
+            }
         }
     };
 }

@@ -73,22 +73,47 @@ public abstract class ImageWorker {
     }
 
     /**
+     * Interface that callbacks passed to
+     * {@link uk.org.ngo.squeezer.util.ImageWorker#loadImage(Object, android.widget.ImageView, uk.org.ngo.squeezer.util.ImageWorker.ImageWorkerCallback)}
+     * must implement.
+     */
+    public interface ImageWorkerCallback {
+
+        /**
+         * Called after the image has been loaded in to the ImageView given to {@link
+         * uk.org.ngo.squeezer.util.ImageWorker#loadImage(Object, android.widget.ImageView,
+         * uk.org.ngo.squeezer.util.ImageWorker.ImageWorkerCallback)}.
+         *
+         * @param bitmap The bitmap that was loaded in to the ImageView (may be null if loading the
+         * bitmap failed).
+         */
+        public void onImageReady(@Nullable Bitmap bitmap);
+    }
+
+    private ImageWorkerCallback mImageWorkerCallback;
+
+    /**
      * Load an image specified by the data parameter into an ImageView (override {@link
      * ImageWorker#processBitmap(Object)} to define the processing logic). A memory and disk cache
      * will be used if an {@link ImageCache} has been set using {@link
      * ImageWorker#setImageCache(ImageCache)}. If the image is found in the memory cache, it is set
      * immediately, otherwise an {@link AsyncTask} will be created to asynchronously load the
      * bitmap.
+     * <p/>
+     * If the callback is provided then it will be called after the bitmap data is available.
      *
      * @param data The URL of the image to download.
      * @param imageView The ImageView to bind the downloaded image to.
+     * @param imageWorkerCallback The callback to use after bitmap data is available.
      */
-    public void loadImage(Object data, ImageView imageView) {
+    public void loadImage(Object data, ImageView imageView,
+            @Nullable ImageWorkerCallback imageWorkerCallback) {
         if (data == null) {
             return;
         }
 
         Bitmap bitmap = null;
+        mImageWorkerCallback = imageWorkerCallback;
 
         if (mImageCache != null) {
             bitmap = mImageCache.getBitmapFromMemCache(String.valueOf(data));
@@ -97,6 +122,9 @@ public abstract class ImageWorker {
         if (bitmap != null) {
             // Bitmap found in memory cache
             imageView.setImageBitmap(bitmap);
+            if (mImageWorkerCallback != null) {
+                mImageWorkerCallback.onImageReady(bitmap);
+            }
         } else if (cancelPotentialWork(data, imageView)) {
             final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
             final AsyncDrawable asyncDrawable =
@@ -108,6 +136,18 @@ public abstract class ImageWorker {
             // for more info on what was changed.
             task.executeOnExecutor(AsyncTask.DUAL_THREAD_EXECUTOR, data);
         }
+    }
+
+    /**
+     * Calls {@link uk.org.ngo.squeezer.util.ImageWorker#loadImage(Object, android.widget.ImageView, uk.org.ngo.squeezer.util.ImageWorker.ImageWorkerCallback)}
+     * with a null callback.
+     *
+     * @param data
+     * @param imageView
+     * @see uk.org.ngo.squeezer.util.ImageWorker#loadImage(Object, android.widget.ImageView, uk.org.ngo.squeezer.util.ImageWorker.ImageWorkerCallback)
+     */
+    public void loadImage(Object data, ImageView imageView) {
+        loadImage(data, imageView, null);
     }
 
     /**
@@ -319,6 +359,9 @@ public abstract class ImageWorker {
                     Log.d(TAG, "onPostExecute - setting bitmap");
                 }
                 setImageBitmap(imageView, bitmap);
+            }
+            if (mImageWorkerCallback != null) {
+                mImageWorkerCallback.onImageReady(bitmap);
             }
         }
 
