@@ -19,6 +19,13 @@
 <resources>
     <string name="home_item_favorites">Favourites</string>
 
+    <string name="settings_ui_color_from_artwork_title">Adjust UI colour from artwork</string>
+    <string name="settings_ui_color_from_artwork_on">The \"Now Playing\" UI colours will reflect the
+        track\'s artwork
+    </string>
+    <string name="settings_ui_color_from_artwork_off">The \"Now Playing\" UI colours are unchanged
+    </string>
+
     <plurals name="favorites">
         <item quantity="one">Favourite</item>
         <item quantity="other">Favourites</item>

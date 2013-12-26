@@ -59,6 +59,13 @@
     <string name="settings_notifyofconnection_off">Show notification only while playing music
     </string>
 
+    <string name="settings_ui_color_from_artwork_title">Adjust UI color from artwork</string>
+    <string name="settings_ui_color_from_artwork_on">The \"Now Playing\" UI colors will reflect the
+        track\'s artwork
+    </string>
+    <string name="settings_ui_color_from_artwork_off">The \"Now Playing\" UI colors are unchanged
+    </string>
+
     <string name="settings_scrobble_title">Scrobble to Last.fm</string>
     <string name="settings_scrobble_on">Song information is sent to Last.fm</string>
     <string name="settings_scrobble_off">Song information is not sent to Last.fm</string>

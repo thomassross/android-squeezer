@@ -60,6 +60,14 @@
             android:summaryOff="@string/settings_notifyofconnection_off"
             android:persistent="true"/>
 
+        <CheckBoxPreference
+            android:key="squeezer.ui_color_from_artwork"
+            android:defaultValue="false"
+            android:title="@string/settings_ui_color_from_artwork_title"
+            android:summaryOn="@string/settings_ui_color_from_artwork_on"
+            android:summaryOff="@string/settings_ui_color_from_artwork_off"
+            android:persistent="true"/>
+
         <ListPreference
             android:key="squeezer.action.onselect.album"
             android:title="@string/settings_album_selectaction"/>

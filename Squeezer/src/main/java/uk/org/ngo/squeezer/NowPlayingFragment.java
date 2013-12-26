@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -144,6 +145,9 @@ public class NowPlayingFragment extends Fragment implements
      * so that the defaults can be used if loading a bitmap fails.
      */
     private SparseArray<ColorStateList> mDefaultTextViewColors = new SparseArray<ColorStateList>();
+
+    /** Whether to update the UI colors from the album artwork. */
+    private boolean mUiColorFromArtwork;
 
     /**
      * Volume control panel.
@@ -627,7 +631,21 @@ public class NowPlayingFragment extends Fragment implements
             updateUIFromServiceState();
         }
 
-        if (isAutoConnect(getSharedPreferences())) {
+        SharedPreferences sharedPreferences = getSharedPreferences();
+
+        // Fetch the user's preference for setting the UI colours based on the album artwork.
+        mUiColorFromArtwork = sharedPreferences
+                .getBoolean(Preferences.KEY_UI_COLOR_FROM_ARTWORK, false);
+
+        // A BitmapDrawable in the albumArt ImageView means the callback should be called to
+        // ensure that the UI colours match the user's choice (e.g., if they've just returned
+        // from toggling the value in the settings their choice needs to be acted on).
+        Drawable drawable = albumArt.getDrawable();
+        if (drawable instanceof BitmapDrawable) {
+            mImageWorkerCallback.onImageReady(((BitmapDrawable) drawable).getBitmap());
+        }
+
+        if (isAutoConnect(sharedPreferences)) {
             mActivity.registerReceiver(broadcastReceiver, new IntentFilter(
                     ConnectivityManager.CONNECTIVITY_ACTION));
         }
@@ -1270,13 +1288,14 @@ public class NowPlayingFragment extends Fragment implements
          * Use {@link org.michaelevans.colorart.library.ColorArt} to figure out appropriate colours
          * for the UI.
          * <p/>
-         * Use the default colours if loading the bitmap failed.
+         * Use the default colours if loading the bitmap failed, or if the preference for this
+         * feature is off.
          *
          * @param bitmap The bitmap that was loaded in to the ImageView (may be null if loading the
          */
         @Override
         public void onImageReady(Bitmap bitmap) {
-            if (bitmap != null) {
+            if (bitmap != null && mUiColorFromArtwork) {
                 ColorArt colorArt = new ColorArt(bitmap);
 
                 trackText.setTextColor(colorArt.getPrimaryColor());

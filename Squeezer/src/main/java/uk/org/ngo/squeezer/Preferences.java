@@ -54,6 +54,9 @@ public final class Preferences {
     // Fade-in period? (0 = disable fade-in)
     public static final String KEY_FADE_IN_SECS = "squeezer.fadeInSecs";
 
+    /** Adjust the UI colour based on album artwork? */
+    public static final String KEY_UI_COLOR_FROM_ARTWORK = "squeezer.ui_color_from_artwork";
+
     // What do to when an album is selected in the list view
     public static final String KEY_ON_SELECT_ALBUM_ACTION = "squeezer.action.onselect.album";
 
