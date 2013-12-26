@@ -141,10 +141,11 @@ public class NowPlayingFragment extends Fragment implements
     private Drawable mDefaultRootViewBackground;
 
     /**
-     * Maps the integer IDs of TextViews in the layout to their default ColorStateList values,
-     * so that the defaults can be used if loading a bitmap fails.
+     * Maps the integer IDs of TextViews in the layout to their default ColorStateList values, so
+     * that the defaults can be used if loading a bitmap fails.
      */
-    private SparseArray<ColorStateList> mDefaultTextViewColors = new SparseArray<ColorStateList>();
+    private final SparseArray<ColorStateList> mDefaultTextViewColors
+            = new SparseArray<ColorStateList>();
 
     /** Whether to update the UI colors from the album artwork. */
     private boolean mUiColorFromArtwork;
@@ -1308,14 +1309,14 @@ public class NowPlayingFragment extends Fragment implements
                     totalTime.setTextColor(colorArt.getDetailColor());
                 }
             } else {
-                trackText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.trackname));
-                albumText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.albumname));
+                trackText.setTextColor(mDefaultTextViewColors.get(R.id.trackname));
+                albumText.setTextColor(mDefaultTextViewColors.get(R.id.albumname));
                 getView().setBackgroundDrawable(mDefaultRootViewBackground);
 
                 if (mFullHeightLayout) {
-                    artistText.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.artistname));
-                    currentTime.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.currenttime));
-                    totalTime.setTextColor((ColorStateList) mDefaultTextViewColors.get(R.id.totaltime));
+                    artistText.setTextColor(mDefaultTextViewColors.get(R.id.artistname));
+                    currentTime.setTextColor(mDefaultTextViewColors.get(R.id.currenttime));
+                    totalTime.setTextColor(mDefaultTextViewColors.get(R.id.totaltime));
                 }
             }
         }
