@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -135,7 +136,7 @@ public class NowPlayingFragment extends Fragment implements
 
     private ImageView albumArt;
 
-    private SeekBar seekBar;
+    private SeekBar mSeekBar;
 
     /** The default drawable for the background of the root view. */
     private Drawable mDefaultRootViewBackground;
@@ -292,7 +293,7 @@ public class NowPlayingFragment extends Fragment implements
             repeatButton = (ImageButton) rootView.findViewById(R.id.repeat);
             currentTime = (TextView) rootView.findViewById(R.id.currenttime);
             totalTime = (TextView) rootView.findViewById(R.id.totaltime);
-            seekBar = (SeekBar) rootView.findViewById(R.id.seekbar);
+            mSeekBar = (SeekBar) rootView.findViewById(R.id.seekbar);
 
             mDefaultTextViewColors.put(R.id.artistname, artistText.getTextColors());
             mDefaultTextViewColors.put(R.id.currenttime, currentTime.getTextColors());
@@ -421,7 +422,7 @@ public class NowPlayingFragment extends Fragment implements
                 }
             });
 
-            seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            mSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
                 Song seekingSong;
 
                 // Update the time indicator to reflect the dragged thumb
@@ -526,8 +527,8 @@ public class NowPlayingFragment extends Fragment implements
                 artistText.setText(getText(R.string.disconnected_text));
                 currentTime.setText("--:--");
                 totalTime.setText("--:--");
-                seekBar.setEnabled(false);
-                seekBar.setProgress(0);
+                mSeekBar.setEnabled(false);
+                mSeekBar.setProgress(0);
             } else {
                 albumArt.setImageResource(R.drawable.icon_album_noart);
             }
@@ -535,7 +536,7 @@ public class NowPlayingFragment extends Fragment implements
             if (mFullHeightLayout) {
                 nextButton.setImageResource(R.drawable.ic_action_next);
                 prevButton.setImageResource(R.drawable.ic_action_previous);
-                seekBar.setEnabled(true);
+                mSeekBar.setEnabled(true);
             }
         }
     }
@@ -697,11 +698,11 @@ public class NowPlayingFragment extends Fragment implements
     private void updateTimeDisplayTo(int secondsIn, int secondsTotal) {
         if (mFullHeightLayout) {
             if (updateSeekBar) {
-                if (seekBar.getMax() != secondsTotal) {
-                    seekBar.setMax(secondsTotal);
+                if (mSeekBar.getMax() != secondsTotal) {
+                    mSeekBar.setMax(secondsTotal);
                     totalTime.setText(Util.makeTimeString(secondsTotal));
                 }
-                seekBar.setProgress(secondsIn);
+                mSeekBar.setProgress(secondsIn);
                 currentTime.setText(Util.makeTimeString(secondsIn));
             }
         }
@@ -1307,6 +1308,11 @@ public class NowPlayingFragment extends Fragment implements
                     artistText.setTextColor(colorArt.getDetailColor());
                     currentTime.setTextColor(colorArt.getDetailColor());
                     totalTime.setTextColor(colorArt.getDetailColor());
+
+                    mSeekBar.getProgressDrawable().setColorFilter(colorArt.getSecondaryColor(),
+                            PorterDuff.Mode.MULTIPLY);
+                    mSeekBar.getThumb()
+                            .setColorFilter(colorArt.getPrimaryColor(), PorterDuff.Mode.MULTIPLY);
                 }
             } else {
                 trackText.setTextColor(mDefaultTextViewColors.get(R.id.trackname));
@@ -1317,6 +1323,9 @@ public class NowPlayingFragment extends Fragment implements
                     artistText.setTextColor(mDefaultTextViewColors.get(R.id.artistname));
                     currentTime.setTextColor(mDefaultTextViewColors.get(R.id.currenttime));
                     totalTime.setTextColor(mDefaultTextViewColors.get(R.id.totaltime));
+
+                    mSeekBar.getProgressDrawable().clearColorFilter();
+                    mSeekBar.getThumb().clearColorFilter();
                 }
             }
         }
