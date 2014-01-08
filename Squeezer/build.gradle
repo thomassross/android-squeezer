@@ -31,7 +31,7 @@ dependencies {
     compile 'de.cketti.library.changelog:ckchangelog:1.2.0'
 
     // ColorArt, see https://github.com/MichaelEvans/ColorArt.
-    compile 'org.michaelevans.colorart:library:0.0.1'
+    compile 'org.michaelevans.colorart:library:0.0.2'
 }
 
 android {
