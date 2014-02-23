@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer;
 
 import org.michaelevans.colorart.library.ColorArt;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -36,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -65,6 +67,8 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
+import javax.annotation.Nullable;
+
 import uk.org.ngo.squeezer.dialog.AboutDialog;
 import uk.org.ngo.squeezer.dialog.AuthenticationDialog;
 import uk.org.ngo.squeezer.dialog.EnableWifiDialog;
@@ -86,6 +90,7 @@ import uk.org.ngo.squeezer.service.SqueezeService;
 import uk.org.ngo.squeezer.util.ImageCache.ImageCacheParams;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 import uk.org.ngo.squeezer.util.ImageWorker;
+import uk.org.ngo.squeezer.util.UIUtils;
 
 public class NowPlayingFragment extends Fragment implements
         HasUiThread, View.OnCreateContextMenuListener {
@@ -545,17 +550,20 @@ public class NowPlayingFragment extends Fragment implements
         playPauseButton
                 .setImageResource((playStatus == PlayStatus.play) ? R.drawable.ic_action_pause
                         : R.drawable.ic_action_play);
+        mImageWorkerCallback.onImageReady(null);
     }
 
     private void updateShuffleStatus(ShuffleStatus shuffleStatus) {
         if (mFullHeightLayout && shuffleStatus != null) {
             shuffleButton.setImageResource(shuffleStatus.getIcon());
+            mImageWorkerCallback.onImageReady(null);
         }
     }
 
     private void updateRepeatStatus(RepeatStatus repeatStatus) {
         if (mFullHeightLayout && repeatStatus != null) {
             repeatButton.setImageResource(repeatStatus.getIcon());
+            mImageWorkerCallback.onImageReady(null);
         }
     }
 
@@ -1286,47 +1294,81 @@ public class NowPlayingFragment extends Fragment implements
     /** Callback when the album artwork load attempt has finished. */
     private final ImageWorker.ImageWorkerCallback mImageWorkerCallback
             = new ImageWorker.ImageWorkerCallback() {
+
+        private ColorArt mColorArt;
+
         /**
          * Use {@link org.michaelevans.colorart.library.ColorArt} to figure out appropriate colours
          * for the UI.
          * <p/>
-         * Use the default colours if loading the bitmap failed, or if the preference for this
-         * feature is off.
+         * Use the default colours if the preference for this feature is off.
          *
-         * @param bitmap The bitmap that was loaded in to the ImageView (may be null if loading the
+         * @param bitmap The bitmap that was loaded in to the ImageView.  If null, the colors from the
+         * last succesfully loaded bitmap are used.
          */
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)  // For calls to getThumb().
         @Override
         public void onImageReady(Bitmap bitmap) {
-            if (bitmap != null && mUiColorFromArtwork) {
-                ColorArt colorArt = new ColorArt(bitmap);
+            if (bitmap != null) {
+                mColorArt = new ColorArt(bitmap);
+            }
 
-                trackText.setTextColor(colorArt.getPrimaryColor());
-                albumText.setTextColor(colorArt.getSecondaryColor());
-                getView().setBackgroundColor(colorArt.getBackgroundColor());
+            if (mUiColorFromArtwork && mColorArt != null) {
+                trackText.setTextColor(mColorArt.getPrimaryColor());
+                albumText.setTextColor(mColorArt.getSecondaryColor());
+                getView().setBackgroundColor(mColorArt.getBackgroundColor());
+
+                setFilter(playPauseButton.getDrawable(), mColorArt.getPrimaryColor());
 
                 if (mFullHeightLayout) {
-                    artistText.setTextColor(colorArt.getDetailColor());
-                    currentTime.setTextColor(colorArt.getDetailColor());
-                    totalTime.setTextColor(colorArt.getDetailColor());
+                    artistText.setTextColor(mColorArt.getDetailColor());
+                    currentTime.setTextColor(mColorArt.getDetailColor());
+                    totalTime.setTextColor(mColorArt.getDetailColor());
 
-                    mSeekBar.getProgressDrawable().setColorFilter(colorArt.getSecondaryColor(),
-                            PorterDuff.Mode.MULTIPLY);
-                    mSeekBar.getThumb()
-                            .setColorFilter(colorArt.getPrimaryColor(), PorterDuff.Mode.MULTIPLY);
+                    setFilter(mSeekBar.getProgressDrawable(), mColorArt.getSecondaryColor());
+                    if (UIUtils.hasJellyBean()) {
+                        setFilter(mSeekBar.getThumb(), mColorArt.getPrimaryColor());
+                    }
+
+                    setFilter(shuffleButton.getDrawable(), mColorArt.getPrimaryColor());
+                    setFilter(prevButton.getDrawable(), mColorArt.getPrimaryColor());
+                    setFilter(nextButton.getDrawable(), mColorArt.getPrimaryColor());
+                    setFilter(repeatButton.getDrawable(), mColorArt.getPrimaryColor());
                 }
             } else {
                 trackText.setTextColor(mDefaultTextViewColors.get(R.id.trackname));
                 albumText.setTextColor(mDefaultTextViewColors.get(R.id.albumname));
                 getView().setBackgroundDrawable(mDefaultRootViewBackground);
 
+                clearFilter(playPauseButton.getDrawable());
+
                 if (mFullHeightLayout) {
                     artistText.setTextColor(mDefaultTextViewColors.get(R.id.artistname));
                     currentTime.setTextColor(mDefaultTextViewColors.get(R.id.currenttime));
                     totalTime.setTextColor(mDefaultTextViewColors.get(R.id.totaltime));
 
-                    mSeekBar.getProgressDrawable().clearColorFilter();
-                    mSeekBar.getThumb().clearColorFilter();
+                    clearFilter(mSeekBar.getProgressDrawable());
+                    if (UIUtils.hasJellyBean()) {
+                        clearFilter(mSeekBar.getThumb());
+                    }
+
+                    clearFilter(shuffleButton.getDrawable());
+                    clearFilter(prevButton.getDrawable());
+                    clearFilter(nextButton.getDrawable());
+                    clearFilter(repeatButton.getDrawable());
                 }
+            }
+        }
+
+        private void setFilter(@Nullable Drawable drawable, int color) {
+            if (drawable != null) {
+                drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            }
+        }
+
+        private void clearFilter(@Nullable Drawable drawable) {
+            if (drawable != null) {
+                drawable.clearColorFilter();
             }
         }
     };
