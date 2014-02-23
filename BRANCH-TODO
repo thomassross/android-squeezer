@@ -1,0 +1,7 @@
+Reasons not to merge (aka, bugs to fix):
+
+- Context disclosure triangle in Now Playing is not coloured.
+
+- Inconsistent results between mini player and full screen.  Since they operate on different
+  sized versions of the bitmap they may choose different colours.  The mini player should
+  operate on the same size bitmap that the full screen player uses.
