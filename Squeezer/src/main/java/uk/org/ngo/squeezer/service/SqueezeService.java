@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.service;
 
+import org.acra.ACRA;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -110,6 +112,8 @@ public class SqueezeService extends Service {
 
     private boolean mHandshakeComplete = false;
 
+    private int mServiceCallbackCount = 0;
+
     final RemoteCallbackList<IServiceCallback> mServiceCallbacks
             = new RemoteCallbackList<IServiceCallback>();
 
@@ -174,8 +178,6 @@ public class SqueezeService extends Service {
      */
     private boolean scrobblingPreviouslyEnabled;
 
-    boolean debugLogging; // Enable this if you are debugging something
-
     boolean mUpdateOngoingNotification;
 
     int mFadeInSecs;
@@ -218,6 +220,7 @@ public class SqueezeService extends Service {
         super.onDestroy();
         disconnect();
         mServiceCallbacks.kill();
+        mServiceCallbackCount = 0;
     }
 
     void disconnect() {
@@ -497,9 +500,9 @@ public class SqueezeService extends Service {
             = initializePrefixedPlayerSpecificHandlers();
 
     void onLineReceived(String serverLine) {
-        if (debugLogging) {
-            Log.v(TAG, "LINE: " + serverLine);
-        }
+        Log.v(TAG, "LINE: " + serverLine);
+        ACRA.getErrorReporter().putCustomData("lastReceivedLine", serverLine);
+
         List<String> tokens = Arrays.asList(serverLine.split(" "));
         if (tokens.size() < 2) {
             return;
@@ -718,13 +721,7 @@ public class SqueezeService extends Service {
         // Subscribe or unsubscribe to the player's realtime status updates
         // depending on whether we have an Activity or some sort of client
         // that cares about second-to-second updates.
-        //
-        // Note: If scrobbling is turned on then that counts as caring
-        // about second-to-second updates -- otherwise we miss events from
-        // buttons on the player, the web interface, and so on
-        int clients = mServiceCallbacks.beginBroadcast();
-        mServiceCallbacks.finishBroadcast();
-        if (clients > 0 || scrobblingEnabled) {
+        if (mServiceCallbackCount > 0) {
             cli.sendPlayerCommand("status - 1 subscribe:1 tags:" + SONGTAGS);
         } else {
             cli.sendPlayerCommand("status - 1 subscribe:-");
@@ -974,12 +971,14 @@ public class SqueezeService extends Service {
         @Override
         public void registerCallback(IServiceCallback callback) throws RemoteException {
             mServiceCallbacks.register(callback);
+            mServiceCallbackCount++;
             updatePlayerSubscriptionState();
         }
 
         @Override
         public void unregisterCallback(IServiceCallback callback) throws RemoteException {
             mServiceCallbacks.unregister(callback);
+            mServiceCallbackCount--;
             updatePlayerSubscriptionState();
         }
 
@@ -1305,8 +1304,13 @@ public class SqueezeService extends Service {
         }
 
         @Override
-        public void setActivePlayer(Player player) throws RemoteException {
-            changeActivePlayer(player);
+        public void setActivePlayer(final Player player) throws RemoteException {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    changeActivePlayer(player);
+                }
+            });
         }
 
         @Override
