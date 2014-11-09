@@ -26,6 +26,11 @@ dependencies {
     compile 'com.android.support:appcompat-v7:20.0.0'
 
     // Third party libraries
+    // License dialogs
+    compile('de.psdev.licensesdialog:licensesdialog:1.6.0') {
+        exclude module: 'support-v4'
+    }
+
     compile 'com.google.guava:guava:17.0'
     // findbugs is required for Proguard to work with Guava.
     compile 'com.google.code.findbugs:jsr305:2.0.2'

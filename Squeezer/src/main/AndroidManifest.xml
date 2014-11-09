@@ -16,9 +16,10 @@
    limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.ngo.squeezer"
-    android:versionCode="13" android:versionName="0.9.1">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="uk.org.ngo.squeezer">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
@@ -29,6 +30,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.REORDER_TASKS"/>
+
+    <uses-sdk
+        tools:overrideLibrary="de.psdev.licensesdialog"/>
 
     <application
         android:icon="@drawable/ic_launcher"
