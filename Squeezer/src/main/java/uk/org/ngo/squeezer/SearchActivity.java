@@ -50,7 +50,7 @@ public class SearchActivity extends ItemListActivity {
 
         loadingLabel = findViewById(R.id.loading_label);
 
-        searchResultsAdapter = new SearchAdapter(this, getImageFetcher());
+        searchResultsAdapter = new SearchAdapter(this);
         resultsExpandableListView = (ExpandableListView) findViewById(R.id.search_expandable_list);
         resultsExpandableListView.setAdapter(searchResultsAdapter);
 
@@ -64,7 +64,7 @@ public class SearchActivity extends ItemListActivity {
         });
 
         resultsExpandableListView.setOnCreateContextMenuListener(searchResultsAdapter);
-        resultsExpandableListView.setOnScrollListener(new ScrollListener());
+        resultsExpandableListView.setOnScrollListener(new ScrollListener(this));
 
         handleIntent(getIntent());
     }

@@ -17,7 +17,7 @@
 package uk.org.ngo.squeezer.framework;
 
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,6 +27,8 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -35,8 +37,6 @@ import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.menu.BaseMenuFragment;
 import uk.org.ngo.squeezer.menu.MenuFragment;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageCache;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 import uk.org.ngo.squeezer.util.RetainFragment;
 
 /**
@@ -81,21 +81,6 @@ public abstract class ItemListActivity extends BaseActivity {
      */
     private static final String TAG_RECEIVED_PAGES = "mReceivedPages";
 
-    /**
-     * An ImageFetcher for loading thumbnails.
-     */
-    private ImageFetcher mImageFetcher;
-
-    /**
-     * Tag for _mImageFetcher in mRetainFragment.
-     */
-    public static final String TAG_IMAGE_FETCHER = "imageFetcher";
-
-    /**
-     * ImageCache parameters for the album art.
-     */
-    private ImageCache.ImageCacheParams mImageCacheParams;
-
     /* Fragment to retain information across orientation changes. */
     private RetainFragment mRetainFragment;
 
@@ -118,13 +103,6 @@ public abstract class ItemListActivity extends BaseActivity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        getImageFetcher().addImageCache(getSupportFragmentManager(), mImageCacheParams);
-    }
-
-    @Override
     protected void onServiceConnected(@NonNull ISqueezeService service) {
         super.onServiceConnected(service);
 
@@ -136,50 +114,12 @@ public abstract class ItemListActivity extends BaseActivity {
 
     @Override
     public void onPause() {
-        if (mImageFetcher != null) {
-            mImageFetcher.closeCache();
-        }
-
         // Any items coming in after callbacks have been unregistered are discarded.
         // We cancel any outstanding orders, so items can be reordered after the
         // activity resumes.
         cancelOrders();
 
         super.onPause();
-    }
-
-    protected ImageFetcher createImageFetcher(int height, int width) {
-        // Get an ImageFetcher to scale artwork to the supplied size.
-        int iconSize = (Math.max(height, width));
-        ImageFetcher imageFetcher = new ImageFetcher(this, iconSize);
-        imageFetcher.setLoadingImage(R.drawable.icon_pending_artwork);
-        return imageFetcher;
-    }
-
-    protected ImageFetcher createImageFetcher() {
-        // Get an ImageFetcher to scale artwork to the size of the icon view.
-        Resources resources = getResources();
-        return createImageFetcher(
-                resources.getDimensionPixelSize(R.dimen.album_art_icon_height),
-                resources.getDimensionPixelSize(R.dimen.album_art_icon_width));
-    }
-
-    protected void createImageCacheParams() {
-        mImageCacheParams = new ImageCache.ImageCacheParams(this, "artwork");
-        mImageCacheParams.setMemCacheSizePercent(this, 0.12f);
-    }
-
-    public ImageFetcher getImageFetcher() {
-        if (mImageFetcher == null) {
-            mImageFetcher = (ImageFetcher) mRetainFragment.get(TAG_IMAGE_FETCHER);
-            if (mImageFetcher == null) {
-                mImageFetcher = createImageFetcher();
-                createImageCacheParams();
-                mRetainFragment.put(TAG_IMAGE_FETCHER, mImageFetcher);
-            }
-        }
-
-        return mImageFetcher;
     }
 
     /**
@@ -293,6 +233,7 @@ public abstract class ItemListActivity extends BaseActivity {
      * delivered after SCROLL_STATE_TOUCH_SCROLL messages.
      */
     protected class ScrollListener implements AbsListView.OnScrollListener {
+        private final Context mContext;
 
         private TouchListener mTouchListener = null;
 
@@ -305,7 +246,8 @@ public abstract class ItemListActivity extends BaseActivity {
          * <p/>
          * Subclasses must call this.
          */
-        public ScrollListener() {
+        public ScrollListener(Context context) {
+            mContext = context;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR &&
                     Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
                 mTouchListener = new TouchListener(this);
@@ -328,12 +270,14 @@ public abstract class ItemListActivity extends BaseActivity {
             switch (scrollState) {
                 case OnScrollListener.SCROLL_STATE_IDLE:
                     mListScrolling = false;
+                    Picasso.with(mContext).resumeTag(mContext);
                     maybeOrderVisiblePages(listView);
                     break;
 
                 case OnScrollListener.SCROLL_STATE_FLING:
                 case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
                     mListScrolling = true;
+                    Picasso.with(mContext).pauseTag(mContext);
                     break;
             }
 

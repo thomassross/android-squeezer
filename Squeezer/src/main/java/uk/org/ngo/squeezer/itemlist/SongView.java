@@ -30,7 +30,6 @@ import uk.org.ngo.squeezer.itemlist.action.PlayableItemAction;
 import uk.org.ngo.squeezer.model.Artist;
 import uk.org.ngo.squeezer.model.Song;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 import static android.text.format.DateUtils.formatElapsedTime;
 
@@ -109,7 +108,7 @@ public class SongView extends PlaylistItemView<Song> {
     }
 
     @Override
-    public void bindView(View view, Song item, ImageFetcher imageFetcher) {
+    public void bindView(View view, Song item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());

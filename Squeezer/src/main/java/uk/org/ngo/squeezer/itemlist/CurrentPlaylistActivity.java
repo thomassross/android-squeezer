@@ -44,7 +44,6 @@ import uk.org.ngo.squeezer.model.Song;
 import uk.org.ngo.squeezer.service.IServiceMusicChangedCallback;
 import uk.org.ngo.squeezer.service.IServicePlayersCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 import static uk.org.ngo.squeezer.framework.BaseItemView.ViewHolder;
 
@@ -68,9 +67,8 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
      */
     private class HighlightingListAdapter extends ItemAdapter<Song> {
 
-        public HighlightingListAdapter(ItemView<Song> itemView,
-                ImageFetcher imageFetcher) {
-            super(itemView, imageFetcher);
+        public HighlightingListAdapter(ItemView<Song> itemView) {
+            super(itemView);
         }
 
         @Override
@@ -109,7 +107,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     @Override
     protected ItemAdapter<Song> createItemListAdapter(
             ItemView<Song> itemView) {
-        return new HighlightingListAdapter(itemView, getImageFetcher());
+        return new HighlightingListAdapter(itemView);
     }
 
     @Override

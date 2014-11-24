@@ -17,33 +17,37 @@
 package uk.org.ngo.squeezer.itemlist;
 
 
+import android.content.Context;
 import android.view.View;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.EnumSet;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.ItemListActivity;
 import uk.org.ngo.squeezer.model.Song;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 /**
  * A view that shows a single song with its artwork, and a context menu.
  */
 public class SongViewWithArt extends SongView {
+    private final Context mContext;
 
     @SuppressWarnings("unused")
     private static final String TAG = "SongView";
 
     public SongViewWithArt(ItemListActivity activity) {
         super(activity);
+        mContext = activity;
 
         setViewParams(EnumSet.of(ViewParams.ICON, ViewParams.TWO_LINE, ViewParams.CONTEXT_BUTTON));
         setLoadingViewParams(EnumSet.of(ViewParams.ICON, ViewParams.TWO_LINE));
     }
 
     @Override
-    public void bindView(View view, Song item, ImageFetcher imageFetcher) {
-        super.bindView(view, item, imageFetcher);
+    public void bindView(View view, Song item) {
+        super.bindView(view, item);
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         String artworkUrl = getAlbumArtUrl(item.getArtwork_track_id());
@@ -51,7 +55,12 @@ public class SongViewWithArt extends SongView {
             viewHolder.icon.setImageResource(
                     item.isRemote() ? R.drawable.icon_iradio_noart : R.drawable.icon_album_noart);
         } else {
-            imageFetcher.loadImage(artworkUrl, viewHolder.icon);
+            Picasso.with(mContext)
+                    .load(artworkUrl)
+                    .placeholder(R.drawable.icon_pending_artwork)
+                    .fit()
+                    .centerInside()
+                    .into(viewHolder.icon);
         }
     }
 

@@ -19,7 +19,6 @@ package uk.org.ngo.squeezer.itemlist;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -32,6 +31,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.EnumSet;
 
@@ -55,7 +56,6 @@ import uk.org.ngo.squeezer.model.Genre;
 import uk.org.ngo.squeezer.model.Song;
 import uk.org.ngo.squeezer.model.Year;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public class SongListActivity extends BaseListActivity<Song>
         implements GenreSpinnerCallback, YearSpinnerCallback,
@@ -214,7 +214,12 @@ public class SongListActivity extends BaseListActivity<Song>
             if (artworkUrl == null) {
                 artwork.setImageResource(R.drawable.icon_album_noart);
             } else {
-                getImageFetcher().loadImage(artworkUrl, artwork);
+                Picasso.with(this)
+                        .load(artworkUrl)
+                        .placeholder(R.drawable.icon_pending_artwork)
+                        .fit()
+                        .centerInside()
+                        .into(artwork);
             }
         }
     }
@@ -256,21 +261,6 @@ public class SongListActivity extends BaseListActivity<Song>
 
     private SongViewWithArt songViewLogicFromListLayout() {
         return (listLayout == SongViewDialog.SongListLayout.grid) ? new SongGridView(this) : new SongViewWithArt(this);
-    }
-
-    @Override
-    protected ImageFetcher createImageFetcher() {
-        // Get an ImageFetcher to scale artwork to the size of the icon view.
-        Resources resources = getResources();
-        int height, width;
-        if (listLayout == SongViewDialog.SongListLayout.grid) {
-            height = resources.getDimensionPixelSize(R.dimen.album_art_icon_grid_height);
-            width = resources.getDimensionPixelSize(R.dimen.album_art_icon_grid_width);
-        } else {
-            height = resources.getDimensionPixelSize(R.dimen.album_art_icon_height);
-            width = resources.getDimensionPixelSize(R.dimen.album_art_icon_width);
-        }
-        return super.createImageFetcher(height, width);
     }
 
     @Override

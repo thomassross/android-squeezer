@@ -30,6 +30,11 @@ dependencies {
     // findbugs is required for Proguard to work with Guava.
     compile 'com.google.code.findbugs:jsr305:2.0.2'
 
+    // Picasso (+ OKHttp for disk caching of results).
+    compile 'com.squareup.picasso:picasso:2.4.0'
+    compile 'com.squareup.okhttp:okhttp:2.1.0'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.1.0'
+
     // Changelogs, see https://github.com/cketti/ckChangeLog.
     compile 'de.cketti.library.changelog:ckchangelog:1.2.0'
     compile 'com.crashlytics.android:crashlytics:1.+'
@@ -58,6 +63,7 @@ android {
             proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
             proguardFile "proguard-crashlytics.cfg"
             proguardFile "proguard-guava.cfg"
+            proguardFile "proguard-picasso.cfg"
             proguardFile "proguard-squeezer.cfg"
         }
     }

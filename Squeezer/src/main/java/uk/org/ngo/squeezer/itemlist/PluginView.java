@@ -18,12 +18,14 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.view.View;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.EnumSet;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseItemView;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.model.Plugin;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public abstract class PluginView extends BaseItemView<Plugin> {
 
@@ -34,10 +36,15 @@ public abstract class PluginView extends BaseItemView<Plugin> {
     }
 
     @Override
-    public void bindView(View view, Plugin item, ImageFetcher imageFetcher) {
+    public void bindView(View view, Plugin item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
-        imageFetcher.loadImage(getActivity().getIconUrl(item.getIcon()), viewHolder.icon);
+        Picasso.with(getActivity())
+                .load(getActivity().getIconUrl(item.getIcon()))
+                .placeholder(R.drawable.icon_pending_artwork)
+                .fit()
+                .centerInside()
+                .into(viewHolder.icon);
     }
 }

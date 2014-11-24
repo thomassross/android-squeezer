@@ -126,7 +126,7 @@ public class PlayerListActivity extends ItemListActivity implements
         if (savedInstanceState != null)
             currentPlayer = savedInstanceState.getParcelable(CURRENT_PLAYER);
 
-        mResultsAdapter = new PlayerListAdapter(this, getImageFetcher());
+        mResultsAdapter = new PlayerListAdapter(this);
         mResultsExpandableListView = (ExpandableListView) findViewById(R.id.expandable_list);
         mResultsExpandableListView.setAdapter(mResultsAdapter);
 
@@ -149,7 +149,7 @@ public class PlayerListActivity extends ItemListActivity implements
         });
 
         mResultsExpandableListView.setOnCreateContextMenuListener(mResultsAdapter);
-        mResultsExpandableListView.setOnScrollListener(new ItemListActivity.ScrollListener());
+        mResultsExpandableListView.setOnScrollListener(new ItemListActivity.ScrollListener(this));
 
         setIgnoreVolumeChange(true);
     }

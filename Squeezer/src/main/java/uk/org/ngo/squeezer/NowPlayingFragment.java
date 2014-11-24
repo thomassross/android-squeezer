@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -58,6 +57,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,8 +87,6 @@ import uk.org.ngo.squeezer.service.IServiceMusicChangedCallback;
 import uk.org.ngo.squeezer.service.IServicePlayersCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
-import uk.org.ngo.squeezer.util.ImageCache.ImageCacheParams;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public class NowPlayingFragment extends Fragment implements
         HasUiThread, View.OnCreateContextMenuListener {
@@ -150,16 +149,6 @@ public class NowPlayingFragment extends Fragment implements
     private int secondsTotal;
 
     private final static int UPDATE_TIME = 1;
-
-    /**
-     * ImageFetcher for album cover art
-     */
-    private ImageFetcher mImageFetcher;
-
-    /**
-     * ImageCache parameters for the album art.
-     */
-    private ImageCacheParams mImageCacheParams;
 
     private final Handler uiThreadHandler = new UiThreadHandler(this);
 
@@ -294,27 +283,11 @@ public class NowPlayingFragment extends Fragment implements
             Display display = mActivity.getWindowManager().getDefaultDisplay();
             DisplayMetrics displayMetrics = new DisplayMetrics();
             display.getMetrics(displayMetrics);
-            mImageFetcher = new ImageFetcher(mActivity,
-                    Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels));
         } else {
             v = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
 
             mProgressBar = (ProgressBar) v.findViewById(R.id.progressbar);
-
-            // Get an ImageFetcher to scale artwork to the size of the icon view.
-            Resources resources = getResources();
-            int iconSize = (Math.max(
-                    resources.getDimensionPixelSize(R.dimen.album_art_icon_height),
-                    resources.getDimensionPixelSize(R.dimen.album_art_icon_width)));
-            mImageFetcher = new ImageFetcher(mActivity, iconSize);
         }
-
-        // TODO: Clean this up.  I think a better approach is to create the cache
-        // in the activity that hosts the fragment, and make the cache available to
-        // the fragment (or, make the cache a singleton across the whole app).
-        mImageFetcher.setLoadingImage(R.drawable.icon_pending_artwork);
-        mImageCacheParams = new ImageCacheParams(mActivity, "artwork");
-        mImageCacheParams.setMemCacheSizePercent(mActivity, 0.12f);
 
         albumArt = (ImageView) v.findViewById(R.id.album);
         trackText = (TextView) v.findViewById(R.id.trackname);
@@ -606,7 +579,8 @@ public class NowPlayingFragment extends Fragment implements
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
                     if (!playerAdapter.getItem(position).equals(mService.getActivePlayer())) {
-                        Log.i(TAG, "onNavigationItemSelected.setActivePlayer(" + playerAdapter.getItem(position) + ")");
+                        Log.i(TAG, "onNavigationItemSelected.setActivePlayer(" + playerAdapter.getItem(
+                                position) + ")");
                         mService.setActivePlayer(playerAdapter.getItem(position));
                     }
                     return true;
@@ -652,8 +626,6 @@ public class NowPlayingFragment extends Fragment implements
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume...");
-
-        mImageFetcher.addImageCache(mActivity.getSupportFragmentManager(), mImageCacheParams);
 
         // Start it and have it run forever (until it shuts itself down).
         // This is required so swapping out the activity (and unbinding the
@@ -782,12 +754,12 @@ public class NowPlayingFragment extends Fragment implements
             return;
         }
 
-        // The image fetcher might not be ready yet.
-        if (mImageFetcher == null) {
-            return;
-        }
-
-        mImageFetcher.loadImage(song.getArtworkUrl(mService), albumArt);
+        Picasso.with(mActivity)
+                .load(song.getArtworkUrl(mService))
+                .placeholder(R.drawable.icon_pending_artwork)
+                .fit()
+                .centerInside()
+                .into(albumArt);
     }
 
     private boolean setSecondsElapsed(int seconds) {
@@ -849,7 +821,6 @@ public class NowPlayingFragment extends Fragment implements
         Log.d(TAG, "onPause...");
 
         clearConnectingDialog();
-        mImageFetcher.closeCache();
 
         if (new Preferences(mActivity).isAutoConnect()) {
             mActivity.unregisterReceiver(broadcastReceiver);

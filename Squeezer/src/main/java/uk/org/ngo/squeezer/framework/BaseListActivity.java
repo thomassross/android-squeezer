@@ -106,7 +106,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
             }
         });
 
-        mListView.setOnScrollListener(new ScrollListener());
+        mListView.setOnScrollListener(new ScrollListener(this));
 
         mListView.setRecyclerListener(new RecyclerListener() {
             @Override
@@ -264,7 +264,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     }
 
     protected ItemAdapter<T> createItemListAdapter(ItemView<T> itemView) {
-        return new ItemAdapter<T>(itemView, getImageFetcher());
+        return new ItemAdapter<T>(itemView);
     }
 
     public void onItemsReceived(final int count, final int start, final List<T> items) {
@@ -288,28 +288,5 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     @Override
     public Object getClient() {
         return this;
-    }
-
-    protected class ScrollListener extends ItemListActivity.ScrollListener {
-
-        ScrollListener() {
-            super();
-        }
-
-        /**
-         * Pauses cache disk fetches if the user is flinging the list, or if their finger is still
-         * on the screen.
-         */
-        @Override
-        public void onScrollStateChanged(AbsListView listView, int scrollState) {
-            super.onScrollStateChanged(listView, scrollState);
-
-            if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING ||
-                    scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                getImageFetcher().setPauseWork(true);
-            } else {
-                getImageFetcher().setPauseWork(false);
-            }
-        }
     }
 }
