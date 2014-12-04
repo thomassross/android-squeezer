@@ -50,7 +50,7 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
 
     private Player mActivePlayer;
 
-    private List<Player> mPlayers = new ImmutableList.Builder<Player>().build();
+    private final List<Player> mPlayers = new ImmutableList.Builder<Player>().build();
 
     /** Joins elements together with ' - ', skipping nulls. */
     private static final Joiner mJoiner = Joiner.on(" - ").skipNulls();

@@ -32,7 +32,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class GenreSpinner {
 
-    final GenreSpinnerCallback callback;
+    private final GenreSpinnerCallback callback;
 
     private final ItemListActivity activity;
 
