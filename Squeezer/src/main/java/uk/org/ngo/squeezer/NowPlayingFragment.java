@@ -103,7 +103,7 @@ public class NowPlayingFragment extends Fragment implements
 
     private TextView trackText;
 
-    ImageView btnContextMenu;
+    private ImageView btnContextMenu;
 
     private TextView currentTime;
 
@@ -609,12 +609,6 @@ public class NowPlayingFragment extends Fragment implements
         mService = service;
 
         maybeRegisterCallbacks(mService);
-        uiThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateUIFromServiceState();
-            }
-        });
 
         // Assume they want to connect (unless manually disconnected).
         if (!isConnected() && !isManualDisconnect()) {
@@ -636,7 +630,6 @@ public class NowPlayingFragment extends Fragment implements
 
         if (mService != null) {
             maybeRegisterCallbacks(mService);
-            updateUIFromServiceState();
         }
 
         if (new Preferences(mActivity).isAutoConnect()) {
@@ -838,9 +831,7 @@ public class NowPlayingFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         if (mService != null) {
-            if (serviceConnection != null) {
-                mActivity.unbindService(serviceConnection);
-            }
+            mActivity.unbindService(serviceConnection);
         }
     }
 
@@ -1178,6 +1169,7 @@ public class NowPlayingFragment extends Fragment implements
                 @Override
                 public void run() {
                     updatePowerMenuItems(canPowerOn(), canPowerOff());
+                    updateUIFromServiceState();
                 }
             });
         }

@@ -55,6 +55,7 @@ import uk.org.ngo.squeezer.model.Artist;
 import uk.org.ngo.squeezer.model.Genre;
 import uk.org.ngo.squeezer.model.Song;
 import uk.org.ngo.squeezer.model.Year;
+import uk.org.ngo.squeezer.service.IServiceHandshakeCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class SongListActivity extends BaseListActivity<Song>
@@ -119,7 +120,6 @@ public class SongListActivity extends BaseListActivity<Song>
     public void setGenre(Genre genre) {
         this.genre = genre;
     }
-
 
     private SongView songViewLogic;
 
@@ -201,9 +201,16 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     @Override
-    protected void onServiceConnected(@NonNull ISqueezeService service) {
-        super.onServiceConnected(service);
+    protected void registerCallback(@NonNull ISqueezeService service) {
+        super.registerCallback(service);
+        service.registerHandshakeCallback(mHandshakeCallback);
+    }
 
+    /**
+     * Updates the artwork in the UI. Can only be called after the server handshake has
+     * completed, as the IP port is required to construct the artwork URL.
+     */
+    private void updateArtwork() {
         // Set artwork that requires a service connection.
         if (album != null) {
             ImageView artwork = (ImageView) findViewById(R.id.album);
@@ -224,6 +231,26 @@ public class SongListActivity extends BaseListActivity<Song>
         }
     }
 
+    /**
+     * Ensures that the artwork in the UI is updated after the server handshake completes.
+     */
+    private final IServiceHandshakeCallback mHandshakeCallback = new IServiceHandshakeCallback() {
+        @Override
+        public void onHandshakeCompleted() {
+            getUIThreadHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    updateArtwork();
+                }
+            });
+        }
+
+        @Override
+        public Object getClient() {
+            return SongListActivity.this;
+        }
+    };
+
     public static void show(Context context, Item... items) {
         final Intent intent = new Intent(context, SongListActivity.class);
         for (Item item : items) {
@@ -231,7 +258,6 @@ public class SongListActivity extends BaseListActivity<Song>
         }
         context.startActivity(intent);
     }
-
 
     @Override
     public ItemView<Song> createItemView() {

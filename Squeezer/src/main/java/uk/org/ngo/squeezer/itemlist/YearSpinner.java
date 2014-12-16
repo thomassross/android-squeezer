@@ -32,7 +32,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class YearSpinner {
 
-    final YearSpinnerCallback callback;
+    private final YearSpinnerCallback callback;
 
     private final ItemListActivity activity;
 
