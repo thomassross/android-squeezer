@@ -105,16 +105,6 @@ public abstract class ItemListActivity extends BaseActivity {
     }
 
     @Override
-    protected void onServiceConnected(@NonNull ISqueezeService service) {
-        super.onServiceConnected(service);
-
-        // Order any pages that were requested before the service was bound.
-        while (!mOrderedPagesBeforeHandshake.empty()) {
-            maybeOrderPage(mOrderedPagesBeforeHandshake.pop());
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
