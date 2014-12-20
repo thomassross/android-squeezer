@@ -37,9 +37,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
-import uk.org.ngo.squeezer.BuildConfig;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.VolumePanel;
@@ -126,8 +123,6 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
 
         mTheme.onCreate(this);
         ActionBar actionBar = getSupportActionBar();
-
-        Picasso.with(this).setIndicatorsEnabled(BuildConfig.DEBUG);
 
         actionBar.setIcon(R.drawable.ic_launcher);
         actionBar.setHomeButtonEnabled(true);
