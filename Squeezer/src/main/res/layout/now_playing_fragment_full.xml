@@ -19,16 +19,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:paddingLeft="8dp">
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar"/>
 
     <uk.org.ngo.squeezer.widget.SquareImageView
         android:id="@+id/album"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/toolbar"
         android:cropToPadding="false"
         android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:paddingTop="8dp"
         android:scaleType="fitCenter"/>
@@ -53,6 +55,7 @@
             android:gravity="left|top"
             android:hint="@string/unknown_track"
             android:marqueeRepeatLimit="marquee_forever"
+            android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingTop="2dp"
             android:singleLine="true"
@@ -70,6 +73,7 @@
         android:gravity="left|top"
         android:hint="@string/unknown_album"
         android:paddingTop="4dp"
+        android:paddingLeft="8dp"
         android:singleLine="true"
         android:textAppearance="@style/SqueezerTextItemSmall"/>
 
@@ -81,6 +85,7 @@
         android:layout_toLeftOf="@id/context_menu"
         android:gravity="left|top"
         android:hint="@string/unknown_artist"
+        android:paddingLeft="8dp"
         android:paddingTop="4dp"
         android:singleLine="true"
         android:textAppearance="@style/SqueezerTextItemSmall"/>
@@ -104,6 +109,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/media_buttons"
         android:layout_alignBottom="@+id/seekbar"
+        android:paddingLeft="8dp"
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@+id/seekbar"
         android:layout_below="@id/artistname"
@@ -144,6 +150,7 @@
         android:layout_below="@id/seekbar"
         android:gravity="center"
         android:orientation="horizontal"
+        android:paddingLeft="8dp"
         android:paddingBottom="4dp"
         android:paddingRight="8dp">
 

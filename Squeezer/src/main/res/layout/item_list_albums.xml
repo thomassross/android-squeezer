@@ -24,6 +24,8 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
+    <include layout="@layout/toolbar"/>
+
     <TextView
         android:id="@+id/header"
         android:layout_width="fill_parent"

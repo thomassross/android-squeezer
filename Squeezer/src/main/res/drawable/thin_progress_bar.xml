@@ -11,7 +11,7 @@
         <clip>
             <shape>
                 <!-- #ff0099cc is android:color/holo_blue_dark. -->
-                <solid android:color="#ff0099cc"/>
+                <solid android:color="@color/accent"/>
             </shape>
         </clip>
     </item>

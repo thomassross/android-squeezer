@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-  Copyright 2011 The Android Open Source Project
+  Copyright (c) 2014 Google Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,4 +19,12 @@
 <resources>
     <color name="panel_background_color">#444</color>
     <color name="list_item_current_background">#281b69</color>
+
+    <!-- Colors from uploading playstore512.png to http://www.palettefx.com/ -->
+    <color name="primary">#cc5522</color>
+    <color name="primary_dark">#883311</color>
+    <color name="accent">#cc8855</color>
+
+    <color name="text_primary_light">#221100</color>
+    <color name="text_secondary_light">#443322</color>
 </resources>

@@ -27,16 +27,18 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import uk.org.ngo.squeezer.HomeActivity;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.VolumePanel;
@@ -50,6 +52,8 @@ import uk.org.ngo.squeezer.service.SqueezeService;
 import uk.org.ngo.squeezer.service.event.PlayerVolume;
 import uk.org.ngo.squeezer.util.SqueezePlayer;
 import uk.org.ngo.squeezer.util.ThemeManager;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Common base class for all activities in Squeezer.
@@ -116,14 +120,31 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     };
 
     @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+
+        Toolbar toolbar = checkNotNull((Toolbar) findViewById(R.id.toolbar),
+                "getContentView() did not return a view containing R.id.toolbar");
+
+        if (! (this instanceof HomeActivity)) {
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_left_white_48dp);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    HomeActivity.show(BaseActivity.this);
+                }
+            });
+        }
+
+        setSupportActionBar(toolbar);
+    }
+
+    @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mTheme.onCreate(this);
-        ActionBar actionBar = getSupportActionBar();
 
-        actionBar.setIcon(R.drawable.ic_launcher);
-        actionBar.setHomeButtonEnabled(true);
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
         Log.d(getTag(), "did bindService; serviceStub = " + getService());
