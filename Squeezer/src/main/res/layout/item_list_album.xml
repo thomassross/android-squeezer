@@ -93,20 +93,15 @@
             android:layout_toRightOf="@id/album"
             android:layout_below="@id/artistname"/>
 
-        <uk.org.ngo.squeezer.widget.ListItemImageButton
-            android:id="@+id/context_menu"
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <include
+            layout="@layout/context_menu_image_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/list_selector_holo_dark"
-            android:contentDescription="@string/app_name"
-            android:minWidth="48dp"
-            android:paddingRight="0dp"
-            android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"
+            android:layout_below="@+id/artistname"
             android:layout_alignWithParentIfMissing="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/artistname"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp"
+            android:visibility="visible" />
     </RelativeLayout>
 
     <ListView
