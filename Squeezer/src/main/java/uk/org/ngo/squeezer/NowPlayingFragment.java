@@ -34,8 +34,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -422,7 +424,15 @@ public class NowPlayingFragment extends Fragment implements
             // Clicking on the layout goes to NowPlayingActivity.
             v.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    NowPlayingActivity.show(mActivity);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            mActivity,
+                            Pair.create((View)albumArt, "albumArtwork"),
+                            Pair.create((View)trackText, "trackname"),
+                            Pair.create((View)albumText, "albumname"),
+                            Pair.create((View)playPauseButton, "playpause"),
+                            Pair.create((View)mProgressBar, "progressBar")
+                    );
+                    NowPlayingActivity.show(mActivity, options);
                 }
             });
         }

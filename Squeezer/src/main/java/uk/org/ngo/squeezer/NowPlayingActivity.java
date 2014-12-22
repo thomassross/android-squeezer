@@ -16,9 +16,13 @@
 
 package uk.org.ngo.squeezer;
 
-import android.content.Context;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
 
 import uk.org.ngo.squeezer.framework.BaseActivity;
 
@@ -35,9 +39,19 @@ public class NowPlayingActivity extends BaseActivity {
         setContentView(R.layout.now_playing);
     }
 
-    public static void show(Context context) {
-        final Intent intent = new Intent(context, NowPlayingActivity.class)
+    public static void show(Activity prevActivity) {
+        final Intent intent = new Intent(prevActivity, NowPlayingActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        context.startActivity(intent);
+        prevActivity.startActivity(intent);
+    }
+
+    @TargetApi(16)
+    public static void show(Activity prevActivity, @NonNull ActivityOptionsCompat options) {
+        final Intent intent = new Intent(prevActivity, NowPlayingActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            prevActivity.startActivity(intent, options.toBundle());
+        }
+        prevActivity.startActivity(intent);
     }
 }
