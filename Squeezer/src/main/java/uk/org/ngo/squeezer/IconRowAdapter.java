@@ -54,8 +54,12 @@ public class IconRowAdapter extends BaseAdapter {
         return mRows.get(position).getIcon();
     }
 
-    public CharSequence getItem(int position) {
-        return mRows.get(position).getText();
+    public IconRow getItem(int position) {
+        return mRows.get(position);
+    }
+
+    public String getText(int position) {
+        return mRows.get(position).getText().toString();
     }
 
     public long getItemId(int position) {
