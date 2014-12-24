@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.service;
 
 import android.net.wifi.WifiManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -28,19 +29,27 @@ import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Squeezer;
 import uk.org.ngo.squeezer.model.Player;
+import uk.org.ngo.squeezer.model.PlayerState;
+import uk.org.ngo.squeezer.service.event.ConnectionChanged;
 
 class ConnectionState {
 
     private static final String TAG = "ConnectionState";
+
+    /** {@link java.util.regex.Pattern} that splits strings on semi-colons. */
+    private static final Pattern mSemicolonSplitPattern = Pattern.compile(";");
 
     // Incremented once per new connection and given to the Thread
     // that's listening on the socket.  So if it dies and it's not the
@@ -70,7 +79,9 @@ class ConnectionState {
     private final AtomicReference<PrintWriter> socketWriter = new AtomicReference<PrintWriter>();
 
     private final AtomicReference<Player> activePlayer = new AtomicReference<Player>();
-    private final List<Player> players = new CopyOnWriteArrayList<Player>();
+
+    /** Map Player IDs to the {@link uk.org.ngo.squeezer.model.Player} with that ID. */
+    private final Map<String, Player> mPlayers = new HashMap<String, Player>();
 
     // Where we connected (or are connecting) to:
     private final AtomicReference<String> currentHost = new AtomicReference<String>();
@@ -136,7 +147,6 @@ class ConnectionState {
         }
         socketRef.set(null);
         socketWriter.set(null);
-        isConnected.set(false);
 
         setConnectionState(service, false, false, loginFailed);
 
@@ -152,41 +162,53 @@ class ConnectionState {
             isConnectInProgress.set(false);
         }
 
-        service.executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                for (IServiceConnectionCallback callback : service.mConnectionCallbacks) {
-                    callback.onConnectionChanged(currentState, postConnect, loginFailed);
-                }
-            }
-        });
+        service.mEventBus.postSticky(new ConnectionChanged(currentState, postConnect, loginFailed));
     }
 
-    Player getActivePlayer() {
+    @Nullable Player getActivePlayer() {
         return activePlayer.get();
     }
 
-    void setActivePlayer(Player player) {
+    void setActivePlayer(@Nullable Player player) {
         activePlayer.set(player);
     }
 
+
+    @Nullable public PlayerState getActivePlayerState() {
+        if (activePlayer.get() == null)
+            return null;
+
+        return activePlayer.get().getPlayerState();
+    }
+
+    @Nullable public PlayerState getPlayerState(String playerId) {
+        if (!mPlayers.containsKey(playerId))
+            return null;
+
+        return mPlayers.get(playerId).getPlayerState();
+    }
+
     List<Player> getPlayers() {
-        return players;
+        return new ArrayList<Player>(mPlayers.values());  // XXX: Immutable list? Return the map?
     }
 
     void clearPlayers() {
-        this.players.clear();
+        mPlayers.clear();
+    }
+
+    public void addPlayer(Player player) {
+        mPlayers.put(player.getId(), player);
     }
 
     void addPlayers(List<Player> players) {
-        this.players.addAll(players);
+        for (Player player : players) {
+            mPlayers.put(player.getId(), player);
+        }
     }
 
+    @Nullable
     Player getPlayer(String playerId) {
-        for (Player player : players)
-            if (playerId.equals(player.getId()))
-                return player;
-        return null;
+        return mPlayers.get(playerId);
     }
 
     PrintWriter getSocketWriter() {
@@ -204,7 +226,7 @@ class ConnectionState {
     }
 
     public void setMediaDirs(String dirs) {
-        mediaDirs.set(dirs.split(";"));
+        mediaDirs.set(mSemicolonSplitPattern.split(dirs));
     }
 
     void setCanFavorites(boolean value) {

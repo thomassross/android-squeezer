@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer.itemlist;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +30,9 @@ import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.itemlist.dialog.PlaylistsNewDialog;
 import uk.org.ngo.squeezer.model.Playlist;
+import uk.org.ngo.squeezer.service.ISqueezeService;
+import uk.org.ngo.squeezer.service.event.PlaylistCreateFailed;
+import uk.org.ngo.squeezer.service.event.PlaylistRenameFailed;
 
 public class PlaylistsActivity extends BaseListActivity<Playlist> {
 
@@ -80,7 +84,12 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
      * Rename the playlist previously set as context.
      */
     public void playlistRename(String newName) {
-        getService().playlistsRename(currentPlaylist, newName);
+        ISqueezeService service = getService();
+        if (service == null) {
+            return;
+        }
+
+        service.playlistsRename(currentPlaylist, newName);
         oldName = currentPlaylist.getName();
         currentPlaylist.setName(newName);
         getItemAdapter().notifyDataSetChanged();
@@ -92,14 +101,8 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     }
 
     @Override
-    protected void registerCallback() {
-        super.registerCallback();
-        getService().registerPlaylistMaintenanceCallback(playlistMaintenanceCallback);
-    }
-
-    @Override
-    protected void orderPage(int start) {
-        getService().playlists(start, this);
+    protected void orderPage(@NonNull ISqueezeService service, int start) {
+        service.playlists(start, this);
     }
 
     @Override
@@ -121,6 +124,19 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.playlistsmenu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Sets the enabled state of the R.menu.playlistsmenu items.
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final MenuItem item = menu.findItem(R.id.menu_item_playlists_new);
+        final boolean boundToService = getService() != null;
+
+        item.setEnabled(boundToService);
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -149,26 +165,14 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
         });
     }
 
-    private final IServicePlaylistMaintenanceCallback playlistMaintenanceCallback
-            = new IServicePlaylistMaintenanceCallback() {
+    public void onEvent(PlaylistCreateFailed event) {
+        showServiceMessage(event.mFailureMessage);
+    }
 
-        @Override
-        public void onRenameFailed(String msg) {
-            if (currentIndex != -1) {
-                currentPlaylist.setName(oldName);
-            }
-            showServiceMessage(msg);
+    public void onEvent(PlaylistRenameFailed event) {
+        if (currentIndex != -1) {
+            currentPlaylist.setName(oldName);
         }
-
-        @Override
-        public void onCreateFailed(String msg) {
-            showServiceMessage(msg);
-        }
-
-        @Override
-        public Object getClient() {
-            return PlaylistsActivity.this;
-        }
-    };
-
+        showServiceMessage(event.mFailureMessage);
+    }
 }

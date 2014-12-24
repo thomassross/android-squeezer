@@ -112,5 +112,4 @@ public class UtilTest extends TestCase {
         assertEquals("album:100 80'er hits (disc 1)",
                 Util.decode("album%3A100%2080'er%20hits%20(disc%201)"));
     }
-
 }

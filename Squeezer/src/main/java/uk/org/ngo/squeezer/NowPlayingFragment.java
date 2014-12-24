@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
@@ -58,6 +60,7 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import uk.org.ngo.squeezer.dialog.AboutDialog;
@@ -76,14 +79,17 @@ import uk.org.ngo.squeezer.model.PlayerState.PlayStatus;
 import uk.org.ngo.squeezer.model.PlayerState.RepeatStatus;
 import uk.org.ngo.squeezer.model.PlayerState.ShuffleStatus;
 import uk.org.ngo.squeezer.model.Song;
-import uk.org.ngo.squeezer.service.IServiceCallback;
-import uk.org.ngo.squeezer.service.IServiceConnectionCallback;
-import uk.org.ngo.squeezer.service.IServiceHandshakeCallback;
-import uk.org.ngo.squeezer.service.IServiceMusicChangedCallback;
-import uk.org.ngo.squeezer.service.IServicePlayersCallback;
-import uk.org.ngo.squeezer.service.IServiceVolumeCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
+import uk.org.ngo.squeezer.service.event.ConnectionChanged;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
+import uk.org.ngo.squeezer.service.event.MusicChanged;
+import uk.org.ngo.squeezer.service.event.PlayStatusChanged;
+import uk.org.ngo.squeezer.service.event.PlayersChanged;
+import uk.org.ngo.squeezer.service.event.PowerStatusChanged;
+import uk.org.ngo.squeezer.service.event.RepeatStatusChanged;
+import uk.org.ngo.squeezer.service.event.ShuffleStatusChanged;
+import uk.org.ngo.squeezer.service.event.SongTimeChanged;
 import uk.org.ngo.squeezer.util.ImageCache.ImageCacheParams;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 
@@ -94,6 +100,7 @@ public class NowPlayingFragment extends Fragment implements
 
     private BaseActivity mActivity;
 
+    @Nullable
     private ISqueezeService mService = null;
 
     private TextView albumText;
@@ -102,7 +109,7 @@ public class NowPlayingFragment extends Fragment implements
 
     private TextView trackText;
 
-    ImageView btnContextMenu;
+    private ImageView btnContextMenu;
 
     private TextView currentTime;
 
@@ -122,8 +129,6 @@ public class NowPlayingFragment extends Fragment implements
 
     private MenuItem menu_item_search;
 
-    private MenuItem menu_item_volume;
-
     private ImageButton playPauseButton;
 
     private ImageButton nextButton;
@@ -141,12 +146,6 @@ public class NowPlayingFragment extends Fragment implements
 
     /** In mini-mode, shows the current progress through the track. */
     private ProgressBar mProgressBar;
-
-    /**
-     * Volume control panel.
-     */
-    private boolean ignoreVolumeChange;
-    private VolumePanel mVolumePanel;
 
     // Updating the seekbar
     private boolean updateSeekBar = true;
@@ -223,8 +222,7 @@ public class NowPlayingFragment extends Fragment implements
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             Log.v(TAG, "ServiceConnection.onServiceConnected()");
-            mService = (ISqueezeService) binder;
-            NowPlayingFragment.this.onServiceConnected();
+            NowPlayingFragment.this.onServiceConnected((ISqueezeService) binder);
         }
 
         @Override
@@ -448,6 +446,11 @@ public class NowPlayingFragment extends Fragment implements
             return;
         }
 
+        if (!connected && !postConnect && !loginFailure && !isManualDisconnect()) {
+            DisconnectedActivity.show(mActivity);
+            return;
+        }
+
         if (postConnect) {
             clearConnectingDialog();
             if (!connected) {
@@ -471,7 +474,8 @@ public class NowPlayingFragment extends Fragment implements
                     .show(mActivity.getSupportFragmentManager(), "AuthenticationDialog");
         }
 
-        setMenuItemStateFromConnection();
+        // Ensure that option menu item state is adjusted as appropriate.
+        getActivity().supportInvalidateOptionsMenu();
 
         if (mFullHeightLayout) {
             nextButton.setEnabled(connected);
@@ -483,7 +487,8 @@ public class NowPlayingFragment extends Fragment implements
         if (!connected) {
             updateSongInfo(null);
 
-            playPauseButton.setImageResource(R.drawable.presence_online); // green circle
+            playPauseButton.setImageResource(
+                    mActivity.getAttributeValue(R.attr.ic_action_av_connect));
 
             if (mFullHeightLayout) {
                 albumArt.setImageResource(R.drawable.icon_album_noart_fullscreen);
@@ -491,7 +496,7 @@ public class NowPlayingFragment extends Fragment implements
                 prevButton.setImageResource(0);
                 shuffleButton.setImageResource(0);
                 repeatButton.setImageResource(0);
-                updatePlayerDropDown(null, null);
+                updatePlayerDropDown(Collections.<Player>emptyList(), null);
                 artistText.setText(getText(R.string.disconnected_text));
                 currentTime.setText("--:--");
                 totalTime.setText("--:--");
@@ -504,8 +509,10 @@ public class NowPlayingFragment extends Fragment implements
             }
         } else {
             if (mFullHeightLayout) {
-                nextButton.setImageResource(R.drawable.ic_action_next);
-                prevButton.setImageResource(R.drawable.ic_action_previous);
+                nextButton.setImageResource(
+                        mActivity.getAttributeValue(R.attr.ic_action_av_next));
+                prevButton.setImageResource(
+                        mActivity.getAttributeValue(R.attr.ic_action_av_previous));
                 seekBar.setEnabled(true);
             } else {
                 mProgressBar.setEnabled(true);
@@ -515,19 +522,23 @@ public class NowPlayingFragment extends Fragment implements
 
     private void updatePlayPauseIcon(PlayStatus playStatus) {
         playPauseButton
-                .setImageResource((playStatus == PlayStatus.play) ? R.drawable.ic_action_pause
-                        : R.drawable.ic_action_play);
+                .setImageResource((playStatus == PlayStatus.play) ?
+                        mActivity.getAttributeValue(R.attr.ic_action_av_pause)
+                        : mActivity.getAttributeValue(R.attr.ic_action_av_play));
+
     }
 
     private void updateShuffleStatus(ShuffleStatus shuffleStatus) {
         if (mFullHeightLayout && shuffleStatus != null) {
-            shuffleButton.setImageResource(shuffleStatus.getIcon());
+            shuffleButton.setImageResource(
+                    mActivity.getAttributeValue(shuffleStatus.getIcon()));
         }
     }
 
     private void updateRepeatStatus(RepeatStatus repeatStatus) {
         if (mFullHeightLayout && repeatStatus != null) {
-            repeatButton.setImageResource(repeatStatus.getIcon());
+            repeatButton.setImageResource(
+                    mActivity.getAttributeValue(repeatStatus.getIcon()));
         }
     }
 
@@ -562,56 +573,86 @@ public class NowPlayingFragment extends Fragment implements
         }
     }
 
-    private void updatePlayerDropDown(List<Player> players, Player activePlayer) {
+    /**
+     * Manages the list of connected players in the action bar.
+     *
+     * @param players A list of players to show. May be empty (use {@code
+     * Collections.&lt;Player>emptyList()}) but not null.
+     * @param activePlayer The currently active player. May be null.
+     */
+    private void updatePlayerDropDown(@NonNull List<Player> players,
+            @Nullable Player activePlayer) {
         if (!isAdded()) {
             return;
         }
 
+        // Only include players that are connected to the server.
+        ArrayList<Player> connectedPlayers = new ArrayList<Player>();
+        for (Player player : players) {
+            if (player.getConnected()) {
+                connectedPlayers.add(player);
+            }
+        }
+
         ActionBar actionBar = mActivity.getSupportActionBar();
-        if (players != null) {
+
+        // If there are multiple players connected then show a spinner allowing the user to
+        // choose between them.
+        if (connectedPlayers.size() > 1) {
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            // Make a copy, cause ArrayAdapter doesn't like it's data modified from a background thread
-            ArrayList<Player> playerList = new ArrayList<Player>(players);
-            final ArrayAdapter<Player> playerAdapter = new ArrayAdapter<Player>(mActivity, android.R.layout.simple_spinner_dropdown_item, playerList) {
+            final ArrayAdapter<Player> playerAdapter = new ArrayAdapter<Player>(
+                    actionBar.getThemedContext(), android.R.layout.simple_spinner_dropdown_item,
+                    connectedPlayers) {
                 @Override
                 public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                    return Util.getSpinnerItemView(mActivity, convertView, parent, getItem(position).getName());
+                    return Util.getActionBarSpinnerItemView(getContext(), convertView, parent,
+                            getItem(position).getName());
                 }
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
-                    return Util.getSpinnerItemView(mActivity, convertView, parent, getItem(position).getName());
+                    return Util.getActionBarSpinnerItemView(getContext(), convertView, parent,
+                            getItem(position).getName());
                 }
             };
-            actionBar.setListNavigationCallbacks(playerAdapter, new ActionBar.OnNavigationListener() {
-                @Override
-                public boolean onNavigationItemSelected(int position, long id) {
-                    if (!playerAdapter.getItem(position).equals(mService.getActivePlayer())) {
-                        Log.i(TAG, "onNavigationItemSelected.setActivePlayer(" + playerAdapter.getItem(position) + ")");
-                        mService.setActivePlayer(playerAdapter.getItem(position));
-                    }
-                    return true;
-                }
-            });
+            actionBar.setListNavigationCallbacks(playerAdapter,
+                    new ActionBar.OnNavigationListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(int position, long id) {
+                            if (!playerAdapter.getItem(position)
+                                    .equals(mService.getActivePlayer())) {
+                                Log.i(TAG,
+                                        "onNavigationItemSelected.setActivePlayer(" + playerAdapter
+                                                .getItem(position) + ")");
+                                mService.setActivePlayer(playerAdapter.getItem(position));
+                            }
+                            return true;
+                        }
+                    });
             if (activePlayer != null) {
                 actionBar.setSelectedNavigationItem(playerAdapter.getPosition(activePlayer));
             }
         } else {
+            // 0 or 1 players, disable the spinner, and either show the sole player in the
+            // action bar, or the app name if there are no players.
             actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle(R.string.app_name);
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+
+            if (connectedPlayers.size() == 1) {
+                actionBar.setTitle(connectedPlayers.get(0).getName());
+            } else {
+                // TODO: Alert the user if there are no connected players.
+                actionBar.setTitle(R.string.app_name);
+            }
         }
     }
 
-    protected void onServiceConnected() {
+    protected void onServiceConnected(@NonNull ISqueezeService service) {
         Log.v(TAG, "Service bound");
-        maybeRegisterCallbacks();
-        uiThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateUIFromServiceState();
-            }
-        });
+        mService = service;
+
+        maybeRegisterCallbacks(mService);
 
         // Assume they want to connect (unless manually disconnected).
         if (!isConnected() && !isManualDisconnect()) {
@@ -624,8 +665,6 @@ public class NowPlayingFragment extends Fragment implements
         super.onResume();
         Log.d(TAG, "onResume...");
 
-        mVolumePanel = new VolumePanel(mActivity);
-
         mImageFetcher.addImageCache(mActivity.getSupportFragmentManager(), mImageCacheParams);
 
         // Start it and have it run forever (until it shuts itself down).
@@ -636,8 +675,7 @@ public class NowPlayingFragment extends Fragment implements
         mActivity.startService(new Intent(mActivity, SqueezeService.class));
 
         if (mService != null) {
-            maybeRegisterCallbacks();
-            updateUIFromServiceState();
+            maybeRegisterCallbacks(mService);
         }
 
         if (new Preferences(mActivity).isAutoConnect()) {
@@ -654,14 +692,10 @@ public class NowPlayingFragment extends Fragment implements
     /**
      * This is called when the service is first connected, and whenever the activity is resumed.
      */
-    private void maybeRegisterCallbacks() {
+    private void maybeRegisterCallbacks(@NonNull ISqueezeService service) {
         if (!mRegisteredCallbacks) {
-            mService.registerCallback(serviceCallback);
-            mService.registerConnectionCallback(connectionCallback);
-            mService.registerHandshakeCallback(handshakeCallback);
-            mService.registerMusicChangedCallback(musicChangedCallback);
-            mService.registerPlayersCallback(playersCallback);
-            mService.registerVolumeCallback(volumeCallback);
+            service.getEventBus().registerSticky(this);
+
             mRegisteredCallbacks = true;
         }
     }
@@ -676,6 +710,11 @@ public class NowPlayingFragment extends Fragment implements
         setConnected(connected, false, false);
         if (connected) {
             PlayerState playerState = getPlayerState();
+
+            // May be no players connected.
+            if (playerState == null)
+                return;
+
             updateSongInfo(playerState.getCurrentSong());
             updatePlayPauseIcon(playerState.getPlayStatus());
             updateTimeDisplayTo(playerState.getCurrentTimeSecond(),
@@ -738,7 +777,7 @@ public class NowPlayingFragment extends Fragment implements
 
     // Should only be called from the UI thread.
     private void updateAlbumArt(Song song) {
-        if (song == null || song.getArtworkUrl(mService) == null) {
+        if (song == null || !song.hasArtwork()) {
             if (mFullHeightLayout) {
                 albumArt.setImageResource(song != null && song.isRemote()
                         ? R.drawable.icon_iradio_noart_fullscreen
@@ -817,7 +856,6 @@ public class NowPlayingFragment extends Fragment implements
     public void onPause() {
         Log.d(TAG, "onPause...");
 
-        mVolumePanel.dismiss();
         clearConnectingDialog();
         mImageFetcher.closeCache();
 
@@ -827,6 +865,7 @@ public class NowPlayingFragment extends Fragment implements
 
         if (mRegisteredCallbacks) {
             mService.cancelSubscriptions(this);
+            mService.getEventBus().unregister(this);
             mRegisteredCallbacks = false;
         }
 
@@ -837,9 +876,7 @@ public class NowPlayingFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         if (mService != null) {
-            if (serviceConnection != null) {
-                mActivity.unbindService(serviceConnection);
-            }
+            mActivity.unbindService(serviceConnection);
         }
     }
 
@@ -920,7 +957,7 @@ public class NowPlayingFragment extends Fragment implements
         // an argument here doesn't work -- but if you do it crashes without
         // a stracktrace on API 7.
         MenuInflater i = mActivity.getMenuInflater();
-        i.inflate(R.menu.squeezer, menu);
+        i.inflate(R.menu.now_playing_fragment, menu);
 
         menu_item_connect = menu.findItem(R.id.menu_item_connect);
         menu_item_disconnect = menu.findItem(R.id.menu_item_disconnect);
@@ -929,21 +966,14 @@ public class NowPlayingFragment extends Fragment implements
         menu_item_players = menu.findItem(R.id.menu_item_players);
         menu_item_playlists = menu.findItem(R.id.menu_item_playlist);
         menu_item_search = menu.findItem(R.id.menu_item_search);
-        menu_item_volume = menu.findItem(R.id.menu_item_volume);
-
-        // On Android 2.3.x and lower onCreateOptionsMenu() is called when the menu is opened,
-        // almost certainly post-connection to the service.  On 3.0 and higher it's called when
-        // the activity is created, before the service connection is made.  Set the visibility
-        // of the menu items accordingly.
-        // XXX: onPrepareOptionsMenu() instead?
-        setMenuItemStateFromConnection();
     }
 
     /**
      * Sets the state of assorted option menu items based on whether or not there is a connection to
      * the server.
      */
-    private void setMenuItemStateFromConnection() {
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
         boolean connected = isConnected();
 
         // These are all set at the same time, so one check is sufficient
@@ -953,7 +983,6 @@ public class NowPlayingFragment extends Fragment implements
             menu_item_players.setEnabled(connected);
             menu_item_playlists.setEnabled(connected);
             menu_item_search.setEnabled(connected);
-            menu_item_volume.setEnabled(connected);
         }
 
         // Don't show the item to go to CurrentPlaylistActivity if in CurrentPlaylistActivity.
@@ -978,7 +1007,6 @@ public class NowPlayingFragment extends Fragment implements
                 return true;
             case R.id.menu_item_disconnect:
                 mService.disconnect();
-                DisconnectedActivity.show(mActivity);
                 return true;
             case R.id.menu_item_poweron:
                 mService.powerOn();
@@ -995,18 +1023,9 @@ public class NowPlayingFragment extends Fragment implements
             case R.id.menu_item_about:
                 new AboutDialog().show(getFragmentManager(), "AboutDialog");
                 return true;
-            case R.id.menu_item_volume:
-                // Show the volume dialog
-                PlayerState playerState = getPlayerState();
-                Player player = getActivePlayer();
-
-                if (playerState != null) {
-                    mVolumePanel.postVolumeChanged(playerState.getCurrentVolume(),
-                            player == null ? "" : player.getName());
-                }
-                return true;
         }
-        return false;
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -1034,6 +1053,10 @@ public class NowPlayingFragment extends Fragment implements
 
     public void startVisibleConnection() {
         Log.v(TAG, "startVisibleConnection");
+        if (mService == null) {
+            return;
+        }
+
         uiThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -1069,7 +1092,8 @@ public class NowPlayingFragment extends Fragment implements
                 try {
                     connectingDialog = ProgressDialog.show(mActivity,
                             getText(R.string.connecting_text),
-                            getString(R.string.connecting_to_text, preferences.getServerName()), true, false);
+                            getString(R.string.connecting_to_text, preferences.getServerName()),
+                            true, false);
                     Log.v(TAG, "startConnect, ipPort: " + ipPort);
                     mService.startConnect(ipPort, preferences.getUserName("test"),
                             preferences.getPassword("test1"));
@@ -1081,162 +1105,60 @@ public class NowPlayingFragment extends Fragment implements
         });
     }
 
-    private final IServiceCallback serviceCallback = new IServiceCallback() {
-        @Override
-        public void onPlayStatusChanged(final String playStatusName) {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePlayPauseIcon(PlayStatus.valueOf(playStatusName));
-                }
-            });
+    public void onEventMainThread(ConnectionChanged event) {
+        Log.v(TAG, "Connected == " + event.mIsConnected + " (postConnect==" + event.mPostConnect
+                + ")");
+        setConnected(event.mIsConnected, event.mPostConnect, event.mLoginFailed);
+    }
+
+    public void onEventMainThread(HandshakeComplete event) {
+        // Event might arrive before this fragment has connected to the service (e.g.,
+        // the activity connected before this fragment did).
+        if (mService == null) {
+            return;
         }
 
-        @Override
-        public void onShuffleStatusChanged(final boolean initial, final int shuffleStatusId) {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ShuffleStatus shuffleStatus = ShuffleStatus.valueOf(shuffleStatusId);
-                    updateShuffleStatus(shuffleStatus);
-                    if (!initial) {
-                        Toast.makeText(mActivity,
-                                mActivity.getServerString(shuffleStatus.getText()),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
+        Log.d(TAG, "Handshake complete");
+        updatePowerMenuItems(canPowerOn(), canPowerOff());
+        updateUIFromServiceState();
+    }
 
-        @Override
-        public void onRepeatStatusChanged(final boolean initial, final int repeatStatusId) {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    RepeatStatus repeatStatus = RepeatStatus.valueOf(repeatStatusId);
-                    updateRepeatStatus(repeatStatus);
-                    if (!initial) {
-                        Toast.makeText(mActivity, mActivity.getServerString(repeatStatus.getText()),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
+    public void onEventMainThread(MusicChanged event) {
+        updateSongInfo(event.mPlayerState.getCurrentSong());
+    }
 
-        @Override
-        public void onTimeInSongChange(final int secondsIn, final int secondsTotal) {
-            NowPlayingFragment.this.secondsIn = secondsIn;
-            NowPlayingFragment.this.secondsTotal = secondsTotal;
-            uiThreadHandler.sendEmptyMessage(UPDATE_TIME);
-        }
+    public void onEventMainThread(PlayersChanged event) {
+        updatePlayerDropDown(event.mPlayers, event.mActivePlayer);
+    }
 
-        @Override
-        public void onPowerStatusChanged(final boolean canPowerOn, final boolean canPowerOff) {
-            uiThreadHandler.post(new Runnable() {
-                public void run() {
-                    updatePowerMenuItems(canPowerOn, canPowerOff);
-                }
-            });
-        }
+    public void onEventMainThread(PlayStatusChanged event) {
+        updatePlayPauseIcon(event.mPlayStatus);
+    }
 
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
-        }
-    };
+    public void onEventMainThread(PowerStatusChanged event) {
+        updatePowerMenuItems(event.mCanPowerOn, event.mCanPowerOff);
+    }
 
-    private final IServiceConnectionCallback connectionCallback = new IServiceConnectionCallback() {
-        @Override
-        public void onConnectionChanged(final boolean isConnected,
-                                        final boolean postConnect,
-                                        final boolean loginFailed) {
-            Log.v(TAG, "Connected == " + isConnected + " (postConnect==" + postConnect + ")");
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setConnected(isConnected, postConnect, loginFailed);
-                }
-            });
+    public void onEventMainThread(RepeatStatusChanged event) {
+        updateRepeatStatus(event.mRepeatStatus);
+        if (!event.mInitial) {
+            Toast.makeText(mActivity, mActivity.getServerString(event.mRepeatStatus.getText()),
+                    Toast.LENGTH_SHORT).show();
         }
+    }
 
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
+    public void onEventMainThread(ShuffleStatusChanged event) {
+        updateShuffleStatus(event.mShuffleStatus);
+        if (!event.mInitial) {
+            Toast.makeText(mActivity,
+                    mActivity.getServerString(event.mShuffleStatus.getText()),
+                    Toast.LENGTH_SHORT).show();
         }
-    };
+    }
 
-    private final IServiceMusicChangedCallback musicChangedCallback
-            = new IServiceMusicChangedCallback() {
-        @Override
-        public void onMusicChanged(final PlayerState playerState) {
-            uiThreadHandler.post(new Runnable() {
-                public void run() {
-                    updateSongInfo(playerState.getCurrentSong());
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
-        }
-    };
-
-    private final IServiceHandshakeCallback handshakeCallback
-            = new IServiceHandshakeCallback() {
-        @Override
-        public void onHandshakeCompleted() {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePowerMenuItems(canPowerOn(), canPowerOff());
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
-        }
-    };
-
-    private final IServicePlayersCallback playersCallback = new IServicePlayersCallback() {
-        @Override
-        public void onPlayersChanged(final List<Player> players, final Player activePlayer) {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePlayerDropDown(players, activePlayer);
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
-        }
-    };
-
-    private final IServiceVolumeCallback volumeCallback = new IServiceVolumeCallback() {
-        @Override
-        public void onVolumeChanged(final int newVolume, final Player player) {
-            if (!ignoreVolumeChange) {
-                mVolumePanel.postVolumeChanged(newVolume, player == null ? "" : player.getName());
-            }
-        }
-
-        @Override
-        public Object getClient() {
-            return NowPlayingFragment.this;
-        }
-
-        @Override
-        public boolean wantAllPlayers() {
-            return false;
-        }
-    };
-
-    public void setIgnoreVolumeChange(boolean ignoreVolumeChange) {
-        this.ignoreVolumeChange = ignoreVolumeChange;
+    public void onEvent(SongTimeChanged event) {
+        NowPlayingFragment.this.secondsIn = event.mCurrentPosition;
+        NowPlayingFragment.this.secondsTotal = event.mDuration;
+        uiThreadHandler.sendEmptyMessage(UPDATE_TIME);
     }
 }

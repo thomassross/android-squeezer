@@ -16,7 +16,8 @@
 
 package uk.org.ngo.squeezer;
 
-import android.app.Activity;
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -28,8 +29,11 @@ import java.net.URLEncoder;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 public class Util {
+    /** {@link Pattern} that splits strings on colons. */
+    private static final Pattern mColonSplitPattern = Pattern.compile(":");
 
     private Util() {
     }
@@ -119,14 +123,26 @@ public class Util {
         }
     }
 
-    public static View getSpinnerItemView(Activity activity, View convertView, ViewGroup parent,
+    public static View getSpinnerItemView(Context context, View convertView, ViewGroup parent,
             String label) {
+        return getSpinnerItemView(context, convertView, parent, label,
+                android.R.layout.simple_spinner_dropdown_item);
+    }
+
+    public static View getActionBarSpinnerItemView(Context context, View convertView,
+                                                   ViewGroup parent, String label) {
+        return getSpinnerItemView(context, convertView, parent, label,
+                android.support.v7.appcompat.R.layout.support_simple_spinner_dropdown_item);
+    }
+
+    private static View getSpinnerItemView(Context context, View convertView, ViewGroup parent,
+                                          String label, int layout) {
         TextView view;
         view = (TextView) (convertView != null
                 && TextView.class.isAssignableFrom(convertView.getClass())
                 ? convertView
-                : activity.getLayoutInflater()
-                        .inflate(android.R.layout.simple_spinner_dropdown_item, parent, false));
+                : ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(
+                        layout, parent, false));
         view.setText(label);
         return view;
     }

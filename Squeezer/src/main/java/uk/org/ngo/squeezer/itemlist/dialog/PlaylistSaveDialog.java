@@ -2,10 +2,12 @@ package uk.org.ngo.squeezer.itemlist.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.InputType;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseActivity;
+import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class PlaylistSaveDialog extends BaseEditTextDialog {
 
@@ -31,11 +33,16 @@ public class PlaylistSaveDialog extends BaseEditTextDialog {
 
     @Override
     protected boolean commit(String name) {
-        activity.getService().playlistSave(name);
+        ISqueezeService service = activity.getService();
+        if (service == null) {
+            return false;
+        }
+
+        service.playlistSave(name);
         return true;
     }
 
-    public static void addTo(BaseActivity activity, String name) {
+    public static void addTo(BaseActivity activity, @Nullable String name) {
         PlaylistSaveDialog dialog = new PlaylistSaveDialog();
         Bundle args = new Bundle();
         args.putString("name", name);

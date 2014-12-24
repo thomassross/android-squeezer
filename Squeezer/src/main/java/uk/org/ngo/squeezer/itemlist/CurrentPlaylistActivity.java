@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -37,10 +38,13 @@ import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.itemlist.dialog.PlaylistItemMoveDialog;
 import uk.org.ngo.squeezer.itemlist.dialog.PlaylistSaveDialog;
 import uk.org.ngo.squeezer.model.Player;
-import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.model.Song;
-import uk.org.ngo.squeezer.service.IServiceMusicChangedCallback;
-import uk.org.ngo.squeezer.service.IServicePlayersCallback;
+import uk.org.ngo.squeezer.service.ISqueezeService;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
+import uk.org.ngo.squeezer.service.event.MusicChanged;
+import uk.org.ngo.squeezer.service.event.PlayersChanged;
+import uk.org.ngo.squeezer.service.event.PlaylistTracksAdded;
+import uk.org.ngo.squeezer.service.event.PlaylistTracksDeleted;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 
 import static uk.org.ngo.squeezer.framework.BaseItemView.ViewHolder;
@@ -81,10 +85,22 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
                 if (position == currentPlaylistIndex) {
                     viewHolder.text1
                             .setTextAppearance(getActivity(), R.style.SqueezerCurrentTextItem);
-                    view.setBackgroundResource(R.drawable.list_item_background_current);
+
+                    // Changing the background resource to a 9-patch drawable causes the padding
+                    // to be reset. See http://www.mail-archive.com/android-developers@googlegroups.com/msg09595.html
+                    // for details. Save the current padding before setting the drawable, and
+                    // restore afterwards.
+                    int paddingLeft = view.getPaddingLeft();
+                    int paddingTop = view.getPaddingTop();
+                    int paddingRight = view.getPaddingRight();
+                    int paddingBottom = view.getPaddingBottom();
+
+                    view.setBackgroundResource(getAttributeValue(R.attr.playing_item));
+
+                    view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
                 } else {
                     viewHolder.text1.setTextAppearance(getActivity(), R.style.SqueezerTextItem);
-                    view.setBackgroundResource(R.drawable.list_item_background_normal);
+                    view.setBackgroundColor(getAttributeValue(R.attr.background));
                 }
             }
             return view;
@@ -105,7 +121,12 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
              */
             @Override
             public void onItemSelected(int index, Song item) {
-                getActivity().getService().playlistIndex(index);
+                ISqueezeService service = getActivity().getService();
+                if (service == null) {
+                    return;
+                }
+
+                service.playlistIndex(index);
             }
 
             @Override
@@ -127,23 +148,28 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
 
             @Override
             public boolean doItemContext(MenuItem menuItem, int index, Song selectedItem) {
+                ISqueezeService service = getService();
+                if (service == null) {
+                    return true;
+                }
+
                 switch (menuItem.getItemId()) {
                     case R.id.play_now:
-                        getService().playlistIndex(index);
+                        service.playlistIndex(index);
                         return true;
 
                     case R.id.remove_from_playlist:
-                        getService().playlistRemove(index);
+                        service.playlistRemove(index);
                         clearAndReOrderItems();
                         return true;
 
                     case R.id.playlist_move_up:
-                        getService().playlistMove(index, index - 1);
+                        service.playlistMove(index, index - 1);
                         clearAndReOrderItems();
                         return true;
 
                     case R.id.playlist_move_down:
-                        getService().playlistMove(index, index + 1);
+                        service.playlistMove(index, index + 1);
                         clearAndReOrderItems();
                         return true;
 
@@ -166,14 +192,30 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    protected void orderPage(int start) {
-        getService().currentPlaylist(start, this);
+    protected void orderPage(@NonNull ISqueezeService service, int start) {
+        service.currentPlaylist(start, this);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.currentplaylistmenu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Sets the enabled state of the R.menu.currentplaylistmenu items.
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final int[] ids = {R.id.menu_item_playlist_clear, R.id.menu_item_playlist_save};
+        final boolean knowCurrentPlaylist = getCurrentPlaylist() != null;
+
+        for (int id : ids) {
+            MenuItem item = menu.findItem(id);
+            item.setVisible(knowCurrentPlaylist);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -200,88 +242,52 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    protected void registerCallback() {
-        super.registerCallback();
+    public void onEvent(HandshakeComplete event) {
+        super.onEvent(event);
         player = getService().getActivePlayer();
-        getService().registerCurrentPlaylistCallback(currentPlaylistCallback);
-        getService().registerMusicChangedCallback(musicChangedCallback);
-        getService().registerPlayersCallback(playersCallback);
     }
 
-    private final IServiceCurrentPlaylistCallback currentPlaylistCallback
-            = new IServiceCurrentPlaylistCallback() {
-        @Override
-        public void onAddTracks(PlayerState playerState) {
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    clearAndReOrderItems();
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
+    public void onEventMainThread(MusicChanged event) {
+        Log.d(getTag(), "onMusicChanged " + event.mPlayerState.getCurrentSong());
+        currentPlaylistIndex = event.mPlayerState.getCurrentPlaylistIndex();
+        getItemAdapter().notifyDataSetChanged();
+    }
+
+    public void onEventMainThread(PlayersChanged event) {
+        supportInvalidateOptionsMenu();
+
+        if (event.mActivePlayer == null) {
+            player = null;
+            clearItems();
+            return;
         }
 
-        public void onDelete(PlayerState playerState, int index) {
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO: Investigate feasibility of deleting single items from the adapter.
-                    clearAndReOrderItems();
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
+        if (!event.mActivePlayer.equals(player)) {
+            player = event.mActivePlayer;
+            clearAndReOrderItems();
         }
+    }
 
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
+    public void onEventMainThread(PlaylistTracksAdded event) {
+        clearAndReOrderItems();
+        getItemAdapter().notifyDataSetChanged();
+    }
 
-    private final IServiceMusicChangedCallback musicChangedCallback
-            = new IServiceMusicChangedCallback() {
-        @Override
-        public void onMusicChanged(PlayerState playerState) {
-            Log.d(getTag(), "onMusicChanged " + playerState.getCurrentSong());
-            currentPlaylistIndex = playerState.getCurrentPlaylistIndex();
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
-
-    private final IServicePlayersCallback playersCallback = new IServicePlayersCallback() {
-        @Override
-        public void onPlayersChanged(List<Player> players, final Player activePlayer) {
-            if (activePlayer != null && !activePlayer.equals(player)) {
-                getUIThreadHandler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        player = activePlayer;
-                        clearAndReOrderItems();
-                    }
-                });
-            }
-        }
-
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
+    public void onEventMainThread(PlaylistTracksDeleted event) {
+        // TODO: Investigate feasibility of deleting single items from the adapter.
+        clearAndReOrderItems();
+        getItemAdapter().notifyDataSetChanged();
+    }
 
     @Override
     public void onItemsReceived(int count, int start, Map<String, String> parameters, List<Song> items, Class<Song> dataType) {
         super.onItemsReceived(count, start, parameters, items, dataType);
-        currentPlaylistIndex = getService().getPlayerState().getCurrentPlaylistIndex();
+        ISqueezeService service = getService();
+        if (service == null) {
+            return;
+        }
+
+        currentPlaylistIndex = service.getPlayerState().getCurrentPlaylistIndex();
         // Initially position the list at the currently playing song.
         // Do it again once it has loaded because the newly displayed items
         // may push the current song outside the displayed area.

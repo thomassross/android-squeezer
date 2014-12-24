@@ -17,8 +17,6 @@
 package uk.org.ngo.squeezer;
 
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,6 +30,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ import uk.org.ngo.squeezer.itemlist.RadioListActivity;
 import uk.org.ngo.squeezer.itemlist.SongListActivity;
 import uk.org.ngo.squeezer.itemlist.YearListActivity;
 import uk.org.ngo.squeezer.itemlist.dialog.AlbumViewDialog;
-import uk.org.ngo.squeezer.service.IServiceHandshakeCallback;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 
 public class HomeActivity extends BaseActivity {
 
@@ -92,10 +94,13 @@ public class HomeActivity extends BaseActivity {
 
     private GoogleAnalyticsTracker tracker;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
+
         setContentView(R.layout.item_list);
         listView = (ListView) findViewById(R.id.item_list);
 
@@ -121,63 +126,7 @@ public class HomeActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void registerCallback() {
-        super.registerCallback();
-        getService().registerHandshakeCallback(mCallback);
-    }
-
-    private final IServiceHandshakeCallback mCallback = new IServiceHandshakeCallback() {
-
-        /**
-         * Sets the menu after handshaking with the SqueezeServer has completed.
-         * <p>
-         * This is necessary because the service doesn't know whether the server
-         * supports music folder browsing and random play ability until the
-         * handshake completes, and the menu is adjusted depending on whether or
-         * not those abilities exist.
-         */
-        @Override
-        public void onHandshakeCompleted() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    createListItems();
-
-                    // Show a tip about volume controls, if this is the first time this app
-                    // has run. TODO: Add more robust and general 'tips' functionality.
-                    PackageInfo pInfo;
-                    try {
-                        final SharedPreferences preferences = getSharedPreferences(Preferences.NAME,
-                                0);
-
-                        pInfo = getPackageManager().getPackageInfo(getPackageName(),
-                                PackageManager.GET_META_DATA);
-                        if (preferences.getLong("lastRunVersionCode", 0) == 0) {
-                            new TipsDialog().show(getSupportFragmentManager(), "TipsDialog");
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putLong("lastRunVersionCode", pInfo.versionCode);
-                            editor.commit();
-                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                        // Nothing to do, don't crash.
-                    }
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return HomeActivity.this;
-        }
-    };
-
-    /**
-     * Creates the list of items to show in the activity.
-     * <p/>
-     * Must be run on the UI thread.
-     */
-    private void createListItems() {
+    public void onEventMainThread(HandshakeComplete event) {
         int[] icons = new int[]{
                 R.drawable.ic_artists,
                 R.drawable.ic_albums, R.drawable.ic_songs,
@@ -190,13 +139,13 @@ public class HomeActivity extends BaseActivity {
         String[] items = getResources().getStringArray(R.array.home_items);
 
         if (getService() != null) {
-            mCanFavorites = getService().canFavorites();
-            mCanMusicfolder = getService().canMusicfolder();
-            mCanMyApps = getService().canMyApps();
-            mCanRandomplay = getService().canRandomplay();
+            mCanFavorites = event.mCanFavourites;
+            mCanMusicfolder = event.mCanMusicFolders;
+            mCanMyApps = event.mCanMyApps;
+            mCanRandomplay = event.mCanRandomPlay;
         }
 
-        List<IconRowAdapter.IconRow> rows = new ArrayList<IconRowAdapter.IconRow>();
+        List<IconRowAdapter.IconRow> rows = new ArrayList<IconRowAdapter.IconRow>(MY_APPS + 1);
         for (int i = ARTISTS; i <= MY_APPS; i++) {
             if (i == MUSIC_FOLDER && !mCanMusicfolder) {
                 continue;
@@ -219,6 +168,25 @@ public class HomeActivity extends BaseActivity {
 
         listView.setAdapter(new IconRowAdapter(this, rows));
         listView.setOnItemClickListener(onHomeItemClick);
+
+        // Show a tip about volume controls, if this is the first time this app
+        // has run. TODO: Add more robust and general 'tips' functionality.
+        PackageInfo pInfo;
+        try {
+            final SharedPreferences preferences = getSharedPreferences(Preferences.NAME,
+                    0);
+
+            pInfo = getPackageManager().getPackageInfo(getPackageName(),
+                    PackageManager.GET_META_DATA);
+            if (preferences.getLong("lastRunVersionCode", 0) == 0) {
+                new TipsDialog().show(getSupportFragmentManager(), "TipsDialog");
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putLong("lastRunVersionCode", pInfo.versionCode);
+                editor.commit();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // Nothing to do, don't crash.
+        }
     }
 
     private final OnItemClickListener onHomeItemClick = new OnItemClickListener() {
@@ -257,9 +225,8 @@ public class HomeActivity extends BaseActivity {
                 case INTERNET_RADIO:
                     // Uncomment these next two lines as an easy way to check
                     // crash reporting functionality.
-
-                    // String sCrashString = null;
-                    // Log.e("MyApp", sCrashString.toString());
+                    //String sCrashString = null;
+                    //Log.e("MyApp", sCrashString);
                     RadioListActivity.show(HomeActivity.this);
                     break;
                 case FAVORITES:

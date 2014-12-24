@@ -16,8 +16,17 @@
 
 package uk.org.ngo.squeezer.model;
 
+import android.os.Build;
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Comparator;
 import java.util.Map;
 
 import uk.org.ngo.squeezer.Util;
@@ -26,54 +35,96 @@ import uk.org.ngo.squeezer.framework.Item;
 
 public class Player extends Item {
 
-    private String ip;
+    private String mName;
 
-    public String getIp() {
-        return ip;
-    }
+    private final String mIp;
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
+    private final String mModel;
 
-    private String name;
+    private final boolean mCanPowerOff;
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    /** Hash function to generate at least 64 bits of hashcode from a player's ID. */
+    private static final HashFunction mHashFunction = Hashing.goodFastHash(64);
 
-    public Player setName(String name) {
-        this.name = name;
-        return this;
-    }
+    /**  A hash of the player's ID. */
+    private final HashCode mHashCode;
 
-    private boolean canpoweroff;
+    private PlayerState mPlayerState = new PlayerState();
 
-    public boolean isCanpoweroff() {
-        return canpoweroff;
-    }
-
-    public void setCanpoweroff(boolean canpoweroff) {
-        this.canpoweroff = canpoweroff;
-    }
-
-    private String model;
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
+    /** Is the player connected? */
+    private boolean mConnected;
 
     public Player(Map<String, String> record) {
         setId(record.get("playerid"));
-        ip = record.get("ip");
-        name = record.get("name");
-        model = record.get("model");
-        canpoweroff = Util.parseDecimalIntOrZero(record.get("canpoweroff")) == 1;
+        mIp = record.get("ip");
+        mName = record.get("name");
+        mModel = record.get("model");
+        mCanPowerOff = Util.parseDecimalIntOrZero(record.get("canpoweroff")) == 1;
+        mConnected = Util.parseDecimalIntOrZero(record.get("connected")) == 1;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            mHashCode = mHashFunction.hashString(getId(), Charsets.UTF_8);
+        } else {
+            // API versions < GINGERBREAD do not have String.getBytes(Charset charset),
+            // which hashString() ends up calling. This will trigger an exception.
+            byte[] bytes;
+            try {
+                bytes = getId().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // Can't happen, Android's native charset is UTF-8. But just in case
+                // we're running on something wacky, fallback to the un-parsed bytes.
+                bytes = getId().getBytes();
+            }
+            mHashCode = mHashFunction.hashBytes(bytes);
+        }
+    }
+
+    private Player(Parcel source) {
+        setId(source.readString());
+        mIp = source.readString();
+        mName = source.readString();
+        mModel = source.readString();
+        mCanPowerOff = (source.readByte() == 1);
+        mConnected = (source.readByte() == 1);
+        mHashCode = HashCode.fromString(source.readString());
+    }
+
+    @Override
+    public String getName() {
+        return mName;
+    }
+
+    public Player setName(String name) {
+        this.mName = name;
+        return this;
+    }
+
+    public String getIp() {
+        return mIp;
+    }
+
+    public String getModel() {
+        return mModel;
+    }
+
+    public boolean isCanpoweroff() {
+        return mCanPowerOff;
+    }
+
+    public void setConnected(boolean connected) {
+        mConnected = connected;
+    }
+
+    public boolean getConnected() {
+        return mConnected;
+    }
+
+    public PlayerState getPlayerState() {
+        return mPlayerState;
+    }
+
+    public void setPlayerState(@NonNull PlayerState playerState) {
+        mPlayerState = playerState;
     }
 
     public static final Creator<Player> CREATOR = new Creator<Player>() {
@@ -86,27 +137,41 @@ public class Player extends Item {
         }
     };
 
-    private Player(Parcel source) {
-        setId(source.readString());
-        ip = source.readString();
-        name = source.readString();
-        model = source.readString();
-        canpoweroff = (source.readByte() == 1);
-    }
-
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(ip);
-        dest.writeString(name);
-        dest.writeString(model);
-        dest.writeByte(canpoweroff ? (byte) 1 : (byte) 0);
+        dest.writeString(mIp);
+        dest.writeString(mName);
+        dest.writeString(mModel);
+        dest.writeByte(mCanPowerOff ? (byte) 1 : (byte) 0);
+        dest.writeByte(mConnected ? (byte) 1 : (byte) 0);
+        dest.writeString(mHashCode.toString());
     }
 
+    /**
+     * Returns a 64 bit identifier for the player.  The ID tracked by the server is a unique
+     * string that identifies the player.  It may be -- but is not required to be -- the
+     * player's MAC address.  Rather than assume it is the MAC address, calculate a 64 bit
+     * hash of the ID and use that.
+     *
+     * @return The hash of the player's ID.
+     */
+    public long getIdAsLong() {
+        return mHashCode.asLong();
+    }
+
+    /**
+     * Comparator to compare two players by ID.
+     */
+    public static Comparator<Player> compareById = new Comparator<Player>() {
+        @Override
+        public int compare(Player lhs, Player rhs) {
+            return lhs.getId().compareTo(rhs.getId());
+        }
+    };
 
     @Override
     public String toString() {
-        return "id=" + getId() + ", name=" + name + ", model=" + model + ", canpoweroff="
-                + canpoweroff + ", ip=" + ip;
+        return "id=" + getId() + ", name=" + mName + ", model=" + mModel + ", canpoweroff="
+                + mCanPowerOff + ", ip=" + mIp + ", connected=" + mConnected;
     }
-
 }

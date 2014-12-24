@@ -22,9 +22,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.io.File;
 
@@ -73,6 +76,20 @@ public class DownloadStatusReceiver extends BroadcastReceiver {
 
                 DownloadDatabase.DownloadEntry downloadEntry = downloadDatabase.popDownloadEntry(downloadId);
 
+                if (downloadEntry == null)
+                    continue;
+
+                // Seen a crash where downloadEntry.tempName is null. Check for this, and if it
+                // happens skip the entry and log additional details.
+                if (downloadEntry.tempName == null) {
+                    Crashlytics.log("Bogus downloadEntry detected in handleDownloadComplete.");
+                    Crashlytics.log("tempName is null");
+                    Crashlytics.log("downloadId: " + downloadEntry.downloadId);
+                    Crashlytics.log("filename: " + downloadEntry.fileName);
+                    Crashlytics.logException(new NullPointerException());
+                    continue;
+                }
+
                 switch (status) {
                     case DownloadManager.STATUS_SUCCESSFUL:
                         File tempFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), downloadEntry.tempName);
@@ -80,7 +97,9 @@ public class DownloadStatusReceiver extends BroadcastReceiver {
                         File localFolder = localFile.getParentFile();
                         if (!localFolder.exists())
                             localFolder.mkdirs();
-                        if (!tempFile.renameTo(localFile)) {
+                        if (tempFile.renameTo(localFile)) {
+                            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(localFile)));
+                        } else {
                             Log.w(TAG, "Could not rename [" + tempFile + "] to [" + localFile + "]");
                         }
                         break;
