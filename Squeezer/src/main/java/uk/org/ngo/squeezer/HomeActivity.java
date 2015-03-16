@@ -38,6 +38,8 @@ import com.crashlytics.android.Crashlytics;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import de.cketti.library.changelog.ChangeLog;
 import uk.org.ngo.squeezer.dialog.TipsDialog;
 import uk.org.ngo.squeezer.framework.BaseActivity;
@@ -90,7 +92,7 @@ public class HomeActivity extends BaseActivity {
 
     private boolean mCanRandomplay = false;
 
-    private ListView listView;
+    @InjectView(R.id.item_list) ListView listView;
 
     private GoogleAnalyticsTracker tracker;
 
@@ -102,7 +104,7 @@ public class HomeActivity extends BaseActivity {
         }
 
         setContentView(R.layout.item_list);
-        listView = (ListView) findViewById(R.id.item_list);
+        ButterKnife.inject(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         final SharedPreferences preferences = getSharedPreferences(Preferences.NAME, 0);

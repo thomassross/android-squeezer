@@ -41,6 +41,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.itemlist.action.PlayableItemAction;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
@@ -360,7 +361,7 @@ public class SettingsActivity extends PreferenceActivity implements
                 dialog.setContentView(R.layout.scrobbler_choice_dialog);
                 dialog.setTitle("Scrobbling applications");
 
-                ListView appList = (ListView) dialog.findViewById(R.id.scrobble_apps);
+                ListView appList = ButterKnife.findById(dialog, R.id.scrobble_apps);
                 appList.setAdapter(new IconRowAdapter(this, apps, icons));
 
                 final Context context = dialog.getContext();

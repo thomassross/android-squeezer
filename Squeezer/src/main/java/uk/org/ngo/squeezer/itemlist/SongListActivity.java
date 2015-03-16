@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import java.util.EnumSet;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
@@ -134,10 +135,10 @@ public class SongListActivity extends BaseListActivity<Song>
 
         // Set the album header.
         if (album != null) {
-            TextView albumView = (TextView) findViewById(R.id.albumname);
-            TextView artistView = (TextView) findViewById(R.id.artistname);
-            TextView yearView = (TextView) findViewById(R.id.yearname);
-            ImageView btnContextMenu = (ImageView) findViewById(R.id.context_menu);
+            TextView albumView = ButterKnife.findById(this, R.id.albumname);
+            TextView artistView = ButterKnife.findById(this, R.id.artistname);
+            TextView yearView = ButterKnife.findById(this, R.id.yearname);
+            ImageView btnContextMenu = ButterKnife.findById(this, R.id.context_menu);
 
             albumView.setText(album.getName());
             artistView.setText(album.getArtist());
@@ -155,7 +156,7 @@ public class SongListActivity extends BaseListActivity<Song>
             });
         } else
         if (artist != null) {
-            TextView header = (TextView) findViewById(R.id.header);
+            TextView header = ButterKnife.findById(this, R.id.header);
             header.setVisibility(View.VISIBLE);
             header.setText(getString(R.string.songs_by_header, artist.getName()));
         }
@@ -207,7 +208,7 @@ public class SongListActivity extends BaseListActivity<Song>
     private void updateArtwork() {
         // Set artwork that requires a service connection.
         if (album != null) {
-            ImageView artwork = (ImageView) findViewById(R.id.album);
+            ImageView artwork = ButterKnife.findById(this, R.id.album);
 
             String artworkUrl = ((SongView) getItemView())
                     .getAlbumArtUrl(album.getArtwork_track_id());

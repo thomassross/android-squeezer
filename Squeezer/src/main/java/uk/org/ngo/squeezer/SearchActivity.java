@@ -29,6 +29,8 @@ import android.widget.ExpandableListView.OnChildClickListener;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.framework.ItemListActivity;
 import uk.org.ngo.squeezer.itemlist.IServiceItemListCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
@@ -36,9 +38,9 @@ import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 
 public class SearchActivity extends ItemListActivity {
 
-    private View loadingLabel;
+    @InjectView(R.id.loading_label) View loadingLabel;
 
-    private ExpandableListView resultsExpandableListView;
+    @InjectView(R.id.search_expandable_list) ExpandableListView resultsExpandableListView;
 
     private SearchAdapter searchResultsAdapter;
 
@@ -49,10 +51,9 @@ public class SearchActivity extends ItemListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_layout);
 
-        loadingLabel = findViewById(R.id.loading_label);
+        ButterKnife.inject(this);
 
         searchResultsAdapter = new SearchAdapter(this, getImageFetcher());
-        resultsExpandableListView = (ExpandableListView) findViewById(R.id.search_expandable_list);
 
         resultsExpandableListView.setOnChildClickListener(new OnChildClickListener() {
             @Override

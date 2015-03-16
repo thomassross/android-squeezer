@@ -33,6 +33,7 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.dialog.NetworkErrorDialogFragment;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
@@ -67,11 +68,11 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         if (extras != null) {
             plugin = extras.getParcelable(Plugin.class.getName());
             parent = extras.getParcelable(PluginItem.class.getName());
-            findViewById(R.id.search_view).setVisibility(
+            ButterKnife.findById(this, R.id.search_view).setVisibility(
                     plugin.isSearchable() ? View.VISIBLE : View.GONE);
 
-            ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
-            final EditText searchCriteriaText = (EditText) findViewById(R.id.search_input);
+            final ImageButton searchButton = ButterKnife.findById(this, R.id.search_button);
+            final EditText searchCriteriaText = ButterKnife.findById(this, R.id.search_input);
 
             searchCriteriaText.setOnKeyListener(new OnKeyListener() {
                 @Override
@@ -97,7 +98,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     }
 
     private void updateHeader(String headerText) {
-        TextView header = (TextView) findViewById(R.id.header);
+        TextView header = ButterKnife.findById(this, R.id.header);
         header.setText(headerText);
         header.setVisibility(View.VISIBLE);
     }

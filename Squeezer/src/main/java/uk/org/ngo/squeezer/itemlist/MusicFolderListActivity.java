@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.framework.ItemAdapter;
@@ -73,7 +74,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             mFolder = extras.getParcelable(MusicFolderItem.class.getName());
-            TextView header = (TextView) findViewById(R.id.header);
+            TextView header = ButterKnife.findById(this, R.id.header);
             header.setText(mFolder.getName());
             header.setVisibility(View.VISIBLE);
         }

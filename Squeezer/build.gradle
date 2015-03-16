@@ -37,6 +37,11 @@ dependencies {
 
     // Changelogs, see https://github.com/cketti/ckChangeLog.
     compile 'de.cketti.library.changelog:ckchangelog:1.2.0'
+
+    // Butterknife, https://jakewharton.github.io/butterknife/.
+    compile 'com.jakewharton:butterknife:6.1.0'
+
+    // Crashlytics.
     compile 'com.crashlytics.android:crashlytics:1.+'
 }
 
@@ -52,6 +57,14 @@ android {
     lintOptions {
         // Downgrade missing translations to non-fatal severity.
         warning 'MissingTranslation'
+
+        // Butterknife requires this.
+        disable 'InvalidPackage'
+    }
+
+    // Butterknife requires this.
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
     }
 
     buildTypes {
@@ -61,6 +74,7 @@ android {
             // same effect, but this ensures that any changes to
             // proguard-android-optimize.txt are automatically included.
             proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+            proguardFile "proguard-butterknife.cfg"
             proguardFile "proguard-crashlytics.cfg"
             proguardFile "proguard-eventbus.cfg"
             proguardFile "proguard-guava.cfg"

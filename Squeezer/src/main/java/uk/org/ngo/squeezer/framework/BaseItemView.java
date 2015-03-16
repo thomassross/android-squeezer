@@ -32,6 +32,9 @@ import android.widget.TextView;
 import java.lang.reflect.Field;
 import java.util.EnumSet;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.Optional;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.util.Reflection;
 import uk.org.ngo.squeezer.itemlist.AlbumListActivity;
@@ -115,15 +118,16 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      */
     public static class ViewHolder {
 
-        public ImageView icon;
-
-        public TextView text1;
-
-        public TextView text2;
-
-        public ImageButton btnContextMenu;
+        @Optional @InjectView(R.id.icon) public ImageView icon;
+        @Optional @InjectView(R.id.text1) public TextView text1;
+        @Optional @InjectView(R.id.text2) public TextView text2;
+        @Optional @InjectView(R.id.context_menu) public ImageButton btnContextMenu;
 
         public EnumSet<ViewParams> viewParams;
+
+        public ViewHolder(View view) {
+            ButterKnife.inject(this, view);
+        }
     }
 
     /**
@@ -286,11 +290,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
 
         if (viewHolder == null) {
             convertView = getLayoutInflater().inflate(layoutResource, parent, false);
-            viewHolder = createViewHolder();
-            viewHolder.text1 = (TextView) convertView.findViewById(R.id.text1);
-            viewHolder.text2 = (TextView) convertView.findViewById(R.id.text2);
-            viewHolder.icon = (ImageView) convertView.findViewById(R.id.icon);
-            viewHolder.btnContextMenu = (ImageButton) convertView.findViewById(R.id.context_menu);
+            viewHolder = createViewHolder(convertView);
             convertView.setTag(viewHolder);
         }
 
@@ -320,8 +320,8 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
         return convertView;
     }
 
-    public ViewHolder createViewHolder() {
-        return new ViewHolder();
+    public ViewHolder createViewHolder(View convertView) {
+        return new ViewHolder(convertView);
     }
 
     @Override

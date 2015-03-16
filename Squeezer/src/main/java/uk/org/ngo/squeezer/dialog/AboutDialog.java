@@ -30,6 +30,8 @@ import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import de.cketti.library.changelog.ChangeLog;
 import uk.org.ngo.squeezer.R;
 
@@ -40,8 +42,9 @@ public class AboutDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         @SuppressLint({"InflateParams"}) // OK, as view is passed to AlertDialog.Builder.setView()
         final View view = getActivity().getLayoutInflater().inflate(R.layout.about_dialog, null);
-        final TextView titleText = (TextView) view.findViewById(R.id.about_title);
-        final TextView versionText = (TextView) view.findViewById(R.id.version_text);
+
+        final TextView titleText = ButterKnife.findById(view, R.id.about_title);
+        final TextView versionText = ButterKnife.findById(view, R.id.version_text);
 
         PackageManager pm = getActivity().getPackageManager();
         PackageInfo info;

@@ -22,11 +22,13 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 
 
 public class ServerAddressPreference extends DialogPreference {
-    private ServerAddressView form;
+    @InjectView(R.id.server_address_view) ServerAddressView form;
 
     public ServerAddressPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -36,7 +38,7 @@ public class ServerAddressPreference extends DialogPreference {
     protected View onCreateDialogView() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.server_address_dialog, null);
-        form = (ServerAddressView) view.findViewById(R.id.server_address_view);
+        ButterKnife.inject(this, view);
         return view;
     }
 

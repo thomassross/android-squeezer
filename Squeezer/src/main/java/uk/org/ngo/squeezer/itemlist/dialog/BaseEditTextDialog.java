@@ -12,11 +12,13 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.EditText;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 
 public abstract class BaseEditTextDialog extends DialogFragment {
 
-    protected EditText editText;
+    @InjectView(R.id.edittext) EditText editText;
 
     abstract protected boolean commit(String string);
 
@@ -27,8 +29,9 @@ public abstract class BaseEditTextDialog extends DialogFragment {
 
         @SuppressLint({"InflateParams"}) // OK, as view is passed to AlertDialog.Builder.setView()
         View form = getActivity().getLayoutInflater().inflate(R.layout.edittext_dialog, null);
+        ButterKnife.inject(this, form);
+
         builder.setView(form);
-        editText = (EditText) form.findViewById(R.id.edittext);
 
         editText.setText("");
         editText.setOnKeyListener(new OnKeyListener() {

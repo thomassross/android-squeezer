@@ -18,36 +18,26 @@ public class SongFilterDialog extends BaseFilterDialog {
 
     private SongListActivity activity;
 
-    private Spinner genreSpinnerView;
-
-    private Spinner yearSpinnerView;
-
-    private EditText editText;
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
 
         activity = (SongListActivity) getActivity();
-        editText = (EditText) filterForm.findViewById(R.id.search_string);
         editText.setHint(getString(R.string.filter_text_hint,
                 activity.getItemAdapter().getQuantityString(2)));
         editText.setText(activity.getSearchString());
 
-        genreSpinnerView = (Spinner) filterForm.findViewById(R.id.genre_spinner);
-        yearSpinnerView = (Spinner) filterForm.findViewById(R.id.year_spinner);
         new GenreSpinner(activity, activity, genreSpinnerView);
         new YearSpinner(activity, activity, yearSpinnerView);
 
         if (activity.getArtist() != null) {
-            ((EditText) filterForm.findViewById(R.id.artist))
-                    .setText(activity.getArtist().getName());
-            filterForm.findViewById(R.id.artist_view).setVisibility(View.VISIBLE);
+            artist.setText(activity.getArtist().getName());
+            artistView.setVisibility(View.VISIBLE);
         }
         if (activity.getAlbum() != null) {
-            ((EditText) filterForm.findViewById(R.id.album)).setText(activity.getAlbum().getName());
-            filterForm.findViewById(R.id.album_view).setVisibility(View.VISIBLE);
+            album.setText(activity.getAlbum().getName());
+            albumView.setVisibility(View.VISIBLE);
         }
 
         return dialog;

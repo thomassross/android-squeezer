@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.ItemListActivity;
 import uk.org.ngo.squeezer.itemlist.dialog.PlayerSyncDialog;
@@ -50,7 +52,7 @@ public class PlayerListActivity extends ItemListActivity implements
         PlayerSyncDialog.PlayerSyncDialogHost {
     private static final String CURRENT_PLAYER = "currentPlayer";
 
-    private ExpandableListView mResultsExpandableListView;
+    @InjectView(R.id.expandable_list) ExpandableListView mResultsExpandableListView;
 
     private PlayerListAdapter mResultsAdapter;
 
@@ -124,11 +126,12 @@ public class PlayerListActivity extends ItemListActivity implements
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.item_list_players);
+        ButterKnife.inject(this);
+
         if (savedInstanceState != null)
             currentPlayer = savedInstanceState.getParcelable(CURRENT_PLAYER);
 
         mResultsAdapter = new PlayerListAdapter(this, getImageFetcher());
-        mResultsExpandableListView = (ExpandableListView) findViewById(R.id.expandable_list);
 
         mResultsExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override

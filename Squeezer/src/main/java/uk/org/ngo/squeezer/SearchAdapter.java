@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.framework.Item;
 import uk.org.ngo.squeezer.framework.ItemAdapter;
 import uk.org.ngo.squeezer.framework.PlaylistItem;
@@ -165,7 +166,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
             ViewGroup parent) {
         View row = activity.getLayoutInflater().inflate(R.layout.group_item, parent, false);
 
-        TextView label = (TextView) row.findViewById(R.id.label);
+        TextView label = ButterKnife.findById(row, R.id.label);
         label.setText(childAdapters[groupPosition].getHeader());
 
         // Build the icon to display next to the text.

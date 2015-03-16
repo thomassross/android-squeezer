@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.dialog.InfoDialog;
 import uk.org.ngo.squeezer.dialog.ServerAddressView;
 import uk.org.ngo.squeezer.framework.BaseActivity;
@@ -37,7 +39,8 @@ import uk.org.ngo.squeezer.service.event.ConnectionChanged;
 public class DisconnectedActivity extends BaseActivity {
     private static final String EXTRA_IS_LOGIN_FAILURE = "login_failure";
 
-    private ServerAddressView serverAddressView;
+    @InjectView(R.id.server_address_view) ServerAddressView serverAddressView;
+    @InjectView(R.id.header_message) View headerMessage;
     private boolean isLoginFailure;
 
     @Override
@@ -50,8 +53,8 @@ public class DisconnectedActivity extends BaseActivity {
         }
 
         setContentView(R.layout.disconnected);
-        serverAddressView = (ServerAddressView) findViewById(R.id.server_address_view);
-        View headerMessage = findViewById(R.id.header_message);
+        ButterKnife.inject(this);
+
         headerMessage.setVisibility(isLoginFailure ? View.VISIBLE : View.GONE);
         headerMessage.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -11,12 +11,26 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.EditText;
+import android.widget.Spinner;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 
 public abstract class BaseFilterDialog extends DialogFragment {
 
     protected View filterForm;
+
+    @InjectView(R.id.genre_spinner) Spinner genreSpinnerView;
+    @InjectView(R.id.year_spinner) Spinner yearSpinnerView;
+    @InjectView(R.id.search_string) EditText editText;
+    @InjectView(R.id.track_view) View trackView;
+    @InjectView(R.id.track) EditText track;
+    @InjectView(R.id.artist_view) View artistView;
+    @InjectView(R.id.artist) EditText artist;
+    @InjectView(R.id.year_view) View yearView;
+    @InjectView(R.id.album_view) View albumView;
+    @InjectView(R.id.album) EditText album;
 
     protected abstract void filter();
 
@@ -26,10 +40,11 @@ public abstract class BaseFilterDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         filterForm = getActivity().getLayoutInflater().inflate(R.layout.filter_dialog, null);
+        ButterKnife.inject(this, filterForm);
+
         builder.setTitle(R.string.menu_item_filter);
         builder.setView(filterForm);
 
-        EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
         editText.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {

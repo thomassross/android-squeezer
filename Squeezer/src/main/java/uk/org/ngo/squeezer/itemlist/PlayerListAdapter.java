@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.ItemAdapter;
 import uk.org.ngo.squeezer.model.Player;
@@ -215,8 +216,8 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         View row = mActivity.getLayoutInflater().inflate(R.layout.group_player, parent, false);
 
-        TextView text1 = (TextView) row.findViewById(R.id.text1);
-        TextView text2 = (TextView) row.findViewById(R.id.text2);
+        TextView text1 = ButterKnife.findById(row, R.id.text1);
+        TextView text2 = ButterKnife.findById(row, R.id.text2);
 
         ItemAdapter<Player> adapter = mChildAdapters.get(groupPosition);
         List<String> playerNames = new ArrayList<String>();

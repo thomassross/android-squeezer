@@ -36,6 +36,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.framework.BaseActivity;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 
@@ -62,13 +64,13 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
      */
     private final View mView;
 
-    private final TextView mMessage;
+    @InjectView(R.id.message) TextView mMessage;
 
-    private final TextView mAdditionalMessage;
+    @InjectView(R.id.additional_message) TextView mAdditionalMessage;
 
-    private final ImageView mLargeStreamIcon;
+    @InjectView(R.id.ringer_stream_icon) ImageView mLargeStreamIcon;
 
-    private final SeekBar mSeekbar;
+    @InjectView(R.id.level) SeekBar mSeekbar;
 
     @SuppressLint({"InflateParams"}) // OK, as view is passed to Dialog.setView()
     public VolumePanel(BaseActivity activity) {
@@ -85,10 +87,7 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
             }
         });
 
-        mMessage = (TextView) mView.findViewById(R.id.message);
-        mAdditionalMessage = (TextView) mView.findViewById(R.id.additional_message);
-        mSeekbar = (SeekBar) mView.findViewById(R.id.level);
-        mLargeStreamIcon = (ImageView) mView.findViewById(R.id.ringer_stream_icon);
+        ButterKnife.inject(this, mView);
 
         mSeekbar.setOnSeekBarChangeListener(this);
 

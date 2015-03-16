@@ -28,18 +28,20 @@ import android.widget.ListView;
 
 import java.util.Arrays;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.framework.BaseActivity;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class RandomplayActivity extends BaseActivity {
 
-    private ListView listView;
+    @InjectView(R.id.item_list) ListView listView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_list);
-        listView = (ListView) findViewById(R.id.item_list);
+        ButterKnife.inject(this);
     }
 
     @Override

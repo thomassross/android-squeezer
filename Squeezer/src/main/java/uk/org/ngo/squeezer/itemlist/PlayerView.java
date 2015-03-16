@@ -27,6 +27,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.BaseItemView;
@@ -58,8 +60,8 @@ public class PlayerView extends BaseItemView<Player> {
     }
 
     @Override
-    public ViewHolder createViewHolder() {
-        return new PlayerViewHolder();
+    public ViewHolder createViewHolder(View convertView) {
+        return new PlayerViewHolder(convertView);
     }
 
     @Override
@@ -70,11 +72,7 @@ public class PlayerView extends BaseItemView<Player> {
 
         viewHolder.text1.setText(item.getName());
         viewHolder.icon.setImageResource(getModelIcon(item.getModel()));
-
-        if (viewHolder.volumeBar == null) {
-            viewHolder.volumeBar = (SeekBar) view.findViewById(R.id.volume_slider);
-            viewHolder.volumeBar.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(item, viewHolder.volumeValue));
-        }
+        viewHolder.volumeBar.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(item));
 
         viewHolder.volumeBar.setVisibility(playerState != null ? View.VISIBLE : View.GONE);
 
@@ -235,11 +233,9 @@ public class PlayerView extends BaseItemView<Player> {
 
     private class VolumeSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
         private final Player player;
-        private final TextView valueView;
 
-        public VolumeSeekBarChangeListener(Player player, TextView valueView) {
+        public VolumeSeekBarChangeListener(Player player) {
             this.player = player;
-            this.valueView = valueView;
         }
 
         @Override
@@ -281,8 +277,12 @@ public class PlayerView extends BaseItemView<Player> {
         }
     }
 
-    private static class PlayerViewHolder extends ViewHolder {
-        SeekBar volumeBar;
-        TextView volumeValue;
+    static class PlayerViewHolder extends ViewHolder {
+        @InjectView(R.id.volume_slider) SeekBar volumeBar;
+
+        public PlayerViewHolder(View convertView) {
+            super(convertView);
+            ButterKnife.inject(this, convertView);
+        }
     }
 }

@@ -24,7 +24,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.util.AsyncTask;
 
@@ -35,28 +39,24 @@ import uk.org.ngo.squeezer.util.AsyncTask;
 public class CancelDownloadsActivity extends Activity {
     private static final String TAG = CancelDownloadsActivity.class.getSimpleName();
 
+    @InjectView(R.id.ok_button) Button btnOk;
+    @InjectView(R.id.cancel_button) Button btnCancel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cancel_downloads);
-        findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-        findViewById(R.id.ok_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cancelDownloads();
-                finish();
-            }
-        });
+        ButterKnife.inject(this);
+
     }
 
-    private void cancelDownloads() {
-        Log.i(TAG, "cancelDownloads");
-        new CancelDownloadsTask(this).execute();
+    @OnClick({R.id.ok_button, R.id.cancel_button})
+    void onClick(Button button) {
+        if (button.getId() == R.id.ok_button) {
+            Log.i(TAG, "cancelDownloads");
+            new CancelDownloadsTask(this).execute();
+        }
+        finish();
     }
 
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)

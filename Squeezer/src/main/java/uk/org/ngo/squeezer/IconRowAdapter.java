@@ -26,6 +26,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.ButterKnife;
+
 /**
  * Simple list adapter to display corresponding lists of images and labels.
  *
@@ -98,8 +100,8 @@ public class IconRowAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = getActivity().getLayoutInflater().inflate(rowLayout, parent, false);
-        TextView text1 = (TextView) row.findViewById(textId);
-        ImageView icon = (ImageView) row.findViewById(iconId);
+        TextView text1 = ButterKnife.findById(row, textId);
+        ImageView icon = ButterKnife.findById(row, iconId);
 
         text1.setText(mRows.get(position).getText());
         icon.setImageResource(mRows.get(position).getIcon());

@@ -33,6 +33,8 @@ import android.widget.TextView;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
@@ -48,13 +50,13 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     private Preferences mPreferences;
     private String mBssId;
 
-    private EditText mServerAddressEditText;
-    private TextView mServerName;
-    private Spinner mServersSpinner;
-    private EditText mUserNameEditText;
-    private EditText mPasswordEditText;
-    private View mScanResults;
-    private View mScanProgress;
+    @InjectView(R.id.server_address) EditText mServerAddressEditText;
+    @InjectView(R.id.server_name) TextView mServerName;
+    @InjectView(R.id.found_servers) Spinner mServersSpinner;
+    @InjectView(R.id.username) EditText mUserNameEditText;
+    @InjectView(R.id.password) EditText mPasswordEditText;
+    @InjectView(R.id.scan_results) View mScanResults;
+    @InjectView(R.id.scan_progress) View mScanProgress;
 
     private ScanNetworkTask mScanNetworkTask;
 
@@ -74,30 +76,23 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     }
 
     private void initialize(final Context context) {
-        inflate(context, R.layout.server_address_view, this);
+        View view = inflate(context, R.layout.server_address_view, this);
         if (!isInEditMode()) {
+            ButterKnife.inject(this, view);
             mPreferences = new Preferences(context);
             Preferences.ServerAddress serverAddress = mPreferences.getServerAddress();
             mBssId = serverAddress.bssId;
 
-
-            mServerAddressEditText = (EditText) findViewById(R.id.server_address);
-            mUserNameEditText = (EditText) findViewById(R.id.username);
-            mPasswordEditText = (EditText) findViewById(R.id.password);
             setServerAddress(serverAddress.address);
 
             // Set up the servers spinner.
             mServersAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
             mServersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mServerName = (TextView) findViewById(R.id.server_name);
-            mServersSpinner = (Spinner) findViewById(R.id.found_servers);
             mServersSpinner.setAdapter(mServersAdapter);
             mServersSpinner.setOnItemSelectedListener(new MyOnItemSelectedListener());
 
-            mScanResults = findViewById(R.id.scan_results);
-            mScanProgress = findViewById(R.id.scan_progress);
             mScanProgress.setVisibility(GONE);
-            TextView scanDisabledMessage = (TextView) findViewById(R.id.scan_disabled_msg);
+            TextView scanDisabledMessage = ButterKnife.findById(view, R.id.scan_disabled_msg);
 
             // Only support network scanning on WiFi.
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -106,7 +101,7 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
             if (isWifi) {
                 scanDisabledMessage.setVisibility(GONE);
                 startNetworkScan(context);
-                Button scanButton = (Button) findViewById(R.id.scan_button);
+                Button scanButton = ButterKnife.findById(view, R.id.scan_button);
                 scanButton.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         startNetworkScan(context);

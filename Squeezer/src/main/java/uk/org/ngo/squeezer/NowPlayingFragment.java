@@ -63,6 +63,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.InjectViews;
+import butterknife.Optional;
 import uk.org.ngo.squeezer.dialog.AboutDialog;
 import uk.org.ngo.squeezer.dialog.EnableWifiDialog;
 import uk.org.ngo.squeezer.framework.BaseActivity;
@@ -103,17 +107,17 @@ public class NowPlayingFragment extends Fragment implements
     @Nullable
     private ISqueezeService mService = null;
 
-    private TextView albumText;
+    @InjectView(R.id.albumname) TextView albumText;
 
-    private TextView artistText;
+    @Optional @InjectView(R.id.artistname) TextView artistText;
 
-    private TextView trackText;
+    @InjectView(R.id.trackname) TextView trackText;
 
-    private ImageView btnContextMenu;
+    @Optional @InjectView(R.id.context_menu) ImageView btnContextMenu;
 
-    private TextView currentTime;
+    @Optional @InjectView(R.id.currenttime) TextView currentTime;
 
-    private TextView totalTime;
+    @Optional @InjectView(R.id.totaltime) TextView totalTime;
 
     private MenuItem menu_item_connect;
 
@@ -129,23 +133,23 @@ public class NowPlayingFragment extends Fragment implements
 
     private MenuItem menu_item_search;
 
-    private ImageButton playPauseButton;
+    @InjectView(R.id.pause) ImageButton playPauseButton;
 
-    private ImageButton nextButton;
+    @Optional @InjectView(R.id.next) ImageButton nextButton;
 
-    private ImageButton prevButton;
+    @Optional @InjectView(R.id.prev) ImageButton prevButton;
 
-    private ImageButton shuffleButton;
+    @Optional @InjectView(R.id.shuffle) ImageButton shuffleButton;
 
-    private ImageButton repeatButton;
+    @Optional @InjectView(R.id.repeat) ImageButton repeatButton;
 
-    private ImageView albumArt;
+    @InjectView(R.id.album) ImageView albumArt;
 
     /** In full-screen mode, shows the current progress through the track. */
-    private SeekBar seekBar;
+    @Optional @InjectView(R.id.seekbar) SeekBar seekBar;
 
     /** In mini-mode, shows the current progress through the track. */
-    private ProgressBar mProgressBar;
+    @Optional @InjectView(R.id.progressbar) ProgressBar mProgressBar;
 
     // Updating the seekbar
     private boolean updateSeekBar = true;
@@ -272,16 +276,8 @@ public class NowPlayingFragment extends Fragment implements
         if (mFullHeightLayout) {
             v = inflater.inflate(R.layout.now_playing_fragment_full, container, false);
 
-            artistText = (TextView) v.findViewById(R.id.artistname);
-            nextButton = (ImageButton) v.findViewById(R.id.next);
-            prevButton = (ImageButton) v.findViewById(R.id.prev);
-            shuffleButton = (ImageButton) v.findViewById(R.id.shuffle);
-            repeatButton = (ImageButton) v.findViewById(R.id.repeat);
-            currentTime = (TextView) v.findViewById(R.id.currenttime);
-            totalTime = (TextView) v.findViewById(R.id.totaltime);
-            seekBar = (SeekBar) v.findViewById(R.id.seekbar);
+            ButterKnife.inject(this, v);
 
-            btnContextMenu = (ImageView) v.findViewById(R.id.context_menu);
             btnContextMenu.setOnCreateContextMenuListener(this);
             btnContextMenu.setOnClickListener(new OnClickListener() {
                 @Override
@@ -299,8 +295,7 @@ public class NowPlayingFragment extends Fragment implements
                     Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels));
         } else {
             v = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
-
-            mProgressBar = (ProgressBar) v.findViewById(R.id.progressbar);
+            ButterKnife.inject(this, v);
 
             // Get an ImageFetcher to scale artwork to the size of the icon view.
             Resources resources = getResources();
@@ -317,10 +312,7 @@ public class NowPlayingFragment extends Fragment implements
         mImageCacheParams = new ImageCacheParams(mActivity, "artwork");
         mImageCacheParams.setMemCacheSizePercent(mActivity, 0.12f);
 
-        albumArt = (ImageView) v.findViewById(R.id.album);
-        trackText = (TextView) v.findViewById(R.id.trackname);
-        albumText = (TextView) v.findViewById(R.id.albumname);
-        playPauseButton = (ImageButton) v.findViewById(R.id.pause);
+        ButterKnife.inject(this, v);
 
         // Marquee effect on TextViews only works if they're focused.
         trackText.requestFocus();
@@ -887,6 +879,12 @@ public class NowPlayingFragment extends Fragment implements
         if (mService != null) {
             mActivity.unbindService(serviceConnection);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 
     /**

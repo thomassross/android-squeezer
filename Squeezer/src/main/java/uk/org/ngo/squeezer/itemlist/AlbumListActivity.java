@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import java.util.EnumSet;
 
+import butterknife.ButterKnife;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
@@ -165,7 +166,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
             }
         }
 
-        TextView header = (TextView) findViewById(R.id.header);
+        TextView header = ButterKnife.findById(this, R.id.header);
         EnumSet<AlbumView.Details> details = EnumSet.allOf(AlbumView.Details.class);
         if (artist != null) {
             details.remove(AlbumView.Details.ARTIST);

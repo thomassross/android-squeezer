@@ -35,6 +35,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.itemlist.IServiceItemListCallback;
 import uk.org.ngo.squeezer.service.event.HandshakeComplete;
@@ -71,14 +73,14 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
      */
     public static final String TAG_ADAPTER = "adapter";
 
-    private AbsListView mListView;
+    @InjectView(R.id.item_list) AbsListView mListView;
 
     private ItemAdapter<T> itemAdapter;
 
     /**
      * Progress bar (spinning) while items are loading.
      */
-    private ProgressBar loadingProgress;
+    @InjectView(R.id.loading_progress) ProgressBar loadingProgress;
 
     /**
      * Fragment to retain information across the activity lifecycle.
@@ -92,11 +94,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
         mRetainFragment = RetainFragment.getInstance(TAG, getSupportFragmentManager());
 
         setContentView(getContentView());
-        mListView = checkNotNull((AbsListView) findViewById(R.id.item_list),
-                "getContentView() did not return a view containing R.id.item_list");
-
-        loadingProgress = checkNotNull((ProgressBar) findViewById(R.id.loading_progress),
-                "getContentView() did not return a view containing R.id.loading_progress");
+        ButterKnife.inject(this);
 
         mListView.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -111,7 +109,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
             @Override
             public void onMovedToScrapHeap(View view) {
                 // Release strong reference when a view is recycled
-                final ImageView imageView = (ImageView) view.findViewById(R.id.icon);
+                final ImageView imageView = ButterKnife.findById(view, R.id.icon);
                 if (imageView != null) {
                     imageView.setImageBitmap(null);
                 }
