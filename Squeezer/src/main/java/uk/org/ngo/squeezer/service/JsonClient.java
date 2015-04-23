@@ -16,8 +16,19 @@
 
 package uk.org.ngo.squeezer.service;
 
-public class JsonClient  {
+import android.support.annotation.NonNull;
+
+import de.greenrobot.event.EventBus;
+
+public class JsonClient extends AbstractClient {
     private static final String TAG = JsonClient.class.getSimpleName();
 
+    public JsonClient(@NonNull EventBus eventBus) {
+        super(eventBus);
+    }
 
+    @Override
+    void disconnect(boolean loginFailed) {
+        // Do something.
+    }
 }

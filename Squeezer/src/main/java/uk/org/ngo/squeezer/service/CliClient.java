@@ -77,7 +77,7 @@ import uk.org.ngo.squeezer.service.event.RepeatStatusChanged;
 import uk.org.ngo.squeezer.service.event.ShuffleStatusChanged;
 import uk.org.ngo.squeezer.service.event.SongTimeChanged;
 
-class CliClient implements IClient {
+class CliClient extends AbstractClient {
 
     private static final String TAG = "CliClient";
 
@@ -95,9 +95,6 @@ class CliClient implements IClient {
     private final Map<String, Player> mPlayers = new HashMap<String, Player>();
 
     private final AtomicReference<Player> mActivePlayer = new AtomicReference<Player>();
-
-    /** Shared event bus for status changes. */
-    @NonNull private final EventBus mEventBus;
 
     /** Executor for off-main-thread work. */
     @NonNull private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
@@ -344,11 +341,7 @@ class CliClient implements IClient {
     private final int pageSize = Squeezer.getContext().getResources().getInteger(R.integer.PageSize);
 
     CliClient(@NonNull EventBus eventBus) {
-        mEventBus = eventBus;
-    }
-
-    void initialize() {
-        mEventBus.postSticky(new ConnectionChanged(ConnectionState.DISCONNECTED));
+        super(eventBus);
     }
 
     // Call through to connectionState implementation for the moment.
@@ -842,7 +835,7 @@ class CliClient implements IClient {
             /**
              * Seeing the <code>version</code> result indicates that the
              * handshake has completed (see
-             * {@link SqueezeService#onCliPortConnectionEstablished(String, String)}),
+             * {@link ConnectionState#onCliPortConnectionEstablished(EventBus, CliClient, String, String)},
              * post a {@link HandshakeComplete} event.
              */
             @Override
