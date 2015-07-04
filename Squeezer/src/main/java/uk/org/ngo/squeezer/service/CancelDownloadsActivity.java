@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import timber.log.Timber;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.util.AsyncTask;
 
@@ -33,8 +34,6 @@ import uk.org.ngo.squeezer.util.AsyncTask;
  * Squeezer downloads.
  */
 public class CancelDownloadsActivity extends Activity {
-    private static final String TAG = CancelDownloadsActivity.class.getSimpleName();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +54,7 @@ public class CancelDownloadsActivity extends Activity {
     }
 
     private void cancelDownloads() {
-        Log.i(TAG, "cancelDownloads");
+        Timber.i("cancelDownloads");
         new CancelDownloadsTask(this).execute();
     }
 

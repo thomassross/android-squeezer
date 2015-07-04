@@ -114,11 +114,13 @@ public class Util {
     }
 
     public static String decode(String string) {
-        try {
-            return URLDecoder.decode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "";
-        }
+        return android.net.Uri.decode(string);
+
+//        try {
+//            return URLDecoder.decode(string, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            return "";
+//        }
     }
 
     public static String parseHost(String hostPort) {

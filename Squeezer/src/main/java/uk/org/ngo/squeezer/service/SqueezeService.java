@@ -58,6 +58,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+import uk.org.ngo.squeezer.BuildConfig;
 import uk.org.ngo.squeezer.NowPlayingActivity;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
@@ -97,7 +99,6 @@ import uk.org.ngo.squeezer.util.Scrobble;
 
 
 public class SqueezeService extends Service implements ServiceCallbackList.ServicePublisher {
-
     private static final String TAG = "SqueezeService";
 
     private static final int PLAYBACKSERVICE_STATUS = 1;
@@ -360,7 +361,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         mActivePlayer.set(newActivePlayer);
         updateAllPlayerSubscriptionStates();
 
-        Log.i(TAG, "Active player now: " + newActivePlayer);
+        Timber.i("Active player now: %s", newActivePlayer);
 
         // If this is a new player then start an async fetch of its status.
         if (newActivePlayer != null) {
@@ -378,10 +379,10 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
                 SharedPreferences.Editor editor = preferences.edit();
 
                 if (newActivePlayer == null) {
-                    Log.v(TAG, "Clearing " + Preferences.KEY_LAST_PLAYER);
+                    Timber.v("Clearing %s", Preferences.KEY_LAST_PLAYER);
                     editor.remove(Preferences.KEY_LAST_PLAYER);
                 } else {
-                    Log.v(TAG, "Saving " + Preferences.KEY_LAST_PLAYER + "=" + newActivePlayer.getId());
+                    Timber.v("Saving %s=%s", Preferences.KEY_LAST_PLAYER, newActivePlayer.getId());
                     editor.putString(Preferences.KEY_LAST_PLAYER, newActivePlayer.getId());
                 }
 
@@ -695,10 +696,10 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
                 Context.MODE_PRIVATE);
         final String lastConnectedPlayer = preferences.getString(Preferences.KEY_LAST_PLAYER,
                 null);
-        Log.i(TAG, "lastConnectedPlayer was: " + lastConnectedPlayer);
+        Timber.i("lastConnectedPlayer was: %s", lastConnectedPlayer);
 
         Collection<Player> players = mPlayers.values();
-        Log.i(TAG, "mPlayers empty?: " + mPlayers.isEmpty());
+        Timber.i("mPlayers empty?: %b", mPlayers.isEmpty());
         for (Player player : players) {
             if (player.getId().equals(lastConnectedPlayer)) {
                 return player;
@@ -813,11 +814,11 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     void updateWifiLock(boolean state) {
         // TODO: this might be running in the wrong thread.  Is wifiLock thread-safe?
         if (state && !wifiLock.isHeld()) {
-            Log.v(TAG, "Locking wifi while playing.");
+            Timber.v("Locking wifi while playing.");
             wifiLock.acquire();
         }
         if (!state && wifiLock.isHeld()) {
-            Log.v(TAG, "Unlocking wifi.");
+            Timber.v("Unlocking wifi.");
             try {
                 wifiLock.release();
                 // Seen a crash here with:
@@ -838,7 +839,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
                 // Both crashes occurred when the wifi was disabled, on HTC Hero
                 // devices running 2.1-update1.
             } catch (SecurityException e) {
-                Log.v(TAG, "Caught odd SecurityException releasing wifilock");
+                Timber.v("Caught odd SecurityException releasing wifilock");
             }
         }
     }
@@ -1280,7 +1281,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         @Override
         public void preferenceChanged(String key) {
-            Log.i(TAG, "Preference changed: " + key);
+            Timber.i("Preference changed: %s", key);
             cachePreferences();
 
             if (Preferences.KEY_NOTIFY_OF_CONNECTION.equals(key)) {
@@ -1677,13 +1678,17 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         @Override
         public void post(Object event) {
-            Log.v("EventBus", "post() " + event.getClass().getSimpleName() + ": " + event);
+            if (BuildConfig.DEBUG) {
+                Timber.v("post() %s: %s", event.getClass().getSimpleName(), event);
+            }
             super.post(event);
         }
 
         @Override
         public void postSticky(Object event) {
-            Log.v("EventBus", "postSticky() " + event.getClass().getSimpleName() + ": " + event);
+            if (BuildConfig.DEBUG) {
+                Timber.v("postSticky() %s: %s", event.getClass().getSimpleName(), event);
+            }
             super.postSticky(event);
         }
 

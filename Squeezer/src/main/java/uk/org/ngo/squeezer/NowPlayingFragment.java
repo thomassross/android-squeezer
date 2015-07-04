@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import timber.log.Timber;
 import uk.org.ngo.squeezer.dialog.AboutDialog;
 import uk.org.ngo.squeezer.dialog.EnableWifiDialog;
 import uk.org.ngo.squeezer.framework.BaseActivity;
@@ -89,9 +90,6 @@ import uk.org.ngo.squeezer.service.event.SongTimeChanged;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public class NowPlayingFragment extends Fragment implements View.OnCreateContextMenuListener {
-
-    private final String TAG = "NowPlayingFragment";
-
     private BaseActivity mActivity;
 
     @Nullable
@@ -153,12 +151,12 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if (networkInfo.isConnected()) {
-                Log.v(TAG, "Received WIFI connected broadcast");
+                Timber.v("Received WIFI connected broadcast");
                 if (!isConnected()) {
                     // Requires a serviceStub. Else we'll do this on the service
                     // connection callback.
                     if (mService != null && !isManualDisconnect()) {
-                        Log.v(TAG, "Initiated connect on WIFI connected");
+                        Timber.v("Initiated connect on WIFI connected");
                         startVisibleConnection();
                     }
                 }
@@ -200,7 +198,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            Log.v(TAG, "ServiceConnection.onServiceConnected()");
+            Timber.v("ServiceConnection.onServiceConnected()");
             NowPlayingFragment.this.onServiceConnected((ISqueezeService) binder);
         }
 
@@ -239,7 +237,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
         mActivity.bindService(new Intent(mActivity, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
-        Log.d(TAG, "did bindService; serviceStub = " + mService);
+        Timber.d("did bindService; serviceStub: %s", mService);
     }
 
     @Override
@@ -288,7 +286,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                     return;
                 }
                 if (isConnected()) {
-                    Log.v(TAG, "Pause...");
+                    Timber.v("Pause...");
                     mService.togglePausePlay();
                 } else {
                     // When we're not connected, the play/pause
@@ -497,9 +495,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                         public boolean onNavigationItemSelected(int position, long id) {
                             if (!playerAdapter.getItem(position)
                                     .equals(mService.getActivePlayer())) {
-                                Log.i(TAG,
-                                        "onNavigationItemSelected.setActivePlayer(" + playerAdapter
-                                                .getItem(position) + ")");
+                                Timber.i("onNavigationItemSelected.setActivePlayer(%s)",
+                                        playerAdapter.getItem(position));
                                 mService.setActivePlayer(playerAdapter.getItem(position));
                                 updateUiFromPlayerState(mService.getActivePlayerState());
                             }
@@ -525,7 +522,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     protected void onServiceConnected(@NonNull ISqueezeService service) {
-        Log.v(TAG, "Service bound");
+        Timber.v("Service bound");
         mService = service;
 
         maybeRegisterCallbacks(mService);
@@ -539,7 +536,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume...");
+        Timber.d("onResume...");
 
         // Start it and have it run forever (until it shuts itself down).
         // This is required so swapping out the activity (and unbinding the
@@ -715,7 +712,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     @Override
     public void onPause() {
-        Log.d(TAG, "onPause...");
+        Timber.d("onPause...");
 
         dismissConnectingDialog();
 
@@ -923,14 +920,14 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     private void onUserInitiatesConnect() {
         if (mService == null) {
-            Log.e(TAG, "serviceStub is null.");
+            Timber.e("serviceStub is null.");
             return;
         }
         startVisibleConnection();
     }
 
     public void startVisibleConnection() {
-        Log.v(TAG, "startVisibleConnection");
+        Timber.v("startVisibleConnection");
         if (mService == null) {
             return;
         }
@@ -947,7 +944,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 if (fragmentManager != null) {
                     EnableWifiDialog.show(getFragmentManager());
                 } else {
-                    Log.i(getTag(), "fragment manager is null so we can't show EnableWifiDialog");
+                    Timber.i("fragment manager is null so we can't show EnableWifiDialog");
                 }
                 return;
                 // When a Wi-Fi connection is made this method will be called again by the
@@ -964,17 +961,17 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
         }
 
         if (isConnectInProgress()) {
-            Log.v(TAG, "Connection is already in progress, connecting aborted");
+            Timber.v("Connection is already in progress, connecting aborted");
             return;
         }
-        Log.v(TAG, "startConnect, ipPort: " + ipPort);
+        Timber.v("startConnect, ipPort: %s", ipPort);
         mService.startConnect(ipPort, preferences.getUserName(serverAddress, "test"),
                 preferences.getPassword(serverAddress, "test1"));
     }
 
     @MainThread
     public void onEventMainThread(ConnectionChanged event) {
-        Log.d(TAG, "ConnectionChanged: " + event);
+        Timber.d("ConnectionChanged: %s", event);
 
         // The fragment may no longer be attached to the parent activity.  If so, do nothing.
         if (!isAdded()) {
@@ -1044,7 +1041,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             return;
         }
 
-        Log.d(TAG, "Handshake complete");
+        Timber.d("Handshake complete");
 
         dismissConnectingDialog();
 

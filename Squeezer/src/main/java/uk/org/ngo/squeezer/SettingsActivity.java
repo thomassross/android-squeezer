@@ -41,6 +41,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import timber.log.Timber;
 import uk.org.ngo.squeezer.itemlist.action.PlayableItemAction;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
@@ -49,9 +50,6 @@ import uk.org.ngo.squeezer.util.ThemeManager;
 
 public class SettingsActivity extends PreferenceActivity implements
         OnPreferenceChangeListener, OnSharedPreferenceChangeListener {
-
-    private final String TAG = "SettingsActivity";
-
     private static final int DIALOG_SCROBBLE_APPS = 0;
 
     private ISqueezeService service = null;
@@ -87,7 +85,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
-        Log.d(TAG, "did bindService; service = " + service);
+        Timber.d("did bindService; service = %s", service);
 
         getPreferenceManager().setSharedPreferencesName(Preferences.NAME);
         addPreferencesFromResource(R.xml.preferences);
@@ -275,7 +273,7 @@ public class SettingsActivity extends PreferenceActivity implements
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         final String key = preference.getKey();
-        Log.v(TAG, "preference change for: " + key);
+        Timber.v("preference change for: %s", key);
 
         if (Preferences.KEY_FADE_IN_SECS.equals(key)) {
             updateFadeInSecondsSummary(Util.parseDecimalIntOrZero(newValue.toString()));
@@ -323,7 +321,7 @@ public class SettingsActivity extends PreferenceActivity implements
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.v(TAG, "Preference changed: " + key);
+        Timber.v("Preference changed: %s", key);
 
         if (key.startsWith(Preferences.KEY_SERVER_ADDRESS)) {
             updateAddressSummary();
@@ -332,7 +330,7 @@ public class SettingsActivity extends PreferenceActivity implements
         if (service != null) {
             service.preferenceChanged(key);
         } else {
-            Log.v(TAG, "service is null!");
+            Timber.v("service is null!");
         }
     }
 

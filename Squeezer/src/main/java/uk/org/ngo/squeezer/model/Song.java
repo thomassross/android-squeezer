@@ -29,8 +29,6 @@ import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.ArtworkItem;
 
 public class Song extends ArtworkItem {
-    private static final String TAG = "Song";
-
     @Override
     public String getPlaylistTag() {
         return "track_id";

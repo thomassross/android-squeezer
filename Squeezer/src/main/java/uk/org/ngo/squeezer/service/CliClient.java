@@ -43,6 +43,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
+import timber.log.Timber;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Squeezer;
 import uk.org.ngo.squeezer.Util;
@@ -79,9 +80,6 @@ import uk.org.ngo.squeezer.service.event.ShuffleStatusChanged;
 import uk.org.ngo.squeezer.service.event.SongTimeChanged;
 
 class CliClient implements IClient {
-
-    private static final String TAG = "CliClient";
-
     final ConnectionState connectionState = new ConnectionState();
 
     /** {@link java.util.regex.Pattern} that splits strings on spaces. */
@@ -402,7 +400,7 @@ class CliClient implements IClient {
         }
 
         String formattedCommands = mNewlineJoiner.join(commands);
-        Log.v(TAG, "SEND: " + formattedCommands);
+        Timber.v("SEND: %s", formattedCommands);
 
         // Make sure that username/password do not make it to Crashlytics.
         if (commands[0].startsWith("login ")) {
@@ -465,7 +463,7 @@ class CliClient implements IClient {
     public void cancelClientRequests(Object client) {
         for (Map.Entry<Integer, IServiceItemListCallback> entry : pendingRequests.entrySet()) {
             if (entry.getValue().getClient() == client) {
-                Log.i(TAG, "cancel request: [" + entry.getKey() + ";" + entry.getValue() +"]");
+                Timber.i("cancel request: [%s;%s]", entry.getKey(), entry.getValue());
                 pendingRequests.remove(entry.getKey());
             }
         }
@@ -628,7 +626,7 @@ class CliClient implements IClient {
      * @param tokens List of tokens with value or key:value.
      */
     void parseSqueezerList(ExtendedQueryFormatCmd cmd, List<String> tokens) {
-        Log.v(TAG, "Parsing list, cmd: " +cmd + ", tokens: " + tokens);
+        Timber.v("Parsing list, cmd: %s, tokens: %s", cmd, tokens);
 
         final int ofs = mSpaceSplitPattern.split(cmd.cmd).length + (cmd.playerSpecific ? 1 : 0) + (cmd.prefixed ? 1 : 0);
         int actionsCount = 0;
@@ -658,12 +656,12 @@ class CliClient implements IClient {
             String token = tokens.get(idx);
             int colonPos = token.indexOf("%3A");
             if (colonPos == -1) {
-                Log.e(TAG, "Expected colon in list token. '" + token + "'");
+                Timber.e("Expected colon in list token. '%s'", token);
                 return;
             }
             String key = Util.decode(token.substring(0, colonPos));
             String value = Util.decode(token.substring(colonPos + 3));
-            Log.v(TAG, "key=" + key + ", value: " + value);
+            Timber.v("key=%s, value: %s", key, value);
 
             if ("rescan".equals(key)) {
                 rescan = (Util.parseDecimalIntOrZero(value) == 1);
@@ -684,7 +682,7 @@ class CliClient implements IClient {
                 SqueezeParserInfo newParserInfo = itemDelimeterMap.get(key);
                 if (newParserInfo != null && parserInfo != null && parserInfo.isComplete(record)) {
                     parserInfo.handler.add(record);
-                    Log.v(TAG, "record=" + record);
+                    Timber.v("record=%s", record);
                     record.clear();
                 }
                 if (newParserInfo != null) parserInfo = newParserInfo;
@@ -700,7 +698,7 @@ class CliClient implements IClient {
 
         if (parserInfo != null && !record.isEmpty()) {
             parserInfo.handler.add(record);
-            Log.v(TAG, "record=" + record);
+            Timber.v("record=%s", record);
         }
 
         // Process the lists for all the registered handlers
@@ -948,14 +946,14 @@ class CliClient implements IClient {
         handlers.put("login", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "Authenticated: " + tokens);
+                Timber.i("Authenticated: %s", tokens);
                 onAuthenticated();
             }
         });
         handlers.put("pref", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "Preference received: " + tokens);
+                Timber.i("Preference received: %s", tokens);
                 if ("httpport".equals(tokens.get(1)) && tokens.size() >= 3) {
                     connectionState.setHttpPort(Integer.parseInt(tokens.get(2)));
                 }
@@ -970,7 +968,7 @@ class CliClient implements IClient {
         handlers.put("can", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "Capability received: " + tokens);
+                Timber.i("Capability received: %s", tokens);
                 if ("favorites".equals(tokens.get(1)) && tokens.size() >= 4) {
                     connectionState.setCanFavorites(Util.parseDecimalIntOrZero(tokens.get(3)) == 1);
                 }
@@ -1018,7 +1016,7 @@ class CliClient implements IClient {
              */
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "Version received: " + tokens);
+                Timber.i("Version received: %s", tokens);
                 mUrlPrefix = "http://" + getCurrentHost() + ":" + getHttpPort();
                 Crashlytics.setString("server_version", tokens.get(1));
 
@@ -1071,14 +1069,14 @@ class CliClient implements IClient {
         handlers.put("play", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.v(TAG, "play registered");
+                Timber.v("play registered");
                 updatePlayStatus(Util.decode(tokens.get(0)), PlayerState.PLAY_STATE_PLAY);
             }
         });
         handlers.put("stop", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.v(TAG, "stop registered");
+                Timber.v("stop registered");
                 updatePlayStatus(Util.decode(tokens.get(0)), PlayerState.PLAY_STATE_STOP);
             }
         });
@@ -1089,7 +1087,7 @@ class CliClient implements IClient {
              */
             @Override
             public void handle(List<String> tokens) {
-                Log.v(TAG, "pause registered: " + tokens);
+                Timber.v("pause registered: %s", tokens);
                 updatePlayStatus(Util.decode(tokens.get(0)), parsePause(tokens.size() >= 3 ? tokens.get(2) : null));
             }
         });
@@ -1102,7 +1100,7 @@ class CliClient implements IClient {
         handlers.put("playerpref", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "Player preference received: " + tokens);
+                Timber.i("Player preference received: %s", tokens);
                 if (tokens.size() == 4) {
                     Player player = mPlayers.get(Util.decode(tokens.get(0)));
                     if (player == null) {
@@ -1139,7 +1137,7 @@ class CliClient implements IClient {
         handlers.put("client", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.i(TAG, "client received: " + tokens);
+                Timber.i("client received: %s", tokens);
                 // Something has happened to the player list, we just fetch the full list again.
                 //
                 // Reasons to do this:
@@ -1252,7 +1250,7 @@ class CliClient implements IClient {
         handlers.put("prefset", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {
-                Log.v(TAG, "Prefset received: " + tokens);
+                Timber.v("Prefset received: %s", tokens);
                 if (tokens.size() == 5 && tokens.get(2).equals("server")) {
                     String playerId = Util.decode(tokens.get(0));
                     Player player = mPlayers.get(playerId);
@@ -1294,7 +1292,7 @@ class CliClient implements IClient {
     }
 
     void onLineReceived(String serverLine) {
-        Log.v(TAG, "RECV: " + serverLine);
+        Timber.v("RECV: %s", serverLine);
 
         // Make sure that username/password do not make it to Crashlytics.
         if (serverLine.startsWith("login ")) {
@@ -1390,7 +1388,7 @@ class CliClient implements IClient {
     }
 
     private void parsePlaylistNotification(List<String> tokens) {
-        Log.v(TAG, "Playlist notification received: " + tokens);
+        Timber.v("Playlist notification received: %s", tokens);
         String notification = tokens.get(2);
         if ("newsong".equals(notification)) {
             sendCommand(tokens.get(0), "status - 1 tags:" + SqueezeService.SONGTAGS);

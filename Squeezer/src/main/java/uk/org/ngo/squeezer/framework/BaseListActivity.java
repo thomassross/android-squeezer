@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import timber.log.Timber;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.itemlist.IServiceItemListCallback;
 import uk.org.ngo.squeezer.service.event.HandshakeComplete;
@@ -174,7 +175,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
             Method method = mListView.getClass().getMethod("setAdapter", ListAdapter.class);
             method.invoke(mListView, getItemAdapter());
         } catch (Exception e) {
-            Log.e(getTag(), "Error calling 'setAdapter'", e);
+            Timber.e("Error calling 'setAdapter'", e);
         }
 
         Integer position = (Integer) mRetainFragment.get(TAG_POSITION);

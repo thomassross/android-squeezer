@@ -38,13 +38,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
+import timber.log.Timber;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.service.event.ConnectionChanged;
 
 public class ConnectionState {
-
-    private static final String TAG = "ConnectionState";
-
     /** {@link java.util.regex.Pattern} that splits strings on semi-colons. */
     private static final Pattern mSemicolonSplitPattern = Pattern.compile(";");
 
@@ -107,7 +105,7 @@ public class ConnectionState {
     private final AtomicReference<String[]> mediaDirs = new AtomicReference<String[]>();
 
     void disconnect(EventBus eventBus, boolean loginFailed) {
-        Log.v(TAG, "disconnect" + (loginFailed ? ": authentication failure" : ""));
+        Timber.v("disconnect%s", (loginFailed ? ": authentication failure" : ""));
         currentConnectionGeneration.incrementAndGet();
         Socket socket = socketRef.get();
         if (socket != null) {
@@ -137,7 +135,7 @@ public class ConnectionState {
      */
     void setConnectionState(@NonNull EventBus eventBus,
             @ConnectionStates int connectionState) {
-        Log.d(TAG, "Setting connection state to: " + connectionState);
+        Timber.d("Setting connection state to: %d", connectionState);
         mConnectionState = connectionState;
         eventBus.postSticky(new ConnectionChanged(mConnectionState));
     }
@@ -148,7 +146,7 @@ public class ConnectionState {
 
     void setHttpPort(Integer port) {
         httpPort.set(port);
-        Log.v(TAG, "HTTP port is now: " + port);
+        Timber.v("HTTP port is now: %d", port);
     }
 
     public String[] getMediaDirs() {
@@ -251,13 +249,13 @@ public class ConnectionState {
 
         @Override
         public void run() {
-            Log.d(TAG, "Listening thread started");
+            Timber.d("Listening thread started");
 
             BufferedReader in;
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             } catch (IOException e) {
-                Log.v(TAG, "IOException while creating BufferedReader: " + e);
+                Timber.v("IOException while creating BufferedReader: %s", e);
                 cli.disconnect(false);
                 return;
             }
@@ -275,11 +273,11 @@ public class ConnectionState {
                     // if we're not the main connection generation anymore,
                     // else we should notify about it.
                     if (currentConnectionGeneration.get() == generationNumber) {
-                        Log.v(TAG, "Server disconnected; exception=" + exception);
+                        Timber.v("Server disconnected; exception=%s", exception);
                         cli.disconnect(exception == null);
                     } else {
                         // Who cares.
-                        Log.v(TAG, "Old generation connection disconnected, as expected.");
+                        Timber.v("Old generation connection disconnected, as expected.");
                     }
                     return;
                 }
@@ -305,7 +303,7 @@ public class ConnectionState {
                       @NonNull final Executor executor,
                       final CliClient cli, String hostPort, final String userName,
                       final String password) {
-        Log.v(TAG, "startConnect");
+        Timber.v("startConnect");
         // Common mistakes, based on crash reports...
         if (hostPort.startsWith("Http://") || hostPort.startsWith("http://")) {
             hostPort = hostPort.substring(7);
@@ -330,16 +328,16 @@ public class ConnectionState {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "Ensuring service is disconnected");
+                Timber.d("Ensuring service is disconnected");
                 service.disconnect();
                 Socket socket = new Socket();
                 try {
-                    Log.d(TAG, "Connecting to: " + cleanHostPort);
+                    Timber.d("Connecting to: %s", cleanHostPort);
                     setConnectionState(eventBus, CONNECTION_STARTED);
                     socket.connect(new InetSocketAddress(host, port),
                             4000 /* ms timeout */);
                     socketRef.set(socket);
-                    Log.d(TAG, "Connected to: " + cleanHostPort);
+                    Timber.d("Connected to: %s", cleanHostPort);
                     socketWriter.set(new PrintWriter(socket.getOutputStream(), true));
                     setConnectionState(eventBus, CONNECTION_COMPLETED);
                     startListeningThread(eventBus, executor, cli);
@@ -351,10 +349,10 @@ public class ConnectionState {
                         }
                     });
                 } catch (SocketTimeoutException e) {
-                    Log.e(TAG, "Socket timeout connecting to: " + cleanHostPort);
+                    Timber.e("Socket timeout connecting to: %s", cleanHostPort);
                     setConnectionState(eventBus, CONNECTION_FAILED);
                 } catch (IOException e) {
-                    Log.e(TAG, "IOException connecting to: " + cleanHostPort);
+                    Timber.e("IOException connecting to: %s", cleanHostPort);
                     setConnectionState(eventBus, CONNECTION_FAILED);
                 }
             }

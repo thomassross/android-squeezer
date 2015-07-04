@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import timber.log.Timber;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.SqueezeService;
@@ -193,7 +194,7 @@ public abstract class ItemListActivity extends BaseActivity {
      * @param size The number of items in this update
      */
     protected void onItemsReceived(final int count, final int start, int size) {
-        Log.d(getTag(), "onItemsReceived(" + count + ", " + start + ", " + size + ")");
+        Timber.d("onItemsReceived(%d, %d, %d)", count, start, size);
 
         // Add this page of data to mReceivedPages and remove from mOrderedPages.
         // Because we might receive a page in chunks, we test for the end of a page,
@@ -321,7 +322,7 @@ public abstract class ItemListActivity extends BaseActivity {
                 boolean mFingerUp = action == MotionEvent.ACTION_UP
                         || action == MotionEvent.ACTION_CANCEL;
                 if (mFingerUp && mPrevScrollState == OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    Log.v(TAG, "Sending special scroll state bump");
+                    Timber.v(TAG, "Sending special scroll state bump");
                     mOnScrollListener.onScrollStateChanged((AbsListView) view,
                             OnScrollListener.SCROLL_STATE_FLING);
                     mOnScrollListener.onScrollStateChanged((AbsListView) view,

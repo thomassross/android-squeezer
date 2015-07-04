@@ -17,7 +17,6 @@ import android.widget.Toast;
 import uk.org.ngo.squeezer.R;
 
 public class EnableWifiDialog extends DialogFragment {
-
     private static final String TAG = EnableWifiDialog.class.getSimpleName();
 
     @NonNull

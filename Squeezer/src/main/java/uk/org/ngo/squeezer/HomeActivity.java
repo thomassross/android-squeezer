@@ -55,9 +55,6 @@ import uk.org.ngo.squeezer.itemlist.dialog.AlbumViewDialog;
 import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 
 public class HomeActivity extends BaseActivity {
-
-    private final String TAG = "HomeActivity";
-
     private static final int ARTISTS = 0;
 
     private static final int ALBUMS = 1;
