@@ -1333,44 +1333,33 @@ class CliClient implements IClient {
 
     private HashMap<String, String> parseTokens(List<String> tokens) {
         HashMap<String, String> tokenMap = new HashMap<String, String>();
-        String[] kv;
         for (String token : tokens) {
-            kv = parseToken(token);
-            if (kv.length == 0)
-                continue;
-
-            tokenMap.put(kv[0], kv[1]);
+            parseTokenIntoMap(token, tokenMap);
         }
         return tokenMap;
     }
 
     /**
-     * Parse a token in to a key-value pair.  The value is optional.
+     * Parse a token in to a key-value pair and stores it in the provided map. The value is optional.
      * <p>
      * The token is assumed to be URL encoded, with the key and value separated by ':' (encoded
      * as '%3A').
      *
      * @param token The string to decode.
-     * @return An array -- empty if token is null or empty, otherwise with two elements. The first
-     * is the key, the second, which may be null, is the value. The elements are decoded.
+     * @param tokenMap The map to store the key-value pair in to.
      */
-    private String[] parseToken(@Nullable String token) {
-        String key, value;
-
-        if (token == null || token.length() == 0) {
-            return new String[]{};
+    private void parseTokenIntoMap(@Nullable String token, Map<String, String> tokenMap) {
+        if (token == null) {
+            return;
         }
 
         int colonPos = token.indexOf("%3A");
         if (colonPos == -1) {
-            key = Util.decode(token);
-            value = null;
+            tokenMap.put(Util.decode(token), null);
         } else {
-            key = Util.decode(token.substring(0, colonPos));
-            value = Util.decode(token.substring(colonPos + 3));
+            tokenMap.put(Util.decode(token.substring(0, colonPos)),
+                    Util.decode(token.substring(colonPos + 3)));
         }
-
-        return new String[]{key, value};
     }
 
     private @PlayerState.PlayState String parsePause(String explicitPause) {
