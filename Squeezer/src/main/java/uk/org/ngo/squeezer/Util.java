@@ -109,11 +109,7 @@ public class Util {
     }
 
     public static String encode(String string) {
-        try {
-            return URLEncoder.encode(string, "UTF-8").replace("+", "%20");
-        } catch (UnsupportedEncodingException e) {
-            return "";
-        }
+        return android.net.Uri.encode(string).replace("+", "%20");
     }
 
     /**
