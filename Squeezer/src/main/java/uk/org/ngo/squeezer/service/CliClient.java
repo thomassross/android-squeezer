@@ -482,7 +482,8 @@ class CliClient implements IClient {
      */
     private void internalRequestItems(String playerId, String cmd, int start, int pageSize, List<String> parameters, IServiceItemListCallback callback) {
         pendingRequests.put(_correlationid, callback);
-        final StringBuilder sb = new StringBuilder(cmd + " " + start + " " + pageSize);
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append(cmd).append(" ").append(start).append(" ").append(pageSize);
         if (playerId != null) {
             sb.insert(0, Util.encode(playerId) + " ");
         }
