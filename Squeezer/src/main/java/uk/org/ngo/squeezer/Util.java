@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer;
 
 import android.content.Context;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,9 +35,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Util {
     private static final String TAG = Util.class.getSimpleName();
 
+    /** Cache of encoded strings to their decoded equivalents. */
+    private static final LruCache<String, String> mDecodeCache = new LruCache<>(128);
+
     private Util() {
     }
-
 
     /**
      * Update target, if it's different from newValue.
@@ -113,14 +116,19 @@ public class Util {
         }
     }
 
+    /**
+     * URI decode the given string, assuming UTF-8.
+     *
+     * @param string encoded string to decode.
+     * @return decoded string.
+     */
     public static String decode(String string) {
-        return android.net.Uri.decode(string);
-
-//        try {
-//            return URLDecoder.decode(string, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            return "";
-//        }
+        String decoded = mDecodeCache.get(string);
+        if (decoded == null) {
+            decoded = android.net.Uri.decode(string);
+            mDecodeCache.put(string, decoded);
+        }
+        return decoded;
     }
 
     public static String parseHost(String hostPort) {
