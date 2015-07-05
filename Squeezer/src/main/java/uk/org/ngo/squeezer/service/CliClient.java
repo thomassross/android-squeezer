@@ -1329,7 +1329,7 @@ class CliClient implements IClient {
     }
 
     private HashMap<String, String> parseTokens(List<String> tokens) {
-        HashMap<String, String> tokenMap = new HashMap<String, String>();
+        HashMap<String, String> tokenMap = new HashMap<String, String>(tokens.size());
         for (String token : tokens) {
             parseTokenIntoMap(token, tokenMap);
         }
