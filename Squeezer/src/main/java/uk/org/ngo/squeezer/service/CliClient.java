@@ -82,9 +82,6 @@ import uk.org.ngo.squeezer.service.event.SongTimeChanged;
 class CliClient implements IClient {
     final ConnectionState connectionState = new ConnectionState();
 
-    /** {@link java.util.regex.Pattern} that splits strings on spaces. */
-    private static final Pattern mSpaceSplitPattern = Pattern.compile(" ");
-
     /**
      * Join multiple strings (skipping nulls) together with newlines.
      */
@@ -628,7 +625,7 @@ class CliClient implements IClient {
     void parseSqueezerList(ExtendedQueryFormatCmd cmd, List<String> tokens) {
         Timber.v("Parsing list, cmd: %s, tokens: %s", cmd, tokens);
 
-        final int ofs = mSpaceSplitPattern.split(cmd.cmd).length + (cmd.playerSpecific ? 1 : 0) + (cmd.prefixed ? 1 : 0);
+        final int ofs = cmd.cmd.split(" ").length + (cmd.playerSpecific ? 1 : 0) + (cmd.prefixed ? 1 : 0);
         int actionsCount = 0;
         final String playerid = (cmd.playerSpecific ? tokens.get(0) + " " : "");
         final String prefix = (cmd.prefixed ? tokens.get(cmd.playerSpecific ? 1 : 0) + " " : "");
@@ -1301,7 +1298,7 @@ class CliClient implements IClient {
             Crashlytics.setString("lastReceivedLine", serverLine);
         }
 
-        List<String> tokens = Arrays.asList(mSpaceSplitPattern.split(serverLine));
+        List<String> tokens = Arrays.asList(serverLine.split(" "));
         if (tokens.size() < 2) {
             return;
         }
