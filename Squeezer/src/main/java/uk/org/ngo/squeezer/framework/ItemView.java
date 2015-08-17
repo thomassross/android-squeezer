@@ -23,17 +23,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import uk.org.ngo.squeezer.util.ImageFetcher;
-
 
 /**
  * Defines view logic for a {@link Item}
- * <p/>
+ * <p>
  * We keep this here because we don't want to pollute the model with view related stuff.
- * <p/>
+ * <p>
  * Currently this is the only logic class you have to implement for each SqueezeServer data type, so
  * it contains a few methods, which are not strictly view related.
- * <p/>
+ * <p>
  * {@link BaseItemView} implements all the common functionality, an some sensible defaults.
  *
  * @param <T> Denotes the class of the item this class implements view logic for
@@ -58,12 +56,12 @@ public interface ItemView<T extends Item> {
      *
      * @param convertView the old view to reuse, per {@link android.widget.Adapter#getView(int, View,
      * android.view.ViewGroup)}
+     * @param position Position of item in adapter
      * @param item the item to display.
-     * @param imageFetcher an {@link ImageFetcher} configured to load image thumbnails.
      *
      * @return the view to display.
      */
-    View getAdapterView(View convertView, ViewGroup parent, T item, ImageFetcher imageFetcher);
+    View getAdapterView(View convertView, ViewGroup parent, int position, T item);
 
     /**
      * Gets a {@link android.view.View} suitable for displaying the supplied (static) text. See
@@ -88,6 +86,15 @@ public interface ItemView<T extends Item> {
     Creator<T> getCreator();
 
     /**
+     * Return whether the supplied item shall be selectable in a list
+     *
+     * @param item Item to check
+     * @return True if the item is selectable
+     * @see android.widget.ListAdapter#isEnabled(int)
+     */
+    boolean isSelectable(T item);
+
+    /**
      * Implement the action to be taken when an item is selected.
      *
      * @param index Position in the list of the selected item.
@@ -98,16 +105,16 @@ public interface ItemView<T extends Item> {
     /**
      * Creates the context menu, and sets the menu's title to the name of the item that it is the
      * context menu.
-     * <p/>
+     * <p>
      * Subclasses with no context menu should override this method and do nothing.
-     * <p/>
+     * <p>
      * Subclasses with a context menu should call this method, then inflate their context menu and
      * perform any adjustments to it before returning.
      *
      * @see android.view.View.OnCreateContextMenuListener#onCreateContextMenu(ContextMenu, View,
      * android.view.ContextMenu.ContextMenuInfo)
      */
-    public void onCreateContextMenu(ContextMenu menu, View v,
+    void onCreateContextMenu(ContextMenu menu, View v,
             ItemView.ContextMenuInfo menuInfo);
 
     /**
@@ -121,7 +128,7 @@ public interface ItemView<T extends Item> {
      *
      * @see android.app.Activity#onContextItemSelected(MenuItem)
      */
-    public boolean doItemContext(MenuItem menuItem, int index, T selectedItem);
+    boolean doItemContext(MenuItem menuItem, int index, T selectedItem);
 
     /**
      * Perform the selected action from the context sub-menu.
@@ -132,13 +139,13 @@ public interface ItemView<T extends Item> {
      *
      * @see android.app.Activity#onContextItemSelected(MenuItem)
      */
-    public boolean doItemContext(MenuItem menuItem);
+    boolean doItemContext(MenuItem menuItem);
 
     /**
      * Extra menu information provided to the {@link android.view.View.OnCreateContextMenuListener#onCreateContextMenu(ContextMenu,
      * View, ContextMenu.ContextMenuInfo) } callback when a context menu is brought up for this ItemView.
      */
-    public static class ContextMenuInfo implements ContextMenu.ContextMenuInfo {
+    class ContextMenuInfo implements ContextMenu.ContextMenuInfo {
 
         /**
          * The position in the adapter for which the context menu is being displayed.

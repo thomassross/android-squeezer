@@ -18,6 +18,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Squeezer</string>
+    <string name="undo">Undo</string>
     <string name="disabled">Disabled</string>
     <string name="volume">%s volume</string>
     <string name="menu_item_players">Players</string>
@@ -32,14 +33,13 @@
     </string>
     <string name="settings_serveraddr_hint">Name or IP address of server</string>
     <string name="settings_server_prompt">Choose a server</string>
-    <string name="settings_server_scan_start">Start scan</string>
-    <string name="settings_server_scan_stop">Stop scanning</string>
-    <string name="settings_server_scan_msg">Or press \'Start scan\' to scan the network for
-        servers.
-    </string>
-    <string name="settings_server_scanning_disabled_msg">Scanning is disabled, because WiFi is not
+    <string name="settings_server_rescan">Rescan</string>
+    <string name="settings_server_scanning_disabled_msg">Scanning is disabled, because Wi-Fi is not
         connected.
     </string>
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light_dark">Light, dark action bar</string>
     <string name="settings_username_hint">User name (optional)</string>
     <string name="settings_password_hint">Password (optional)</string>
     <string name="settings_server_scan_progress">Scanning for servers&#8230;</string>
@@ -92,7 +92,13 @@
     <string name="connecting_to_text">Connecting to SqueezeBox CLI at %s</string>
     <string name="connection_failed_text">Connection failed. Check settings.</string>
     <string name="not_connected">Squeezer is not connected to any Squeezeservers.</string>
-    <string name="login_failed_text">Login failed. Enter user name and password.</string>
+    <string name="select_server">Or select one the servers below.</string>
+    <string name="login_failed_text">Login failed. Make sure the correct port, user name and password is entered.</string>
+    <string name="login_failed_info_text">
+        &lt;p&gt;You find the correct values in the servers web-interface. Select settings and the Advanced tab.&lt;/p&gt;
+        &lt;p&gt;To check the port number select network in the dropdown.&lt;/p&gt;
+        &lt;p&gt;User name and password is found by selecting security in the dropdown.&lt;/p&gt;
+    </string>
     <string name="disconnected_text">Disconnected.</string>
     <string name="wifi_disabled_text">Wi-Fi is disabled</string>
     <string name="enable_wifi_text">This will turn on Wi-Fi on your Android device. When an active
@@ -113,6 +119,7 @@
     <string name="new_playlist_title">New playlist</string>
     <string name="new_playlist_hint">Enter name of playlist</string>
     <string name="rename_title">Rename %s</string>
+    <string name="sync_title">Synchronize %s to…</string>
     <string name="delete_title">Delete %s</string>
     <string name="delete__message">Are you sure to delete?</string>
     <string name="loading_text">Loading&#8230;</string>
@@ -127,6 +134,14 @@
     <string name="year_label">Year</string>
     <string name="filter_label">Search text</string>
 
+    <string name="player_group_header">Group: %s</string>
+    <string name="menu_item_player_sync">Synchronize…</string>
+    <string name="menu_item_player_unsync">No synchronization</string>
+
+    <string name="no_players_connected">No players are connected.</string>
+    <string name="player_list_changed">Connected players changed while context menu was open,
+        ignoring request</string>
+
     <string name="albums_by_artist_header">Albums with songs by %s</string>
     <string name="albums_by_genre_header">Albums with songs in genre \"%s\"</string>
     <string name="albums_by_year_header">Albums with songs from %s</string>
@@ -137,6 +152,32 @@
     <string name="unknown_album">Unknown album</string>
     <string name="unknown_artist">Unknown artist</string>
     <string name="unknown_year">Unknown year</string>
+
+    <!-- Alarm management -->
+    <string name="all_alarms_on_hint">Individual alarms can be enabled</string>
+    <string name="all_alarms_off_hint">All alarms are disabled</string>
+
+    <string name="alarm_music_prompt">Music for alarm</string>
+
+    <string name="alarms_settings_dialog_title">%s alarm settings</string>
+    <string name="alarm_volume_text">Alarm volume</string>
+
+    <string name="alarm_snooze_duration_text">Snooze duration</string>
+    <plurals name="alarm_snooze_hint_text">
+        <item quantity="one">Alarms snooze for %d minute</item>
+        <item quantity="other">Alarms snooze for %d minutes</item>
+    </plurals>
+
+    <string name="alarm_timeout_text">Alarm timeout</string>
+    <string name="alarm_timeout_hint_text_zero">Alarms play indefinitely</string>
+    <plurals name="alarm_timeout_hint_text">
+        <item quantity="one">Alarms stop after %d minute</item>
+        <item quantity="other">Alarms stop after %d minutes</item>
+    </plurals>
+
+    <string name="alarm_fade_text">Fade alarms up</string>
+    <string name="alarm_fade_on_text">Alarms will fade in</string>
+    <string name="alarm_fade_off_text">Alarms will not fade in</string>
 
     <string name="tips_title">Tips</string>
     <string name="tip_volume">Use your device\'s hardware volume controls to change the playing
@@ -341,7 +382,7 @@ of your accepting any such warranty or additional liability.&lt;/p&gt;</string>
     <string name="BROWSE_ARTIST_SONGS">Browse songs by artist</string>
     <string name="PLAY_NOW">Play</string>
     <string name="ADD_TO_END">Add to playlist</string>
-    <string name="PLAY_NEXT">Play after the currently playing song</string>
+    <string name="PLAY_NEXT">Play after the current song</string>
     <string name="DOWNLOAD_ITEM">Download</string>
     <string name="DOWNLOAD_MANAGER_NEEDED">Download requires Android 2.3 or later</string>
 

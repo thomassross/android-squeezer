@@ -44,8 +44,9 @@ public class IconRowAdapter extends BaseAdapter {
     /**
      * Rows to display in the list.
      */
-    List<IconRow> mRows = new ArrayList<IconRow>();
+    private List<IconRow> mRows = new ArrayList<IconRow>();
 
+    @Override
     public int getCount() {
         return mRows.size();
     }
@@ -54,10 +55,12 @@ public class IconRowAdapter extends BaseAdapter {
         return mRows.get(position).getIcon();
     }
 
+    @Override
     public CharSequence getItem(int position) {
         return mRows.get(position).getText();
     }
 
+    @Override
     public long getItemId(int position) {
         return mRows.get(position).getId();
     }
@@ -65,7 +68,7 @@ public class IconRowAdapter extends BaseAdapter {
     /**
      * Creates an IconRowAdapter where the id of each item corresponds to its index in
      * <code>items</code>.
-     * <p/>
+     * <p>
      * <code>items</code> and <code>icons</item> must be the same size.
      *
      * @param context
@@ -92,6 +95,7 @@ public class IconRowAdapter extends BaseAdapter {
         mRows = rows;
     }
 
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = getActivity().getLayoutInflater().inflate(rowLayout, parent, false);
         TextView text1 = (TextView) row.findViewById(textId);
@@ -109,7 +113,7 @@ public class IconRowAdapter extends BaseAdapter {
 
     /**
      * Helper class to represent a row. Each row has an identifier, a string, and an icon.
-     * <p/>
+     * <p>
      * The identifier should be unique across all rows in a given {@link IconRowAdapter}, and will
      * be used as the <code>id</code> parameter to the <code>OnItemClickListener</code>.
      */

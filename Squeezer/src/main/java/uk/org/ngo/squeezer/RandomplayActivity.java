@@ -21,19 +21,37 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.google.common.collect.ImmutableList;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 import uk.org.ngo.squeezer.framework.BaseActivity;
 import uk.org.ngo.squeezer.service.ISqueezeService;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 
 public class RandomplayActivity extends BaseActivity {
 
     private ListView listView;
+
+    @StringDef({TRACKS, ALBUMS, CONTRIBUTORS, YEAR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RandomplayType {}
+    public static final String TRACKS = "tracks";
+    public static final String ALBUMS = "albums";
+    public static final String CONTRIBUTORS = "contributors";
+    public static final String YEAR = "year";
+
+    // Note: Must appear in the same order as R.array.randomplay_items
+    ImmutableList<String> randomplayTypes = ImmutableList.of(
+            TRACKS, ALBUMS, CONTRIBUTORS, YEAR);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,10 +60,8 @@ public class RandomplayActivity extends BaseActivity {
         listView = (ListView) findViewById(R.id.item_list);
     }
 
-    protected void onServiceConnected(@NonNull ISqueezeService service) {
-        super.onServiceConnected(service);
-
-        setRandomPlayList(service);
+    public void onEventMainThread(HandshakeComplete event) {
+        setRandomPlayList(getService());
     }
 
     private void setRandomPlayList(@NonNull ISqueezeService service) {
@@ -71,9 +87,10 @@ public class RandomplayActivity extends BaseActivity {
             mService = service;
         }
 
+        @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (position < RandomPlayType.values().length) {
-                mService.randomPlay(RandomPlayType.values()[position].toString());
+            if (position < randomplayTypes.size()) {
+                mService.randomPlay(randomplayTypes.get(position));
                 NowPlayingActivity.show(RandomplayActivity.this);
             }
         }
@@ -83,12 +100,4 @@ public class RandomplayActivity extends BaseActivity {
         final Intent intent = new Intent(context, RandomplayActivity.class);
         context.startActivity(intent);
     }
-
-    public enum RandomPlayType {
-        tracks,
-        albums,
-        contributors,
-        year
-    }
-
 }

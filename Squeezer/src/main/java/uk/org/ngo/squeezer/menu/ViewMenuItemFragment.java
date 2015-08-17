@@ -13,9 +13,9 @@ import uk.org.ngo.squeezer.itemlist.dialog.BaseViewDialog;
 
 /**
  * A fragment that implements a "View" menu.
- * <p/>
+ * <p>
  * Activities that host this fragment must implement {@link ListActivityWithViewMenu}.
- * <p/>
+ * <p>
  * <pre>
  * {@code
  * public void onCreate(Bundle savedInstanceState) {
@@ -29,7 +29,7 @@ import uk.org.ngo.squeezer.itemlist.dialog.BaseViewDialog;
  */
 public class ViewMenuItemFragment extends BaseMenuFragment {
 
-    ListActivityWithViewMenu activity;
+    private ListActivityWithViewMenu activity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,7 +82,7 @@ public class ViewMenuItemFragment extends BaseMenuFragment {
         /**
          * Ensure that the activity that hosts this fragment derives from BaseListActivity.
          */
-        public ItemAdapter<T> getItemAdapter();
+        ItemAdapter<T> getItemAdapter();
 
     }
 }

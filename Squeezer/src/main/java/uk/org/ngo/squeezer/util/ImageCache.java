@@ -16,9 +16,6 @@
 
 package uk.org.ngo.squeezer.util;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -27,9 +24,14 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.StatFs;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
 import android.util.Log;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteStreams;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,7 +176,7 @@ public class ImageCache {
                             mDiskLruCache = DiskLruCache.open(
                                     diskCacheDir, 1, 1, mCacheParams.diskCacheSize);
                             if (BuildConfig.DEBUG) {
-                                Log.d(TAG, "Disk cache initialized");
+                                Log.d(TAG, "Disk cache initialized in " + diskCacheDir);
                             }
                         } catch (final IOException e) {
                             mCacheParams.diskCacheDir = null;
@@ -267,6 +269,51 @@ public class ImageCache {
     }
 
     /**
+     * Adds a byte[] to the disk cache.
+     *
+     * @param data Unique identifier for the bitmap to store
+     * @param bytes The bytes to store
+     */
+    public void addBytesToDiskCache(String data, byte[] bytes) {
+        if (data == null || bytes.length == 0) {
+            return;
+        }
+
+        synchronized (mDiskCacheLock) {
+            // Add to disk cache
+            if (mDiskLruCache != null) {
+                final String key = hashKeyForDisk(data);
+                OutputStream out = null;
+                try {
+                    DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+                    if (snapshot == null) {
+                        final DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+                        if (editor != null) {
+                            out = editor.newOutputStream(DISK_CACHE_INDEX);
+                            out.write(bytes);
+                            editor.commit();
+                            out.close();
+                        }
+                    } else {
+                        snapshot.getInputStream(DISK_CACHE_INDEX).close();
+                    }
+                } catch (final IOException e) {
+                    Log.e(TAG, "addBitmapToCache - " + e);
+                } catch (Exception e) {
+                    Log.e(TAG, "addBitmapToCache - " + e);
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Get from memory cache.
      *
      * @param data Unique identifier for which item to get
@@ -280,7 +327,7 @@ public class ImageCache {
             bitmap = mMemoryCache.get(data);
 
             /*
-            Log.v(TAG, String.format(
+            Log.d(TAG, String.format(
                     "Cache stats: h: %d m: %d (%.2f%%) p: %d e: %d, size: %d of %d (%.2f%%)",
                     mMemoryCache.hitCount(),
                     mMemoryCache.missCount(),
@@ -291,6 +338,7 @@ public class ImageCache {
                     ((float) mMemoryCache.size() / mMemoryCache.maxSize()) * 100));
             */
         }
+
         return bitmap;
     }
 
@@ -301,6 +349,7 @@ public class ImageCache {
      *
      * @return The bitmap if found in cache, null otherwise
      */
+    @Nullable
     public Bitmap getBitmapFromDiskCache(String data) {
         final String key = hashKeyForDisk(data);
         synchronized (mDiskCacheLock) {
@@ -339,16 +388,56 @@ public class ImageCache {
     }
 
     /**
+     * Get byte[] from disk cache.
+     *
+     * @param data Unique identifier for which item to get
+     *
+     * @return The bytes at that entry in the cache, null otherwise
+     */
+    @Nullable
+    public byte[] getBytesFromDiskCache(String data) {
+        final String key = hashKeyForDisk(data);
+        synchronized (mDiskCacheLock) {
+            while (mDiskCacheStarting) {
+                try {
+                    mDiskCacheLock.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            if (mDiskLruCache != null) {
+                InputStream inputStream = null;
+                try {
+                    final DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+                    if (snapshot != null) {
+                        if (BuildConfig.DEBUG) {
+                            Log.d(TAG, "Disk cache hit");
+                        }
+                        inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
+                        if (inputStream != null) {
+                            return ByteStreams.toByteArray(inputStream);
+                        }
+                    }
+                } catch (final IOException e) {
+                    Log.e(TAG, "getBitmapFromDiskCache - " + e);
+                } finally {
+                    try {
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
      * Clears both the memory and disk cache associated with this ImageCache object. Note that this
      * includes disk access so this should not be executed on the main/UI thread.
      */
     public void clearCache() {
-        if (mMemoryCache != null) {
-            mMemoryCache.evictAll();
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "Memory cache cleared");
-            }
-        }
+        clearMemoryCache();
 
         synchronized (mDiskCacheLock) {
             mDiskCacheStarting = true;
@@ -364,6 +453,13 @@ public class ImageCache {
                 mDiskLruCache = null;
                 initDiskCache();
             }
+        }
+    }
+
+    public void clearMemoryCache() {
+        if (mMemoryCache != null) {
+            mMemoryCache.evictAll();
+            Log.d(TAG, "Memory cache cleared");
         }
     }
 
@@ -443,7 +539,7 @@ public class ImageCache {
          * Sets the memory cache size based on a percentage of the device memory class. Eg. setting
          * percent to 0.2 would set the memory cache to one fifth of the device memory class. Throws
          * {@link IllegalArgumentException} if percent is < 0.05 or > .8.
-         * <p/>
+         * <p>
          * This value should be chosen carefully based on a number of factors Refer to the
          * corresponding Android Training class for more discussion: http://developer.android.com/training/displaying-bitmaps/
          *
@@ -496,7 +592,7 @@ public class ImageCache {
     /**
      * Get the size in bytes of a bitmap.
      *
-     * @param bitmap
+     * @param bitmap Bitmap to examine.
      *
      * @return size in bytes
      */

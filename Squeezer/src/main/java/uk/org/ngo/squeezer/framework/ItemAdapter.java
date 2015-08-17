@@ -28,17 +28,14 @@ import android.widget.BaseAdapter;
 import java.util.List;
 
 import uk.org.ngo.squeezer.R;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 
 /**
  * A generic class for an adapter to list items of a particular SqueezeServer data type. The data
  * type is defined by the generic type argument, and must be an extension of {@link Item}.
- * <p/>
- * If you need an adapter for a {@link BaseListActivity}, then use {@link ItemListAdapter} instead.
- * <p/>
- * Normally there is no need to extend this (or {@link ItemListAdapter}), as we delegate all type
- * dependent stuff to {@link ItemView}.
+ * <p>
+ * Normally there is no need to extend this, as we delegate all type dependent stuff to
+ * {@link ItemView}.
  *
  * @param <T> Denotes the class of the items this class should list
  *
@@ -48,8 +45,6 @@ import uk.org.ngo.squeezer.util.ImageFetcher;
 public class ItemAdapter<T extends Item> extends BaseAdapter implements
         OnCreateContextMenuListener {
 
-    private static final String TAG = ItemAdapter.class.getSimpleName();
-
     /**
      * View logic for this adapter
      */
@@ -57,7 +52,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
 
     /**
      * List of items, possibly headed with an empty item.
-     * <p/>
+     * <p>
      * As the items are received from SqueezeServer they will be inserted in the list.
      */
     private int count;
@@ -67,22 +62,17 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     /**
      * This is set if the list shall start with an empty item.
      */
-    private final boolean mEmptyItem;
+    protected final boolean mEmptyItem;
 
     /**
      * Text to display before the items are received from SqueezeServer
      */
-    private final String loadingText;
+    protected final String loadingText;
 
     /**
      * Number of elements to by fetched at a time
      */
     private final int pageSize;
-
-    /**
-     * ImageFetcher for thumbnails
-     */
-    private final ImageFetcher mImageFetcher;
 
     public int getPageSize() {
         return pageSize;
@@ -90,36 +80,25 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
 
     /**
      * Creates a new adapter. Initially the item list is populated with items displaying the
-     * localized "loading" text. Call {@link #update(int, int, int, List)} as items arrives from
+     * localized "loading" text. Call {@link #update(int, int, List)} as items arrives from
      * SqueezeServer.
      *
      * @param itemView The {@link ItemView} to use with this adapter
      * @param emptyItem If set the list of items shall start with an empty item
-     * @param imageFetcher ImageFetcher to use for loading thumbnails
      */
-    public ItemAdapter(ItemView<T> itemView, boolean emptyItem,
-            ImageFetcher imageFetcher) {
+    public ItemAdapter(ItemView<T> itemView, boolean emptyItem) {
         mItemView = itemView;
         mEmptyItem = emptyItem;
-        mImageFetcher = imageFetcher;
         loadingText = itemView.getActivity().getString(R.string.loading_text);
         pageSize = itemView.getActivity().getResources().getInteger(R.integer.PageSize);
         pages.clear();
     }
 
     /**
-     * Calls {@link #BaseAdapter(ItemView, boolean, ImageFetcher)}, with emptyItem = false
-     */
-    public ItemAdapter(ItemView<T> itemView, ImageFetcher imageFetcher) {
-        this(itemView, false, imageFetcher);
-    }
-
-    /**
-     * Calls {@link #BaseAdapter(ItemView, boolean, ImageFetcher)}, with emptyItem = false
-     * and a null ImageFetcher.
+     * Calls {@link #ItemAdapter(ItemView, boolean)}, with emptyItem = false
      */
     public ItemAdapter(ItemView<T> itemView) {
-        this(itemView, false, null);
+        this(itemView, false);
     }
 
     private int pageNumber(int position) {
@@ -138,15 +117,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     public View getView(int position, View convertView, ViewGroup parent) {
         T item = getItem(position);
         if (item != null) {
-            // XXX: This is ugly -- not all adapters need an ImageFetcher.
-            // We should really have subclasses of types in the model classes,
-            // with the hierarchy probably being:
-            //
-            // [basic item] -> [item with artwork] -> [artwork is downloaded]
-            //
-            // instead of special-casing whether or not mImageFetcher is null
-            // in getAdapterView().
-            return mItemView.getAdapterView(convertView, parent, item, mImageFetcher);
+            return mItemView.getAdapterView(convertView, parent, position, item);
         }
 
         return mItemView.getAdapterView(convertView, parent,
@@ -170,8 +141,8 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
 
     /**
      * Creates the context menu for the selected item by calling {@link
-     * ItemView.onCreateContextMenu} which the subclass should have specialised.
-     * <p/>
+     * ItemView#onCreateContextMenu} which the subclass should have specialised.
+     * <p>
      * Unpacks the {@link ContextMenu.ContextMenuInfo} passed to this method, and creates a {@link
      * ItemView.ContextMenuInfo} suitable for passing to subclasses of {@link BaseItemView}.
      */
@@ -254,8 +225,14 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         return position;
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        T item = getItem(position);
+        return item != null && item.getId() != null && mItemView.isSelectable(item);
+    }
+
     /**
-     * Generates a string suitable for use as an activity's title.
+     * Generates a string suitable for use as the list's title.
      *
      * @return the title.
      */
@@ -272,11 +249,11 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
 
     /**
      * Update the contents of the items in this list.
-     * <p/>
+     * <p>
      * The size of the list of items is automatically adjusted if necessary, to obey the given
      * parameters.
      *
-     * @param count Number of items as reported by squeezeserver.
+     * @param count Number of items as reported by SqueezeServer.
      * @param start The start position of items in this update.
      * @param items New items to insert in the main list
      */
@@ -294,8 +271,6 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     }
 
     /**
-     * @param item
-     *
      * @return The position of the given item in this adapter or 0 if not found
      */
     public int findItem(T item) {
@@ -309,6 +284,51 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
             }
         }
         return 0;
+    }
+
+    /**
+     * Remove the item at the specified position, update the count and notify the change.
+     */
+    public void removeItem(int position) {
+        T[] page = getPage(position);
+        int offset = position % pageSize;
+        while (position++ <= count) {
+            if (offset == pageSize - 1) {
+                T[] nextPage = getPage(position);
+                page[offset] = nextPage[0];
+                offset = 0;
+                page = nextPage;
+            } else {
+                page[offset] = page[offset+1];
+                offset++;
+            }
+        }
+
+        count--;
+        onCountUpdated();
+        notifyDataSetChanged();
+    }
+
+    public void insertItem(int position, T item) {
+        int n = count;
+        T[] page = getPage(n);
+        int offset = n % pageSize;
+        while (n-- > position) {
+            if (offset == 0) {
+                T[] nextPage = getPage(n);
+                offset = pageSize - 1;
+                page[0] = nextPage[offset];
+                page = nextPage;
+            } else {
+                page[offset] = page[offset-1];
+                offset--;
+            }
+        }
+        page[offset] = item;
+
+        count++;
+        onCountUpdated();
+        notifyDataSetChanged();
     }
 
     protected T[] arrayInstance(int size) {

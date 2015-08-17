@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,12 +37,13 @@ import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.itemlist.dialog.PlaylistItemMoveDialog;
 import uk.org.ngo.squeezer.itemlist.dialog.PlaylistSaveDialog;
 import uk.org.ngo.squeezer.model.Player;
-import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.model.Song;
-import uk.org.ngo.squeezer.service.IServiceMusicChangedCallback;
-import uk.org.ngo.squeezer.service.IServicePlayersCallback;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
+import uk.org.ngo.squeezer.service.event.MusicChanged;
+import uk.org.ngo.squeezer.service.event.PlayersChanged;
+import uk.org.ngo.squeezer.service.event.PlaylistTracksAdded;
+import uk.org.ngo.squeezer.service.event.PlaylistTracksDeleted;
 
 import static uk.org.ngo.squeezer.framework.BaseItemView.ViewHolder;
 
@@ -67,9 +67,8 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
      */
     private class HighlightingListAdapter extends ItemAdapter<Song> {
 
-        public HighlightingListAdapter(ItemView<Song> itemView,
-                ImageFetcher imageFetcher) {
-            super(itemView, imageFetcher);
+        public HighlightingListAdapter(ItemView<Song> itemView) {
+            super(itemView);
         }
 
         @Override
@@ -82,11 +81,23 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
                 ViewHolder viewHolder = (ViewHolder) viewTag;
                 if (position == currentPlaylistIndex) {
                     viewHolder.text1
-                            .setTextAppearance(getActivity(), R.style.SqueezerCurrentTextItem);
-                    view.setBackgroundResource(R.drawable.list_item_background_current);
+                            .setTextAppearance(getActivity(), R.style.SqueezerTextAppearance_ListItem_Primary);
+
+                    // Changing the background resource to a 9-patch drawable causes the padding
+                    // to be reset. See http://www.mail-archive.com/android-developers@googlegroups.com/msg09595.html
+                    // for details. Save the current padding before setting the drawable, and
+                    // restore afterwards.
+                    int paddingLeft = view.getPaddingLeft();
+                    int paddingTop = view.getPaddingTop();
+                    int paddingRight = view.getPaddingRight();
+                    int paddingBottom = view.getPaddingBottom();
+
+                    view.setBackgroundResource(getAttributeValue(R.attr.playing_item));
+
+                    view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
                 } else {
-                    viewHolder.text1.setTextAppearance(getActivity(), R.style.SqueezerTextItem);
-                    view.setBackgroundResource(R.drawable.list_item_background_normal);
+                    viewHolder.text1.setTextAppearance(getActivity(), R.style.SqueezerTextAppearance_ListItem_Primary);
+                    view.setBackgroundColor(getAttributeValue(R.attr.background));
                 }
             }
             return view;
@@ -96,7 +107,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     @Override
     protected ItemAdapter<Song> createItemListAdapter(
             ItemView<Song> itemView) {
-        return new HighlightingListAdapter(itemView, getImageFetcher());
+        return new HighlightingListAdapter(itemView);
     }
 
     @Override
@@ -123,12 +134,19 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
                 menu.findItem(R.id.add_to_playlist).setVisible(false);
                 menu.findItem(R.id.play_next).setVisible(false);
 
+                // First item? Disable "move up" menu entry.
                 if (menuInfo.position == 0) {
                     menu.findItem(R.id.playlist_move_up).setVisible(false);
                 }
 
+                // Last item? Disable "move down" menu entry.
                 if (menuInfo.position == menuInfo.adapter.getCount() - 1) {
                     menu.findItem(R.id.playlist_move_down).setVisible(false);
+                }
+
+                // Only item? Disable "move" menu entry.
+                if (menuInfo.adapter.getCount() == 1) {
+                    menu.findItem(R.id.playlist_move).setVisible(false);
                 }
             }
 
@@ -169,10 +187,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
             }
         };
 
-        view.setDetails(EnumSet.of(
-                SongView.Details.DURATION,
-                SongView.Details.ALBUM,
-                SongView.Details.ARTIST));
+        view.setDetails(SongView.DETAILS_DURATION | SongView.DETAILS_ALBUM | SongView.DETAILS_ARTIST);
 
         return view;
     }
@@ -194,11 +209,11 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         final int[] ids = {R.id.menu_item_playlist_clear, R.id.menu_item_playlist_save};
-        final boolean boundToService = getService() != null;
+        final boolean knowCurrentPlaylist = getCurrentPlaylist() != null;
 
         for (int id : ids) {
             MenuItem item = menu.findItem(id);
-            item.setEnabled(boundToService);
+            item.setVisible(knowCurrentPlaylist);
         }
 
         return super.onPrepareOptionsMenu(menu);
@@ -228,83 +243,46 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    protected void registerCallback(@NonNull ISqueezeService service) {
-        super.registerCallback(service);
-        player = service.getActivePlayer();
-        service.registerCurrentPlaylistCallback(currentPlaylistCallback);
-        service.registerMusicChangedCallback(musicChangedCallback);
-        service.registerPlayersCallback(playersCallback);
+    public void onEvent(HandshakeComplete event) {
+        super.onEvent(event);
+        player = getService().getActivePlayer();
     }
 
-    private final IServiceCurrentPlaylistCallback currentPlaylistCallback
-            = new IServiceCurrentPlaylistCallback() {
-        @Override
-        public void onAddTracks(PlayerState playerState) {
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    clearAndReOrderItems();
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
+    public void onEventMainThread(MusicChanged event) {
+        if (event.player.equals(getService().getActivePlayer())) {
+            Log.d(getTag(), "onMusicChanged " + event.playerState.getCurrentSong());
+            currentPlaylistIndex = event.playerState.getCurrentPlaylistIndex();
+            getItemAdapter().notifyDataSetChanged();
+        }
+    }
+
+    public void onEventMainThread(PlayersChanged event) {
+        supportInvalidateOptionsMenu();
+
+        Player activePlayer = getService().getActivePlayer();
+
+        if (activePlayer == null) {
+            player = null;
+            clearItems();
+            return;
         }
 
-        public void onDelete(PlayerState playerState, int index) {
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO: Investigate feasibility of deleting single items from the adapter.
-                    clearAndReOrderItems();
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
+        if (!activePlayer.equals(player)) {
+            player = activePlayer;
+            clearAndReOrderItems();
         }
+    }
 
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
+    public void onEventMainThread(PlaylistTracksAdded event) {
+        clearAndReOrderItems();
+        getItemAdapter().notifyDataSetChanged();
+    }
 
-    private final IServiceMusicChangedCallback musicChangedCallback
-            = new IServiceMusicChangedCallback() {
-        @Override
-        public void onMusicChanged(PlayerState playerState) {
-            Log.d(getTag(), "onMusicChanged " + playerState.getCurrentSong());
-            currentPlaylistIndex = playerState.getCurrentPlaylistIndex();
-            getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    getItemAdapter().notifyDataSetChanged();
-                }
-            });
-        }
-
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
-
-    private final IServicePlayersCallback playersCallback = new IServicePlayersCallback() {
-        @Override
-        public void onPlayersChanged(List<Player> players, final Player activePlayer) {
-            if (activePlayer != null && !activePlayer.equals(player)) {
-                getUIThreadHandler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        player = activePlayer;
-                        clearAndReOrderItems();
-                    }
-                });
-            }
-        }
-
-        @Override
-        public Object getClient() {
-            return CurrentPlaylistActivity.this;
-        }
-    };
+    public void onEventMainThread(PlaylistTracksDeleted event) {
+        // TODO: Investigate feasibility of deleting single items from the adapter.
+        clearAndReOrderItems();
+        getItemAdapter().notifyDataSetChanged();
+    }
 
     @Override
     public void onItemsReceived(int count, int start, Map<String, String> parameters, List<Song> items, Class<Song> dataType) {

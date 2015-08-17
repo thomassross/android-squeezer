@@ -25,42 +25,70 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import uk.org.ngo.squeezer.HomeActivity;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
-import uk.org.ngo.squeezer.menu.BaseMenuFragment;
-import uk.org.ngo.squeezer.menu.MenuFragment;
+import uk.org.ngo.squeezer.VolumePanel;
+import uk.org.ngo.squeezer.model.Player;
+import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.ServerString;
 import uk.org.ngo.squeezer.service.SqueezeService;
+import uk.org.ngo.squeezer.service.event.PlayerVolume;
+import uk.org.ngo.squeezer.util.ImageFetcher;
 import uk.org.ngo.squeezer.util.SqueezePlayer;
+import uk.org.ngo.squeezer.util.ThemeManager;
 
 /**
- * Common base class for all activities in the squeezer
+ * Common base class for all activities in Squeezer.
  *
  * @author Kurt Aaholst
  */
 public abstract class BaseActivity extends ActionBarActivity implements HasUiThread {
 
-    @Nullable private ISqueezeService mService = null;
+    @Nullable
+    private ISqueezeService mService = null;
 
-    /**
-     * Keep track of whether callbacks have been registered
-     */
-    private boolean mRegisteredCallbacks;
+    private final ThemeManager mTheme = new ThemeManager();
+    private int mThemeId = mTheme.getDefaultTheme().mThemeId;
+
+    /** Records whether the activity has registered on the service's event bus. */
+    private boolean mRegisteredOnEventBus;
 
     private final Handler uiThreadHandler = new Handler() {
     };
 
     private SqueezePlayer squeezePlayer;
+
+    /** Option menu volume control entry. */
+    @Nullable
+    private MenuItem mMenuItemVolume;
+
+    /** Whether volume changes should be ignored. */
+    private boolean mIgnoreVolumeChange;
+
+    /** Volume control panel. */
+    @Nullable
+    private VolumePanel mVolumePanel;
 
     protected String getTag() {
         return getClass().getSimpleName();
@@ -72,6 +100,10 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     @Nullable
     public ISqueezeService getService() {
         return mService;
+    }
+
+    public int getThemeId() {
+        return mThemeId;
     }
 
     /**
@@ -98,6 +130,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mTheme.onCreate(this);
         ActionBar actionBar = getSupportActionBar();
 
         actionBar.setIcon(R.drawable.ic_launcher);
@@ -105,46 +139,81 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
         Log.d(getTag(), "did bindService; serviceStub = " + getService());
-
-        BaseMenuFragment.add(this, MenuFragment.class);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unbindService(serviceConnection);
+    public void setTheme(int resId) {
+        super.setTheme(resId);
+        mThemeId = resId;
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        mTheme.onResume(this);
+
         if (mService != null) {
-            maybeRegisterCallbacks(mService);
+            maybeRegisterOnEventBus(mService);
         }
 
+        mVolumePanel = new VolumePanel(this);
+
         // If SqueezePlayer is installed, start it
+        // TODO Only when connected (or at least serveraddress is saved)
         if (SqueezePlayer.hasSqueezePlayer(this) && new Preferences(this).controlSqueezePlayer()) {
             squeezePlayer = new SqueezePlayer(this);
         }
+
+        // Ensure that any image fetching tasks started by this activity do not finish prematurely.
+        ImageFetcher.getInstance(this).setExitTasksEarly(false);
     }
 
     @Override
     public void onPause() {
+        // At least some Samsung devices call onPause without ensuring that onResume is called
+        // first, per https://code.google.com/p/android/issues/detail?id=74464, so mVolumePanel
+        // may be null on those devices.
+        if (mVolumePanel != null) {
+            mVolumePanel.dismiss();
+            mVolumePanel = null;
+        }
+
         if (squeezePlayer != null) {
             squeezePlayer.stopControllingSqueezePlayer();
             squeezePlayer = null;
         }
-        if (mRegisteredCallbacks) {
+        if (mRegisteredOnEventBus) {
             // If we are not bound to the service, it's process is no longer
             // running, so the callbacks are already cleaned up.
-            if (getService() != null) {
-                unregisterCallback();
+            if (mService != null) {
+                mService.getEventBus().unregister(this);
+                mService.cancelItemListRequests(this);
+                mService.cancelSubscriptions(this);
             }
-            mRegisteredCallbacks = false;
+            mRegisteredOnEventBus = false;
         }
 
+        // Ensure that any pending image fetching tasks are unpaused, and finish quickly.
+        ImageFetcher imageFetcher = ImageFetcher.getInstance(this);
+        imageFetcher.setExitTasksEarly(true);
+        imageFetcher.setPauseWork(false);
+
         super.onPause();
+    }
+
+    /**
+     * Clear the image memory cache if memory gets low.
+     */
+    @Override
+    public void onLowMemory() {
+        ImageFetcher.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbindService(serviceConnection);
     }
 
     /** Fix for https://code.google.com/p/android/issues/detail?id=63570. */
@@ -162,7 +231,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     @TargetApi(Build.VERSION_CODES.KITKAT)
     public void finish() {
         super.finish();
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT && !isTaskRoot() && mIsRestoredToTop) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT && !isTaskRoot()
+                && mIsRestoredToTop) {
             // 4.4.2 platform issues for FLAG_ACTIVITY_REORDER_TO_FRONT,
             // reordered activity back press will go to home unexpectedly,
             // Workaround: move reordered activity current task to front when it's finished.
@@ -172,9 +242,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     /**
-     * Performs any actions necessary after the service has been connected. Sub-classes must
-     * call through to this implementation.
-     *
+     * Performs any actions necessary after the service has been connected. Derived classes
+     * should call through to the base class.
      * <ul>
      *     <li>Invalidates the options menu so that menu items can be adjusted based on
      *     the state of the service connection.</li>
@@ -183,47 +252,85 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
      *
      * @param service The connection to the bound service.
      */
+    @CallSuper
     protected void onServiceConnected(@NonNull ISqueezeService service) {
         supportInvalidateOptionsMenu();
-        maybeRegisterCallbacks(service);
+        maybeRegisterOnEventBus(service);
     }
 
     /**
-     * Registers any callbacks with the bound service. The default implementation does nothing,
-     * sub-classes should override this as appropriate.
+     * Conditionally registers with the service's EventBus.
+     * <p>
+     * Registration can happen in {@link #onResume()} and {@link
+     * #onServiceConnected(uk.org.ngo.squeezer.service.ISqueezeService)}, this ensures that it only
+     * happens once.
      *
      * @param service The connection to the bound service.
      */
-    protected void registerCallback(@NonNull ISqueezeService service) {
-    }
-
-    /**
-     * This is called when the service is disconnected.
-     * <p/>
-     * Normally you do not need to override this.
-     */
-    protected void unregisterCallback() {
-        if (mService == null) return;
-
-        mService.cancelItemListRequests(this);
-        mService.cancelSubscriptions(this);
-    }
-
-    /**
-     * Conditionally registers callbacks.
-     * <p/>
-     * Callback registration can happen in {@link #onResume()} and
-     * {@link #onServiceConnected(uk.org.ngo.squeezer.service.ISqueezeService)}, this ensures
-     * that it only happens once.
-     *
-     * @param service The connection to the bound service.
-     */
-    private void maybeRegisterCallbacks(@NonNull ISqueezeService service) {
-        if (!mRegisteredCallbacks) {
-            registerCallback(service);
-            mRegisteredCallbacks = true;
+    private void maybeRegisterOnEventBus(@NonNull ISqueezeService service) {
+        if (!mRegisteredOnEventBus) {
+            service.getEventBus().registerSticky(this);
+            mRegisteredOnEventBus = true;
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.base_activity, menu);
+
+        mMenuItemVolume = menu.findItem(R.id.menu_item_volume);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean haveConnectedPlayers = isConnected() && mService != null
+                && !mService.getConnectedPlayers().isEmpty();
+
+        if (mMenuItemVolume != null) {
+            mMenuItemVolume.setVisible(haveConnectedPlayers);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent upIntent = NavUtils.getParentActivityIntent(this);
+                if (upIntent != null) {
+                    if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                        TaskStackBuilder.create(this)
+                                .addNextIntentWithParentStack(upIntent)
+                                .startActivities();
+                    } else {
+                        upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        NavUtils.navigateUpTo(this, upIntent);
+                    }
+                } else {
+                    HomeActivity.show(this);
+                }
+                return true;
+            case R.id.menu_item_volume:
+                // Show the volume dialog.
+                if (mService != null) {
+                    PlayerState playerState = mService.getPlayerState();
+                    Player player = mService.getActivePlayer();
+
+                    if (playerState != null  && mVolumePanel != null) {
+                        mVolumePanel.postVolumeChanged(playerState.getCurrentVolume(),
+                                player == null ? "" : player.getName());
+                    }
+
+                    return true;
+                }
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     /**
      * Block searches, when we are not connected.
@@ -245,6 +352,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
      * changing.
      */
     @Override
+    @CallSuper
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -257,7 +365,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    @CallSuper
+    public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
@@ -277,6 +386,16 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
         return true;
     }
 
+    public void onEvent(PlayerVolume event) {
+        if (!mIgnoreVolumeChange && mVolumePanel != null && event.player == mService.getActivePlayer()) {
+            mVolumePanel.postVolumeChanged(event.volume, event.player.getName());
+        }
+    }
+
+    public void setIgnoreVolumeChange(boolean ignoreVolumeChange) {
+        mIgnoreVolumeChange = ignoreVolumeChange;
+    }
+
     // Safe accessors
 
     public boolean canDownload() {
@@ -284,17 +403,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     public boolean isConnected() {
-        if (mService == null) {
-            return false;
-        }
-        return mService.isConnected();
-    }
-
-    public String getIconUrl(String icon) {
-        if (mService == null || icon == null) {
-            return null;
-        }
-        return mService.getIconUrl(icon);
+        return mService != null && mService.isConnected();
     }
 
     public String getServerString(ServerString stringToken) {
@@ -304,24 +413,24 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     // This section is just an easier way to call squeeze service
 
     public void play(PlaylistItem item) {
-        playlistControl(PlaylistControlCmd.load, item, R.string.ITEM_PLAYING);
+        playlistControl(PLAYLIST_PLAY_NOW, item, R.string.ITEM_PLAYING);
     }
 
     public void add(PlaylistItem item) {
-        playlistControl(PlaylistControlCmd.add, item, R.string.ITEM_ADDED);
+        playlistControl(PLAYLIST_ADD_TO_END, item, R.string.ITEM_ADDED);
     }
 
     public void insert(PlaylistItem item) {
-        playlistControl(PlaylistControlCmd.insert, item, R.string.ITEM_INSERTED);
+        playlistControl(PLAYLIST_PLAY_AFTER_CURRENT, item, R.string.ITEM_INSERTED);
     }
 
-    private void playlistControl(PlaylistControlCmd cmd, PlaylistItem item, int resId)
+    private void playlistControl(@PlaylistControlCmd String cmd, PlaylistItem item, int resId)
             {
         if (mService == null) {
             return;
         }
 
-        mService.playlistControl(cmd.name(), item);
+        mService.playlistControl(cmd, item);
         Toast.makeText(this, getString(resId, item.getName()), Toast.LENGTH_SHORT).show();
     }
 
@@ -338,10 +447,22 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
             Toast.makeText(this, R.string.DOWNLOAD_MANAGER_NEEDED, Toast.LENGTH_LONG).show();
     }
 
-    private enum PlaylistControlCmd {
-        load,
-        add,
-        insert
-    }
+    @StringDef({PLAYLIST_PLAY_NOW, PLAYLIST_ADD_TO_END, PLAYLIST_PLAY_AFTER_CURRENT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PlaylistControlCmd {}
+    public static final String PLAYLIST_PLAY_NOW = "load";
+    public static final String PLAYLIST_ADD_TO_END = "add";
+    public static final String PLAYLIST_PLAY_AFTER_CURRENT = "insert";
 
+    /**
+     * Look up an attribute resource styled for the current theme.
+     *
+     * @param attribute Attribute identifier to look up.
+     * @return The resource identifier for the given attribute.
+     */
+    public int getAttributeValue(int attribute) {
+        TypedValue v = new TypedValue();
+        getTheme().resolveAttribute(attribute, v, true);
+        return v.resourceId;
+    }
 }

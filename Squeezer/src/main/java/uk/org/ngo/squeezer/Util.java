@@ -16,7 +16,9 @@
 
 package uk.org.ngo.squeezer;
 
-import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -30,6 +32,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Util {
+    private static final String TAG = Util.class.getSimpleName();
 
     private Util() {
     }
@@ -37,9 +40,6 @@ public class Util {
 
     /**
      * Update target, if it's different from newValue.
-     *
-     * @param target
-     * @param newValue
      *
      * @return true if target is updated. Otherwise return false.
      */
@@ -85,22 +85,24 @@ public class Util {
 
     /**
      * Formats an elapsed time in the form "M:SS" or "H:MM:SS" for display.
-     * <p/>
+     * <p>
      * Like {@link android.text.format.DateUtils#formatElapsedTime(long)} but without the leading
      * zeroes if the number of minutes is < 10.
      *
      * @param elapsedSeconds the elapsed time, in seconds.
      */
     public synchronized static String formatElapsedTime(long elapsedSeconds) {
+        calculateTimeArgs(elapsedSeconds);
         sFormatBuilder.setLength(0);
+        return sFormatter.format("%2$d:%5$02d", sTimeArgs).toString();
+    }
 
-        final Object[] timeArgs = sTimeArgs;
-        timeArgs[0] = elapsedSeconds / 3600;
-        timeArgs[1] = elapsedSeconds / 60;
-        timeArgs[2] = (elapsedSeconds / 60) % 60;
-        timeArgs[3] = elapsedSeconds;
-        timeArgs[4] = elapsedSeconds % 60;
-        return sFormatter.format("%2$d:%5$02d", timeArgs).toString();
+    private static void calculateTimeArgs(long elapsedSeconds) {
+        sTimeArgs[0] = elapsedSeconds / 3600;
+        sTimeArgs[1] = elapsedSeconds / 60;
+        sTimeArgs[2] = (elapsedSeconds / 60) % 60;
+        sTimeArgs[3] = elapsedSeconds;
+        sTimeArgs[4] = elapsedSeconds % 60;
     }
 
     public static String encode(String string) {
@@ -119,25 +121,75 @@ public class Util {
         }
     }
 
-    public static View getSpinnerItemView(Activity activity, View convertView, ViewGroup parent,
-            String label) {
-        return getSpinnerItemView(activity, convertView, parent, label,
+    public static String parseHost(String hostPort) {
+        if (hostPort == null) {
+            return "";
+        }
+        int colonPos = hostPort.indexOf(":");
+        if (colonPos == -1) {
+            return hostPort;
+        }
+        return hostPort.substring(0, colonPos);
+    }
+
+    public static int parsePort(String hostPort) {
+        if (hostPort == null) {
+            return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
+        }
+        int colonPos = hostPort.indexOf(":");
+        if (colonPos == -1) {
+            return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
+        }
+        try {
+            return Integer.parseInt(hostPort.substring(colonPos + 1));
+        } catch (NumberFormatException unused) {
+            Log.d(TAG, "Can't parse port out of " + hostPort);
+            return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
+        }
+    }
+
+    /**
+     *
+     * @param context
+     * @param convertView
+     * @param parent
+     * @param label
+     * @return a view suitable for use as a spinner view.
+     */
+    public static View getSpinnerItemView(Context context, View convertView, ViewGroup parent,
+                                          String label) {
+        return getSpinnerView(context, convertView, parent, label,
+                android.R.layout.simple_spinner_item);
+    }
+
+    /**
+     *
+     * @param context
+     * @param convertView
+     * @param parent
+     * @param label
+     * @return a view suitable for use in a spinner's dropdown menu.
+     */
+    public static View getSpinnerDropDownView(Context context, View convertView, ViewGroup parent,
+                                      String label) {
+        return getSpinnerView(context, convertView, parent, label,
                 android.R.layout.simple_spinner_dropdown_item);
     }
 
-    public static View getActionBarSpinnerItemView(Activity activity, View convertView,
+    public static View getActionBarSpinnerItemView(Context context, View convertView,
                                                    ViewGroup parent, String label) {
-        return getSpinnerItemView(activity, convertView, parent, label,
+        return getSpinnerView(context, convertView, parent, label,
                 android.support.v7.appcompat.R.layout.support_simple_spinner_dropdown_item);
     }
 
-    private static View getSpinnerItemView(Activity activity, View convertView, ViewGroup parent,
-                                          String label, int layout) {
+    private static View getSpinnerView(Context context, View convertView, ViewGroup parent,
+                                       String label, int layout) {
         TextView view;
         view = (TextView) (convertView != null
                 && TextView.class.isAssignableFrom(convertView.getClass())
                 ? convertView
-                : activity.getLayoutInflater().inflate(layout, parent, false));
+                : ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(
+                        layout, parent, false));
         view.setText(label);
         return view;
     }

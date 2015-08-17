@@ -26,11 +26,11 @@ import android.support.v4.app.DialogFragment;
 
 /**
  * A dialog for displaying networking error messages received from the server.
- * <p/>
+ * <p>
  * Activities that host this dialog must implement
  * {@link NetworkErrorDialogFragment.NetworkErrorDialogListener} to
  * be notified when the user dismisses the dialog.
- * <p/>
+ * <p>
  * To easily create the dialog displaying a given message call {@link #newInstance(String)} with
  * the message to display.
  */
@@ -53,7 +53,7 @@ public class NetworkErrorDialogFragment extends DialogFragment {
          *
          * @param dialog The dialog that has been dismissed.
          */
-        public void onDialogDismissed(DialogInterface dialog);
+        void onDialogDismissed(DialogInterface dialog);
     }
 
     /**

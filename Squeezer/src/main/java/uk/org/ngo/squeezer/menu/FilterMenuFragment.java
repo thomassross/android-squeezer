@@ -10,7 +10,7 @@ import uk.org.ngo.squeezer.R;
 
 /**
  * A fragment that implements a "Filter" menu.
- * <p/>
+ * <p>
  * Activities that host this fragment must implement {@link #FilterableListActivity}.
  *
  * <pre>
@@ -58,7 +58,7 @@ public class FilterMenuFragment extends BaseMenuFragment {
         /**
          * Show a dialog allowing the user to specify how to filter the results.
          */
-        public void showFilterDialog();
+        void showFilterDialog();
 
         /**
          * Ensure that the activity that hosts this fragment derives from FragmentActivity.

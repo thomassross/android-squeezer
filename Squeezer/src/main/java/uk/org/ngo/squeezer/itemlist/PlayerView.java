@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +30,12 @@ import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.BaseItemView;
 import uk.org.ngo.squeezer.itemlist.dialog.PlayerRenameDialog;
+import uk.org.ngo.squeezer.itemlist.dialog.PlayerSyncDialog;
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.model.Song;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.ServerString;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public class PlayerView extends BaseItemView<Player> {
     private static final Map<String, Integer> modelIcons = initializeModelIcons();
@@ -47,12 +46,12 @@ public class PlayerView extends BaseItemView<Player> {
         super(activity);
         this.activity = activity;
 
-        setViewParams(EnumSet.of(ViewParams.ICON, ViewParams.TWO_LINE, ViewParams.CONTEXT_BUTTON));
-        setLoadingViewParams(EnumSet.of(ViewParams.ICON, ViewParams.TWO_LINE));
+        setViewParams(VIEW_PARAM_ICON | VIEW_PARAM_TWO_LINE | VIEW_PARAM_CONTEXT_BUTTON);
+        setLoadingViewParams(VIEW_PARAM_ICON | VIEW_PARAM_TWO_LINE);
     }
 
     @Override
-    public View getAdapterView(View convertView, ViewGroup parent, EnumSet<ViewParams> viewParams) {
+    public View getAdapterView(View convertView, ViewGroup parent, @ViewParam int viewParams) {
         return getAdapterView(convertView, parent, viewParams, R.layout.list_item_player);
     }
 
@@ -61,7 +60,8 @@ public class PlayerView extends BaseItemView<Player> {
         return new PlayerViewHolder();
     }
 
-    public void bindView(View view, Player item, ImageFetcher imageFetcher) {
+    @Override
+    public void bindView(View view, Player item) {
         final PlayerListActivity activity = (PlayerListActivity) getActivity();
         PlayerState playerState = activity.getPlayerState(item.getId());
         PlayerViewHolder viewHolder = (PlayerViewHolder) view.getTag();
@@ -91,6 +91,7 @@ public class PlayerView extends BaseItemView<Player> {
         }
     }
 
+    @Override
     public void onItemSelected(int index, Player item) {
     }
 
@@ -154,6 +155,10 @@ public class PlayerView extends BaseItemView<Player> {
             case R.id.toggle_power:
                 service.togglePower(selectedItem);
                 return true;
+            case R.id.player_sync:
+                new PlayerSyncDialog().show(activity.getSupportFragmentManager(),
+                        PlayerSyncDialog.class.getName());
+                return true;
         }
         return super.doItemContext(menuItem, index, selectedItem);
     }
@@ -199,6 +204,7 @@ public class PlayerView extends BaseItemView<Player> {
         return super.doItemContext(menuItem);
     }
 
+    @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.player, quantity);
     }

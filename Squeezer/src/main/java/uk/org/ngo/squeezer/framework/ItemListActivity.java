@@ -17,7 +17,6 @@
 package uk.org.ngo.squeezer.framework;
 
 
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,11 +31,9 @@ import java.util.Set;
 import java.util.Stack;
 
 import uk.org.ngo.squeezer.R;
-import uk.org.ngo.squeezer.menu.BaseMenuFragment;
-import uk.org.ngo.squeezer.menu.MenuFragment;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageCache;
-import uk.org.ngo.squeezer.util.ImageFetcher;
+import uk.org.ngo.squeezer.service.SqueezeService;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 import uk.org.ngo.squeezer.util.RetainFragment;
 
 /**
@@ -70,31 +67,16 @@ public abstract class ItemListActivity extends BaseActivity {
     private Set<Integer> mReceivedPages;
 
     /**
-     * Pages requested before the service connection was bound. A stack on the assumption
+     * Pages requested before the handshake completes. A stack on the assumption
      * that once the service is bound the most recently requested pages should be ordered
      * first.
      */
-    private Stack<Integer> mOrderedPagesBeforeBinding = new Stack<Integer>();
+    private final Stack<Integer> mOrderedPagesBeforeHandshake = new Stack<Integer>();
 
     /**
      * Tag for mReceivedPages in mRetainFragment.
      */
     private static final String TAG_RECEIVED_PAGES = "mReceivedPages";
-
-    /**
-     * An ImageFetcher for loading thumbnails.
-     */
-    private ImageFetcher mImageFetcher;
-
-    /**
-     * Tag for _mImageFetcher in mRetainFragment.
-     */
-    public static final String TAG_IMAGE_FETCHER = "imageFetcher";
-
-    /**
-     * ImageCache parameters for the album art.
-     */
-    private ImageCache.ImageCacheParams mImageCacheParams;
 
     /* Fragment to retain information across orientation changes. */
     private RetainFragment mRetainFragment;
@@ -104,8 +86,6 @@ public abstract class ItemListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         mPageSize = getResources().getInteger(R.integer.PageSize);
-
-        BaseMenuFragment.add(this, MenuFragment.class);
 
         mRetainFragment = RetainFragment.getInstance(TAG, getSupportFragmentManager());
 
@@ -118,68 +98,13 @@ public abstract class ItemListActivity extends BaseActivity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        getImageFetcher().addImageCache(getSupportFragmentManager(), mImageCacheParams);
-    }
-
-    @Override
-    protected void onServiceConnected(@NonNull ISqueezeService service) {
-        super.onServiceConnected(service);
-
-        // Order any pages that were requested before the service was bound.
-        while (!mOrderedPagesBeforeBinding.empty()) {
-            maybeOrderPage(mOrderedPagesBeforeBinding.pop());
-        }
-    }
-
-    @Override
     public void onPause() {
-        if (mImageFetcher != null) {
-            mImageFetcher.closeCache();
-        }
+        super.onPause();
 
         // Any items coming in after callbacks have been unregistered are discarded.
         // We cancel any outstanding orders, so items can be reordered after the
         // activity resumes.
         cancelOrders();
-
-        super.onPause();
-    }
-
-    protected ImageFetcher createImageFetcher(int height, int width) {
-        // Get an ImageFetcher to scale artwork to the supplied size.
-        int iconSize = (Math.max(height, width));
-        ImageFetcher imageFetcher = new ImageFetcher(this, iconSize);
-        imageFetcher.setLoadingImage(R.drawable.icon_pending_artwork);
-        return imageFetcher;
-    }
-
-    protected ImageFetcher createImageFetcher() {
-        // Get an ImageFetcher to scale artwork to the size of the icon view.
-        Resources resources = getResources();
-        return createImageFetcher(
-                resources.getDimensionPixelSize(R.dimen.album_art_icon_height),
-                resources.getDimensionPixelSize(R.dimen.album_art_icon_width));
-    }
-
-    protected void createImageCacheParams() {
-        mImageCacheParams = new ImageCache.ImageCacheParams(this, "artwork");
-        mImageCacheParams.setMemCacheSizePercent(this, 0.12f);
-    }
-
-    public ImageFetcher getImageFetcher() {
-        if (mImageFetcher == null) {
-            mImageFetcher = (ImageFetcher) mRetainFragment.get(TAG_IMAGE_FETCHER);
-            if (mImageFetcher == null) {
-                mImageFetcher = createImageFetcher();
-                createImageCacheParams();
-                mRetainFragment.put(TAG_IMAGE_FETCHER, mImageFetcher);
-            }
-        }
-
-        return mImageFetcher;
     }
 
     /**
@@ -188,7 +113,7 @@ public abstract class ItemListActivity extends BaseActivity {
      *
      * @param service The connection to the bound service.
      * @param start Position in list to start the fetch. Pass this on to {@link
-     * uk.org.ngo.squeezer.service.SqueezeService}
+     *     uk.org.ngo.squeezer.service.SqueezeService}
      */
     protected abstract void orderPage(@NonNull ISqueezeService service, int start);
 
@@ -200,25 +125,28 @@ public abstract class ItemListActivity extends BaseActivity {
     protected abstract void clearItemAdapter();
 
     /**
-     * Order a page worth of data, starting at the specified position, if it has not already been
-     * ordered.
+     * Orders a page worth of data, starting at the specified position, if it has not already been
+     * ordered, and if the service is connected and the handshake has completed.
      *
      * @param pagePosition position in the list to start the fetch.
-     *
      * @return True if the page needed to be ordered (even if the order failed), false otherwise.
      */
     public boolean maybeOrderPage(int pagePosition) {
         if (!mListScrolling && !mReceivedPages.contains(pagePosition) && !mOrderedPages
-                .contains(pagePosition)) {
+                .contains(pagePosition) && !mOrderedPagesBeforeHandshake.contains(pagePosition)) {
             ISqueezeService service = getService();
 
-            // If the service connection hasn't happened yet then store the page request
-            // where it can be used in onServiceConnected().
+            // If the service connection hasn't happened yet then store the page
+            // request where it can be used in mHandshakeComplete.
             if (service == null) {
-                mOrderedPagesBeforeBinding.push(pagePosition);
+                mOrderedPagesBeforeHandshake.push(pagePosition);
             } else {
-                mOrderedPages.add(pagePosition);
-                orderPage(service, pagePosition);
+                try {
+                    orderPage(service, pagePosition);
+                    mOrderedPages.add(pagePosition);
+                } catch (SqueezeService.HandshakeNotCompleteException e) {
+                    mOrderedPagesBeforeHandshake.push(pagePosition);
+                }
             }
             return true;
         } else {
@@ -227,8 +155,18 @@ public abstract class ItemListActivity extends BaseActivity {
     }
 
     /**
+     * Orders any pages requested before the handshake completed.
+     */
+    public void onEvent(HandshakeComplete event) {
+        // Order any pages that were requested before the handshake complete.
+        while (!mOrderedPagesBeforeHandshake.empty()) {
+            maybeOrderPage(mOrderedPagesBeforeHandshake.pop());
+        }
+    }
+
+    /**
      * Orders pages that correspond to visible rows in the listview.
-     * <p/>
+     * <p>
      * Computes the pages that correspond to the rows that are currently being displayed by the
      * listview, and calls {@link #maybeOrderPage(int)} to fetch the page if necessary.
      *
@@ -246,7 +184,7 @@ public abstract class ItemListActivity extends BaseActivity {
 
     /**
      * Tracks items that have been received from the server.
-     * <p/>
+     * <p>
      * Subclasses <b>must</b> call this method when receiving data from the server to ensure that
      * internal bookkeeping about pages that have/have not been ordered is kept consistent.
      *
@@ -271,9 +209,15 @@ public abstract class ItemListActivity extends BaseActivity {
      * Empties the variables that track which pages have been requested, and orders page 0.
      */
     public void clearAndReOrderItems() {
+        clearItems();
+        maybeOrderPage(0);
+    }
+
+    /** Empty the variables that track which pages have been requested. */
+    public void clearItems() {
+        mOrderedPagesBeforeHandshake.clear();
         mOrderedPages.clear();
         mReceivedPages.clear();
-        maybeOrderPage(0);
         clearItemAdapter();
     }
 
@@ -286,9 +230,9 @@ public abstract class ItemListActivity extends BaseActivity {
 
     /**
      * Tracks scrolling activity.
-     * <p/>
+     * <p>
      * When the list is idle, new pages of data are fetched from the server.
-     * <p/>
+     * <p>
      * Use a TouchListener to work around an Android bug where SCROLL_STATE_IDLE messages are not
      * delivered after SCROLL_STATE_TOUCH_SCROLL messages.
      */
@@ -302,7 +246,7 @@ public abstract class ItemListActivity extends BaseActivity {
 
         /**
          * Sets up the TouchListener.
-         * <p/>
+         * <p>
          * Subclasses must call this.
          */
         public ScrollListener() {
@@ -349,16 +293,16 @@ public abstract class ItemListActivity extends BaseActivity {
 
         /**
          * Work around a bug in (at least) API levels 7 and 8.
-         * <p/>
+         * <p>
          * The bug manifests itself like so: after completing a TOUCH_SCROLL the system does not
          * deliver a SCROLL_STATE_IDLE message to any attached listeners.
-         * <p/>
+         * <p>
          * In addition, if the user does TOUCH_SCROLL, IDLE, TOUCH_SCROLL you would expect to
          * receive three messages. You don't -- you get the first TOUCH_SCROLL, no IDLE message, and
          * then the second touch doesn't generate a second TOUCH_SCROLL message.
-         * <p/>
+         * <p>
          * This state clears when the user flings the list.
-         * <p/>
+         * <p>
          * The simplest work around for this app is to track the user's finger, and if the previous
          * state was TOUCH_SCROLL then pretend that they finished with a FLING and an IDLE event was
          * triggered. This serves to unstick the message pipeline.

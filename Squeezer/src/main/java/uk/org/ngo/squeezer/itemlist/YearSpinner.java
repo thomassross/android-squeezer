@@ -27,13 +27,13 @@ import java.util.Map;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.ItemAdapter;
 import uk.org.ngo.squeezer.framework.ItemListActivity;
+import uk.org.ngo.squeezer.framework.SpinnerItemAdapter;
 import uk.org.ngo.squeezer.model.Year;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.util.ImageFetcher;
 
 public class YearSpinner {
 
-    final YearSpinnerCallback callback;
+    private final YearSpinnerCallback callback;
 
     private final ItemListActivity activity;
 
@@ -55,15 +55,16 @@ public class YearSpinner {
     private final IServiceItemListCallback<Year> yearListCallback = new IServiceItemListCallback<Year>() {
         private ItemAdapter<Year> adapter;
 
+        @Override
         public void onItemsReceived(final int count, final int start, Map<String, String> parameters, final List<Year> list, Class<Year> dataType) {
             callback.getUIThreadHandler().post(new Runnable() {
+                @Override
                 public void run() {
                     if (adapter == null) {
                         YearView itemView = new YearView(activity) {
                             @Override
                             public View getAdapterView(View convertView, ViewGroup parent,
-                                    Year item,
-                                    ImageFetcher unused) {
+                                    int position, Year item) {
                                 return Util.getSpinnerItemView(getActivity(), convertView, parent,
                                         item.getName());
                             }
@@ -75,7 +76,7 @@ public class YearSpinner {
                                         label);
                             }
                         };
-                        adapter = new ItemAdapter<Year>(itemView, true, null);
+                        adapter = new SpinnerItemAdapter<Year>(itemView, true);
                         spinner.setAdapter(adapter);
                     }
                     adapter.update(count, start, list);

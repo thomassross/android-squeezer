@@ -18,7 +18,6 @@ package uk.org.ngo.squeezer.framework;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,7 +37,8 @@ import java.util.Map;
 
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.itemlist.IServiceItemListCallback;
-import uk.org.ngo.squeezer.service.ISqueezeService;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
+import uk.org.ngo.squeezer.util.ImageFetcher;
 import uk.org.ngo.squeezer.util.RetainFragment;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * data type is defined by the generic type argument, and must be an extension of {@link Item}. You
  * must provide an {@link ItemView} to provide the view logic used by this activity. This is done by
  * implementing {@link #createItemView()}.
- * <p/>
+ * <p>
  * When the activity is first created ({@link #onCreate(Bundle)}), an empty {@link ItemAdapter}
  * is created using the provided {@link ItemView}. See {@link ItemListActivity} for see details of
  * ordering and receiving of list items from SqueezeServer, and handling of item selection.
@@ -123,9 +123,14 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
         mListView.setOnCreateContextMenuListener(getItemAdapter());
     }
 
+    public void onEventMainThread(HandshakeComplete event) {
+        maybeOrderVisiblePages(mListView);
+        setAdapter();
+    }
+
     /**
      * Returns the ID of a content view to be used by this list activity.
-     * <p/>
+     * <p>
      * The content view must contain a {@link AbsListView} with the id {@literal item_list} and a
      * {@link ProgressBar} with the id {@literal loading_progress} in order to be valid.
      *
@@ -153,14 +158,14 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
 
     /**
      * Set our adapter on the list view.
-     * <p/>
+     * <p>
      * This can't be done in {@link #onCreate(android.os.Bundle)} because getView might be called
-     * before the service is connected, so we need to delay it.
-     * <p/>
+     * before the handshake is complete, so we need to delay it.
+     * <p>
      * However when we set the adapter after onCreate the list is scrolled to top, so we retain the
      * visible position.
-     * <p/>
-     * Call this method when the service is connected
+     * <p>
+     * Call this method after the handshake is complete.
      */
     private void setAdapter() {
         // setAdapter is not defined for AbsListView before API level 11, but
@@ -182,25 +187,6 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
         }
     }
 
-
-    @Override
-    protected void onServiceConnected(@NonNull ISqueezeService service) {
-        super.onServiceConnected(service);
-
-        maybeOrderVisiblePages(mListView);
-        setAdapter();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (getService() != null) {
-            maybeOrderVisiblePages(mListView);
-            setAdapter();
-        }
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -216,7 +202,6 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     private void saveVisiblePosition() {
         mRetainFragment.put(TAG_POSITION, mListView.getFirstVisiblePosition());
     }
-
 
     /**
      * @return The current {@link ItemAdapter}'s {@link ItemView}
@@ -264,7 +249,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     }
 
     protected ItemAdapter<T> createItemListAdapter(ItemView<T> itemView) {
-        return new ItemAdapter<T>(itemView, getImageFetcher());
+        return new ItemAdapter<T>(itemView);
     }
 
     public void onItemsReceived(final int count, final int start, final List<T> items) {
@@ -306,9 +291,9 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
 
             if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING ||
                     scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                getImageFetcher().setPauseWork(true);
+                ImageFetcher.getInstance(BaseListActivity.this).setPauseWork(true);
             } else {
-                getImageFetcher().setPauseWork(false);
+                ImageFetcher.getInstance(BaseListActivity.this).setPauseWork(false);
             }
         }
     }
