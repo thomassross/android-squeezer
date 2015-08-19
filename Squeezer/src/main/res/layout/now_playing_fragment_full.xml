@@ -17,10 +17,13 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:paddingLeft="8dp">
+    android:paddingLeft="8dp"
+    android:id="@+id/pageView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:fitsSystemWindows="true">
 
     <uk.org.ngo.squeezer.widget.SquareImageView
         android:id="@+id/album"
@@ -31,117 +34,198 @@
         android:paddingBottom="4dp"
         android:paddingRight="8dp"
         android:paddingTop="8dp"
-        android:scaleType="fitCenter"/>
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/background_image_str"/>
 
-    <!-- The trackname TextView needs to be wrapped in a LinearLayout.
-
-         If you do not do this then changing the contents of any other item in the layout
-         will cause the layout to reflow, which causes the scrolling marquee text to
-         reset.  Wrapping the trackname TextView in a LinearLayout means that the TextView
-         will not change size when then the layout is recalculated, and the text continues
-         to scroll. -->
-    <LinearLayout
-        android:id="@+id/track_wrapper"
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/album">
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/fullscreen_bg_gradient" >
+
         <TextView
             android:id="@+id/trackname"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="left|top"
-            android:paddingRight="8dp"
-            android:paddingTop="2dp"
+            android:layout_above="@+id/albumname"
+            android:ellipsize="end"
+            android:gravity="center_horizontal"
+            android:maxLines="1"
+            android:shadowColor="@color/black"
+            android:shadowRadius="20"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#E5FFFFFF"
             style="@style/SqueezerWidget.NowPlaying.SongName"/>
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/albumname"
-        android:layout_below="@id/track_wrapper"
-        android:layout_toLeftOf="@id/context_menu"
-        android:gravity="left|top"
-        android:paddingTop="4dp"
-        style="@style/SqueezerWidget.NowPlaying.AlbumName"/>
+        <TextView
+            android:id="@+id/albumname"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/artistname"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:maxLines="1"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:shadowColor="@color/black"
+            android:shadowRadius="20"
+            android:textColor="#E5CCCCCC"
+            style="@style/SqueezerWidget.NowPlaying.AlbumName"/>
 
-    <TextView
-        android:id="@+id/artistname"
-        android:layout_below="@id/albumname"
-        android:layout_toLeftOf="@id/context_menu"
-        android:gravity="left|top"
-        android:paddingTop="4dp"
-        style="@style/SqueezerWidget.NowPlaying.ArtistName"/>
+        <TextView
+            android:id="@+id/artistname"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/controllers"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:maxLines="1"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:shadowColor="@color/black"
+            android:shadowRadius="20"
+            android:textColor="#E5CCCCCC"
+            style="@style/SqueezerWidget.NowPlaying.ArtistName"/>
 
-    <uk.org.ngo.squeezer.widget.ListItemImageButton
-        android:id="@+id/context_menu"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignBottom="@+id/artistname"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/track_wrapper"
-        android:background="@drawable/list_selector_holo_dark"
-        android:contentDescription="@string/app_name"
-        android:minWidth="48dp"
-        android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"/>
+        <LinearLayout
+            android:id="@+id/controllers"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:visibility="invisible">
 
-    <TextView
-        android:id="@+id/currenttime"
-        android:layout_above="@+id/media_buttons"
-        android:layout_alignBottom="@+id/seekbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignTop="@+id/seekbar"
-        android:layout_below="@id/artistname"
-        style="@style/SqueezerWidget.NowPlaying.Timestamp"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp">
 
-    <SeekBar
-        android:id="@+id/seekbar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dip"
+                <TextView
+                    android:id="@+id/currenttime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_marginStart="@dimen/text_view_margin"
+                    android:layout_alignParentStart="true"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    style="@style/SqueezerWidget.NowPlaying.Timestamp"/>
+
+                <SeekBar
+                    android:id="@+id/seekbar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_toStartOf="@+id/totaltime"
+                    android:layout_toEndOf="@+id/currenttime" />
+
+                <TextView
+                    android:id="@+id/totaltime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_marginEnd="@dimen/end_text_margin"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center_vertical"
+                    android:layout_alignWithParentIfMissing="true"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    style="@style/SqueezerWidget.NowPlaying.Timestamp"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp">
+
+                <uk.org.ngo.squeezer.widget.RepeatingImageButton
+                    android:id="@+id/prev"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_skip_previous_white_48dp"
+                    android:contentDescription="@string/skip_prev"
+                    style="@style/SqueezerWidget.MediaButton.Previous"/>
+
+                <ImageButton
+                    android:id="@+id/pause"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_play_arrow_white_48dp"
+                    android:contentDescription="@string/play_pause"
+                    style="@style/SqueezerWidget.MediaButton.Play"/>
+
+                <uk.org.ngo.squeezer.widget.RepeatingImageButton
+                    android:id="@+id/next"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_skip_next_white_48dp"
+                    android:contentDescription="@string/skip_next"
+                    style="@style/SqueezerWidget.MediaButton.Next"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/artistname"
-        android:layout_toLeftOf="@+id/totaltime"
-        android:layout_toRightOf="@+id/currenttime"/>
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/totaltime"
-        android:layout_above="@id/media_buttons"
-        android:layout_alignBottom="@id/seekbar"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/seekbar"
-        android:layout_below="@id/context_menu"
-        android:paddingRight="8dp"
-        style="@style/SqueezerWidget.NowPlaying.Timestamp"/>
+    <!--android:background="@drawable/actionbar_bg_gradient_light"-->
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
 
-    <LinearLayout
-        android:id="@+id/media_buttons"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/seekbar"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="4dp"
-        android:paddingRight="8dp">
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-        <ImageButton
-            android:id="@+id/shuffle"
-            style="@style/SqueezerWidget.MediaButton.Shuffle"/>
+    <!--<uk.org.ngo.squeezer.widget.ListItemImageButton-->
+        <!--android:id="@+id/context_menu"-->
+        <!--android:layout_width="48dp"-->
+        <!--android:layout_height="48dp"-->
+        <!--android:layout_alignBottom="@+id/artistname"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_below="@id/track_wrapper"-->
+        <!--android:background="@drawable/list_selector_holo_dark"-->
+        <!--android:contentDescription="@string/app_name"-->
+        <!--android:minWidth="48dp"-->
+        <!--android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"/>-->
 
-        <uk.org.ngo.squeezer.widget.RepeatingImageButton
-            android:id="@+id/prev"
-            style="@style/SqueezerWidget.MediaButton.Previous"/>
+    <!--<LinearLayout-->
+        <!--android:id="@+id/media_buttons"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_below="@id/seekbar"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:paddingBottom="4dp"-->
+        <!--android:paddingRight="8dp">-->
 
-        <ImageButton
-            android:id="@+id/pause"
-            style="@style/SqueezerWidget.MediaButton.Play"/>
+        <!--<ImageButton-->
+            <!--android:id="@+id/shuffle"-->
+            <!--style="@style/SqueezerWidget.MediaButton.Shuffle"/>-->
 
-        <uk.org.ngo.squeezer.widget.RepeatingImageButton
-            android:id="@+id/next"
-            style="@style/SqueezerWidget.MediaButton.Next"/>
-
-        <ImageButton
-            android:id="@+id/repeat"
-            style="@style/SqueezerWidget.MediaButton.Repeat"/>
-    </LinearLayout>
+        <!--<ImageButton-->
+            <!--android:id="@+id/repeat"-->
+            <!--style="@style/SqueezerWidget.MediaButton.Repeat"/>-->
+    <!--</LinearLayout>-->
 </RelativeLayout>
 
 
