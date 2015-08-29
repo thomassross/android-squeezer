@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.R;
@@ -43,6 +44,17 @@ public class RadioListActivity extends BaseListActivity<Plugin> {
     @Override
     protected void orderPage(@NonNull ISqueezeService service, int start) {
         service.radios(start, this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(10, false);
+        }
     }
 
     public static void show(Activity activity) {

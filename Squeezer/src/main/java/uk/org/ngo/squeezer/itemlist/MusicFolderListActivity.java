@@ -70,6 +70,12 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(9, false);
+        }
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             mFolder = extras.getParcelable(MusicFolderItem.class.getName());

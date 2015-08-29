@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
@@ -34,6 +35,16 @@ public class FavoriteListActivity extends PluginItemListActivity {
     @Override
     public ItemView<PluginItem> createItemView() {
         return new FavoritesView(this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(11, false);
+        }
     }
 
     public static void show(Activity activity) {

@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.framework.BaseListActivity;
@@ -35,6 +36,16 @@ public class YearListActivity extends BaseListActivity<Year> {
     @Override
     protected void orderPage(@NonNull ISqueezeService service, int start) {
         service.years(start, this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(5, false);
+        }
     }
 
     public static void show(Context context) {

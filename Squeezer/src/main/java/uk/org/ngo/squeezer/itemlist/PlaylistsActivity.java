@@ -59,10 +59,19 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(8, false);
+        }
+
         if (savedInstanceState != null) {
             currentIndex = savedInstanceState.getInt(CURRENT_INDEX);
             currentPlaylist = savedInstanceState.getParcelable(CURRENT_PLAYLIST);
         }
+
+
     }
 
     @Override

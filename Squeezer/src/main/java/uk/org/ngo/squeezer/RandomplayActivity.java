@@ -57,6 +57,13 @@ public class RandomplayActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_list);
+
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(7, false);
+        }
+
         listView = (ListView) findViewById(R.id.item_list);
     }
 

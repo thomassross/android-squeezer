@@ -130,6 +130,12 @@ public class SongListActivity extends BaseListActivity<Song>
         setListLayout();
         super.onCreate(savedInstanceState);
 
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(1, false);
+        }
+
         // Set the album header.
         if (album != null) {
             ImageView artwork = (ImageView) findViewById(R.id.album);

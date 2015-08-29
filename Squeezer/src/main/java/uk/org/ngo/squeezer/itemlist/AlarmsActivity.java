@@ -79,6 +79,12 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(20, false);
+        }
+
         mNonEmptyView = findViewById(R.id.alarm_manager);
         mEmptyView = findViewById(android.R.id.empty);
 

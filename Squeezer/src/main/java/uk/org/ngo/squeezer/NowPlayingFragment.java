@@ -103,7 +103,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     private TextView trackText;
 
-    private ImageView btnContextMenu;
+//    private ImageView btnContextMenu;
 
     private TextView currentTime;
 
@@ -117,11 +117,11 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     private MenuItem menu_item_poweroff;
 
-    private MenuItem menu_item_players;
+//    private MenuItem menu_item_players;
 
     private MenuItem menu_item_playlist;
 
-    private MenuItem menu_item_alarm;
+//    private MenuItem menu_item_alarm;
 
     private MenuItem menu_item_search;
 
@@ -136,6 +136,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     private ImageButton repeatButton;
 
     private ImageView albumArt;
+
+    private View ControllersView;
 
     /** In full-screen mode, shows the current progress through the track. */
     private SeekBar seekBar;
@@ -223,6 +225,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 "http://schemas.android.com/apk/res/android",
                 "layout_height", 0);
 
+        Log.d("player", String.valueOf(layout_height));
+        Log.d("player", String.valueOf(ViewGroup.LayoutParams.FILL_PARENT));
+
         mFullHeightLayout = (layout_height == ViewGroup.LayoutParams.FILL_PARENT);
     }
 
@@ -258,15 +263,16 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             currentTime = (TextView) v.findViewById(R.id.currenttime);
             totalTime = (TextView) v.findViewById(R.id.totaltime);
             seekBar = (SeekBar) v.findViewById(R.id.seekbar);
+            ControllersView = v.findViewById(R.id.controllers);
 
-            btnContextMenu = (ImageView) v.findViewById(R.id.context_menu);
-            btnContextMenu.setOnCreateContextMenuListener(this);
-            btnContextMenu.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.showContextMenu();
-                }
-            });
+//            btnContextMenu = (ImageView) v.findViewById(R.id.context_menu);
+//            btnContextMenu.setOnCreateContextMenuListener(this);
+//            btnContextMenu.setOnClickListener(new OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    v.showContextMenu();
+//                }
+//            });
         } else {
             v = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
 
@@ -274,6 +280,15 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
         }
 
         albumArt = (ImageView) v.findViewById(R.id.album);
+        if (mFullHeightLayout) {
+            albumArt.setOnCreateContextMenuListener(this);
+            albumArt.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.showContextMenu();
+                }
+            });
+        }
         trackText = (TextView) v.findViewById(R.id.trackname);
         albumText = (TextView) v.findViewById(R.id.albumname);
         playPauseButton = (ImageButton) v.findViewById(R.id.pause);
@@ -469,6 +484,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             }
         }
 
+        /**
         ActionBar actionBar = mActivity.getSupportActionBar();
 
         // If there are multiple players connected then show a spinner allowing the user to
@@ -522,6 +538,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 actionBar.setTitle(R.string.app_name);
             }
         }
+         */
     }
 
     protected void onServiceConnected(@NonNull ISqueezeService service) {
@@ -640,13 +657,15 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                     }
                     prevButton.setEnabled(false);
                     Util.setAlpha(prevButton, 0.25f);
-                    btnContextMenu.setVisibility(View.GONE);
+                    albumArt.setClickable(false);
+//                    btnContextMenu.setVisibility(View.GONE);
                 } else {
+                    albumArt.setClickable(true);
                     nextButton.setEnabled(true);
                     Util.setAlpha(nextButton, 1.0f);
                     prevButton.setEnabled(true);
                     Util.setAlpha(prevButton, 1.0f);
-                    btnContextMenu.setVisibility(View.VISIBLE);
+//                    btnContextMenu.setVisibility(View.VISIBLE);
                 }
             }
         } else {
@@ -654,7 +673,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             trackText.setText("");
             if (mFullHeightLayout) {
                 artistText.setText("");
-                btnContextMenu.setVisibility(View.GONE);
+                albumArt.setClickable(false);
+//                btnContextMenu.setVisibility(View.GONE);
             }
         }
 
@@ -825,9 +845,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
         menu_item_disconnect = menu.findItem(R.id.menu_item_disconnect);
         menu_item_poweron = menu.findItem(R.id.menu_item_poweron);
         menu_item_poweroff = menu.findItem(R.id.menu_item_poweroff);
-        menu_item_players = menu.findItem(R.id.menu_item_players);
+//        menu_item_players = menu.findItem(R.id.menu_item_players);
         menu_item_playlist = menu.findItem(R.id.menu_item_playlist);
-        menu_item_alarm = menu.findItem(R.id.menu_item_alarm);
+//        menu_item_alarm = menu.findItem(R.id.menu_item_alarm);
         menu_item_search = menu.findItem(R.id.menu_item_search);
     }
 
@@ -854,11 +874,11 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             boolean haveConnectedPlayers = connected && mService != null
                     && !mService.getConnectedPlayers().isEmpty();
 
-            menu_item_players.setVisible(haveConnectedPlayers);
+//            menu_item_players.setVisible(haveConnectedPlayers);
             menu_item_playlist.setVisible(haveConnectedPlayers);
-            menu_item_alarm.setVisible(haveConnectedPlayers);
+//            menu_item_alarm.setVisible(haveConnectedPlayers);
             if (connected)
-                menu_item_alarm.setTitle(ServerString.ALARM.getLocalizedString());
+//                menu_item_alarm.setTitle(ServerString.ALARM.getLocalizedString());
             menu_item_search.setEnabled(connected);
         }
 
@@ -867,9 +887,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             menu_item_playlist.setVisible(false);
         }
         // Don't show the item to go to alarms if in AlarmsActivity.
-        if (mActivity instanceof AlarmsActivity && menu_item_alarm != null) {
-            menu_item_alarm.setVisible(false);
-        }
+//        if (mActivity instanceof AlarmsActivity && menu_item_alarm != null) {
+//            menu_item_alarm.setVisible(false);
+//        }
 
         updatePowerMenuItems(canPowerOn(), canPowerOff());
     }
@@ -877,9 +897,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_settings:
-                SettingsActivity.show(mActivity);
-                return true;
+//            case R.id.menu_item_settings:
+//                SettingsActivity.show(mActivity);
+//                return true;
             case R.id.menu_item_search:
                 mActivity.onSearchRequested();
                 return true;
@@ -898,16 +918,17 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             case R.id.menu_item_playlist:
                 CurrentPlaylistActivity.show(mActivity);
                 break;
-            case R.id.menu_item_players:
-                PlayerListActivity.show(mActivity);
-                return true;
-            case R.id.menu_item_alarm:
-                AlarmsActivity.show(mActivity);
-                return true;
-            case R.id.menu_item_about:
-                new AboutDialog().show(getFragmentManager(), "AboutDialog");
-                return true;
+//            case R.id.menu_item_players:
+//                PlayerListActivity.show(mActivity);
+//                return true;
+//            case R.id.menu_item_alarm:
+//                AlarmsActivity.show(mActivity);
+//                return true;
+//            case R.id.menu_item_about:
+//                new AboutDialog().show(getFragmentManager(), "AboutDialog");
+//                return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }

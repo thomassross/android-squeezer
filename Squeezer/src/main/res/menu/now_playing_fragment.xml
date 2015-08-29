@@ -34,19 +34,21 @@
         squeezer:showAsAction="always|withText"
         android:orderInCategory="1"/>
 
-    <item
-        android:id="@+id/menu_item_players"
-        android:title="@string/menu_item_players"
-        android:alphabeticShortcut="z"
-        android:icon="@drawable/ic_menu_choose_player"
-        squeezer:showAsAction="ifRoom|withText"/>
+    <!-- WEG -->
+    <!--<item-->
+        <!--android:id="@+id/menu_item_players"-->
+        <!--android:title="@string/menu_item_players"-->
+        <!--android:alphabeticShortcut="z"-->
+        <!--android:icon="@drawable/ic_menu_choose_player"-->
+        <!--squeezer:showAsAction="ifRoom|withText"/>-->
 
-    <item
-        android:id="@+id/menu_item_alarm"
-        android:title="Alarm Clock"
-        android:alphabeticShortcut="z"
-        android:icon="@android:drawable/ic_lock_idle_alarm"
-        squeezer:showAsAction="ifRoom"/>
+    <!--<item-->
+        <!--android:id="@+id/menu_item_alarm"-->
+        <!--android:title="Alarm Clock"-->
+        <!--android:alphabeticShortcut="z"-->
+        <!--android:icon="@android:drawable/ic_lock_idle_alarm"-->
+        <!--squeezer:showAsAction="ifRoom"/>-->
+    <!-- WEG EINDE -->
 
     <item
         android:id="@+id/menu_item_poweron"
@@ -73,17 +75,17 @@
 
     <!-- Force these to the bottom of the menu. -->
 
-    <item
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:id="@+id/menu_item_settings"
-        android:title="@string/menu_item_settings_label"
-        android:alphabeticShortcut="p"
-        android:orderInCategory="99"/>
+    <!--<item-->
+        <!--android:icon="@android:drawable/ic_menu_preferences"-->
+        <!--android:id="@+id/menu_item_settings"-->
+        <!--android:title="@string/menu_item_settings_label"-->
+        <!--android:alphabeticShortcut="p"-->
+        <!--android:orderInCategory="99"/>-->
 
-    <item
-        android:icon="@android:drawable/ic_menu_info_details"
-        android:id="@+id/menu_item_about"
-        android:title="@string/menu_item_about_label"
-        android:alphabeticShortcut="a"
-        android:orderInCategory="100"/>
+    <!--<item-->
+        <!--android:icon="@android:drawable/ic_menu_info_details"-->
+        <!--android:id="@+id/menu_item_about"-->
+        <!--android:title="@string/menu_item_about_label"-->
+        <!--android:alphabeticShortcut="a"-->
+        <!--android:orderInCategory="100"/>-->
 </menu>

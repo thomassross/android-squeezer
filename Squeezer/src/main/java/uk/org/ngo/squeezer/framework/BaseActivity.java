@@ -34,6 +34,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.widget.Toolbar;
 //import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -320,21 +321,27 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d("onCreateOptionsMenu", "1");
         MenuInflater inflater = getMenuInflater();
+        Log.d("onCreateOptionsMenu", "2");
         inflater.inflate(R.menu.base_activity, menu);
-
+        Log.d("onCreateOptionsMenu", "3");
         mMenuItemVolume = menu.findItem(R.id.menu_item_volume);
+        Log.d("onCreateOptionsMenu", "4");
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        Log.d("onPrepareOptionsMenu", "1");
         boolean haveConnectedPlayers = isConnected() && mService != null
                 && !mService.getConnectedPlayers().isEmpty();
-
+        Log.d("onPrepareOptionsMenu", "2");
         if (mMenuItemVolume != null) {
+            Log.d("onPrepareOptionsMenu", "3");
             mMenuItemVolume.setVisible(haveConnectedPlayers);
         }
+        Log.d("onPrepareOptionsMenu", "4");
 
         return true;
     }
@@ -512,10 +519,9 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
 
     public void NavigationDrawer(Bundle savedInstanceState){
 
-        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setTitle("HOME");
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("SQUEEZER TITLE");
 
         ProfileDrawerItem profile5 = new ProfileDrawerItem().withName("Batman").withEmail("batman@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile5));
 
@@ -585,7 +591,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                         new PrimaryDrawerItem().withName(R.string.home_item_favorites).withIcon(GoogleMaterial.Icon.gmd_favorite).withIdentifier(11).withSelectable(false),
                         new PrimaryDrawerItem().withName(R.string.home_item_my_apps).withIcon(GoogleMaterial.Icon.gmd_apps).withIdentifier(12).withSelectable(false),
                         new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withName(R.string.alarm_clock).withIcon(FontAwesome.Icon.faw_clock_o).withIdentifier(20).withSelectable(false),
+                        new PrimaryDrawerItem().withName(ServerString.ALARM.getLocalizedString()).withIcon(FontAwesome.Icon.faw_clock_o).withIdentifier(20).withSelectable(false),
                         new PrimaryDrawerItem().withName(R.string.menu_item_settings_label).withIcon(FontAwesome.Icon.faw_cog).withIdentifier(21).withSelectable(false),
                         new PrimaryDrawerItem().withName(R.string.menu_item_about_label).withIcon(FontAwesome.Icon.faw_cog).withIdentifier(22).withSelectable(false)
 
@@ -629,8 +635,6 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                                 intent = new Intent(BaseActivity.this, FavoriteListActivity.class);
                             } else if (drawerItem.getIdentifier() == 12) {
                                 intent = new Intent(BaseActivity.this, ApplicationListActivity.class);
-
-
                             } else if (drawerItem.getIdentifier() == 20) {
                                 intent = new Intent(BaseActivity.this, AlarmsActivity.class);
                             } else if (drawerItem.getIdentifier() == 21) {

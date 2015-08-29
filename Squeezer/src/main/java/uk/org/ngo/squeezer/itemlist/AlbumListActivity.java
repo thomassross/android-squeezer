@@ -165,6 +165,14 @@ public class AlbumListActivity extends BaseListActivity<Album>
             header.setVisibility(View.VISIBLE);
         }
         ((AlbumView) getItemView()).setDetails(details);
+
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(3, false);
+        }
+
+
     }
 
     @Override

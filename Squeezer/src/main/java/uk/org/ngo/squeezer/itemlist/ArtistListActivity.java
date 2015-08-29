@@ -79,6 +79,12 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(2, false);
+        }
+
         BaseMenuFragment.add(this, FilterMenuFragment.class);
 
         Bundle extras = getIntent().getExtras();

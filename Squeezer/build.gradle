@@ -17,7 +17,12 @@ apply plugin: 'com.neenbedankt.android-apt'
 
 repositories {
     mavenCentral()
-    maven { url 'http://download.crashlytics.com/maven' }
+    maven {
+        url 'http://download.crashlytics.com/maven'
+    }
+    maven {
+        url 'http://dl.bintray.com/amulyakhare/maven'
+    }
 }
 
 dependencies {
@@ -60,6 +65,8 @@ dependencies {
     compile 'com.mikepenz:google-material-typeface:1.2.0.1@aar'
     compile 'com.mikepenz:fontawesome-typeface:4.4.0.1@aar'
     compile 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
+
+    compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 }
 
 android {
