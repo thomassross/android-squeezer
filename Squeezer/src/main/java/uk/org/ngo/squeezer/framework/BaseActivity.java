@@ -23,7 +23,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.CallSuper;
@@ -45,15 +47,47 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 import uk.org.ngo.squeezer.HomeActivity;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
+import uk.org.ngo.squeezer.RandomplayActivity;
+import uk.org.ngo.squeezer.SettingsActivity;
 import uk.org.ngo.squeezer.VolumePanel;
+import uk.org.ngo.squeezer.dialog.AboutDialog;
+import uk.org.ngo.squeezer.itemlist.AlarmsActivity;
+import uk.org.ngo.squeezer.itemlist.AlbumListActivity;
+import uk.org.ngo.squeezer.itemlist.ApplicationListActivity;
+import uk.org.ngo.squeezer.itemlist.ArtistListActivity;
+import uk.org.ngo.squeezer.itemlist.FavoriteListActivity;
+import uk.org.ngo.squeezer.itemlist.GenreListActivity;
+import uk.org.ngo.squeezer.itemlist.MusicFolderListActivity;
+import uk.org.ngo.squeezer.itemlist.PlayerListActivity;
+import uk.org.ngo.squeezer.itemlist.PlaylistsActivity;
+import uk.org.ngo.squeezer.itemlist.RadioListActivity;
+import uk.org.ngo.squeezer.itemlist.SongListActivity;
+import uk.org.ngo.squeezer.itemlist.YearListActivity;
+import uk.org.ngo.squeezer.itemlist.dialog.AlbumViewDialog;
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.service.ISqueezeService;
@@ -95,6 +129,10 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
     /** Volume control panel. */
     @Nullable
     private VolumePanel mVolumePanel;
+
+    //save our header or result
+    protected AccountHeader navigationDrawerHeader = null;
+    protected Drawer navigationDrawer = null;
 
     protected String getTag() {
         return getClass().getSimpleName();
@@ -138,13 +176,13 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
         super.onCreate(savedInstanceState);
 
         mTheme.onCreate(this);
-        ActionBar actionBar = getSupportActionBar();
-//
+//        ActionBar actionBar = getSupportActionBar();
+
 //        actionBar.setIcon(R.drawable.ic_launcher);
-//        actionBar.setHomeButtonEnabled(true);
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
-//        Log.d(getTag(), "did bindService; serviceStub = " + getService());
+        Log.d(getTag(), "did bindService; serviceStub = " + getService());
+
     }
 
     @Override
@@ -470,5 +508,160 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
         TypedValue v = new TypedValue();
         getTheme().resolveAttribute(attribute, v, true);
         return v.resourceId;
+    }
+
+    public void NavigationDrawer(Bundle savedInstanceState){
+
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle("HOME");
+
+
+        ProfileDrawerItem profile5 = new ProfileDrawerItem().withName("Batman").withEmail("batman@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile5));
+
+        // Create the AccountHeader
+        navigationDrawerHeader = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.header)
+                .addProfiles(
+                        profile5,
+                        new ProfileSettingDrawerItem().withName("Manage Players").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(200)
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+                        //sample usage of the onProfileChanged listener
+                        //if the clicked item has the identifier 1 add a new profile ;)
+                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 200) {
+                            Intent intent = new Intent(BaseActivity.this, PlayerListActivity.class);
+                            BaseActivity.this.startActivity(intent);
+                        }
+                        //false if you have not consumed the event and it should close the drawer
+                        return false;
+                    }
+                })
+                .withSavedInstance(savedInstanceState)
+                .build();
+
+//        Log.d("players", String.valueOf(getService().getPlayers()));
+//
+//        List<Player> players = getService().getPlayers();
+//        if (savedInstanceState == null) {
+//            for (int i = 0; i < players.size(); i++) {
+//                TextDrawable image = TextDrawable.builder()
+//                        .buildRound(String.valueOf(players.get(i).getName().charAt(0)), Color.GREEN);
+//
+//                IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image);
+//
+//                if (navigationDrawerHeader.getProfiles() != null) {
+//                    //we know that there are 2 setting elements. set the new profile above them ;)
+//                    navigationDrawerHeader.addProfile(newProfile, navigationDrawerHeader.getProfiles().size() - 2);
+//                } else {
+//                    navigationDrawerHeader.addProfiles(newProfile);
+//                }
+//
+//                if (players.get(i).getConnected()) {
+//                    navigationDrawerHeader.setActiveProfile(newProfile);
+//                }
+//            }
+//        }
+
+        //Create the drawer
+        navigationDrawer = new DrawerBuilder().addDrawerItems()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withAccountHeader(navigationDrawerHeader) //set the AccountHeader we created earlier for the header
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName(R.string.home_item_songs).withIcon(FontAwesome.Icon.faw_music).withIdentifier(1).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_artists).withIcon(FontAwesome.Icon.faw_home).withIdentifier(2).withSelectable(false), //NEE
+                        new PrimaryDrawerItem().withName(R.string.home_item_albums).withIcon(GoogleMaterial.Icon.gmd_album).withIdentifier(3).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_genres).withIcon(FontAwesome.Icon.faw_music).withIdentifier(4).withSelectable(false), //NEE
+                        new PrimaryDrawerItem().withName(R.string.home_item_years).withIcon(FontAwesome.Icon.faw_music).withIdentifier(5).withSelectable(false), //NEE
+                        new PrimaryDrawerItem().withName(R.string.home_item_new_music).withIcon(FontAwesome.Icon.faw_music).withIdentifier(6).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_random_mix).withIcon(FontAwesome.Icon.faw_random).withIdentifier(7).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_playlists).withIcon(FontAwesome.Icon.faw_music).withIdentifier(8).withSelectable(false), //NEE
+                        new PrimaryDrawerItem().withName(R.string.home_item_music_folder).withIcon(FontAwesome.Icon.faw_folder).withIdentifier(9).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_radios).withIcon(GoogleMaterial.Icon.gmd_radio).withIdentifier(10).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_favorites).withIcon(GoogleMaterial.Icon.gmd_favorite).withIdentifier(11).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.home_item_my_apps).withIcon(GoogleMaterial.Icon.gmd_apps).withIdentifier(12).withSelectable(false),
+                        new DividerDrawerItem(),
+                        new PrimaryDrawerItem().withName(R.string.alarm_clock).withIcon(FontAwesome.Icon.faw_clock_o).withIdentifier(20).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.menu_item_settings_label).withIcon(FontAwesome.Icon.faw_cog).withIdentifier(21).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.menu_item_about_label).withIcon(FontAwesome.Icon.faw_cog).withIdentifier(22).withSelectable(false)
+
+//                        new SwitchDrawerItem().withName("Switch").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener),
+//                        new SwitchDrawerItem().withName("Switch2").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener),
+//                        new ToggleDrawerItem().withName("Toggle").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener)
+                ) // add the items we want to use with our Drawer
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        //check if the drawerItem is set.
+                        //there are different reasons for the drawerItem to be null
+                        //--> click on the header
+                        //--> click on the footer
+                        //those items don't contain a drawerItem
+
+                        if (drawerItem != null) {
+                            Intent intent = null;
+                            if (drawerItem.getIdentifier() == 1) {
+                                intent = new Intent(BaseActivity.this, SongListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 2) {
+                                intent = new Intent(BaseActivity.this, ArtistListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 3) {
+                                intent = new Intent(BaseActivity.this, AlbumListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 4) {
+                                intent = new Intent(BaseActivity.this, GenreListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 5) {
+                                intent = new Intent(BaseActivity.this, YearListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 6) {
+                                intent = new Intent(BaseActivity.this, AlbumListActivity.class);
+                                intent.putExtra(AlbumViewDialog.AlbumsSortOrder.class.getName(), AlbumViewDialog.AlbumsSortOrder.__new.name());
+                            } else if (drawerItem.getIdentifier() == 7) {
+                                intent = new Intent(BaseActivity.this, RandomplayActivity.class);
+                            } else if (drawerItem.getIdentifier() == 8) {
+                                intent = new Intent(BaseActivity.this, PlaylistsActivity.class);
+                            } else if (drawerItem.getIdentifier() == 9) {
+                                intent = new Intent(BaseActivity.this, MusicFolderListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 10) {
+                                intent = new Intent(BaseActivity.this, RadioListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 11) {
+                                intent = new Intent(BaseActivity.this, FavoriteListActivity.class);
+                            } else if (drawerItem.getIdentifier() == 12) {
+                                intent = new Intent(BaseActivity.this, ApplicationListActivity.class);
+
+
+                            } else if (drawerItem.getIdentifier() == 20) {
+                                intent = new Intent(BaseActivity.this, AlarmsActivity.class);
+                            } else if (drawerItem.getIdentifier() == 21) {
+                                intent = new Intent(BaseActivity.this, SettingsActivity.class);
+                            } else if (drawerItem.getIdentifier() == 22) {
+                                intent = new Intent(BaseActivity.this, AboutDialog.class);
+                            }
+
+                            if (intent != null) {
+                                BaseActivity.this.startActivity(intent);
+                            }
+                        }
+
+                        return false;
+                    }
+                })
+                .withSavedInstance(savedInstanceState)
+                .withShowDrawerOnFirstLaunch(true)
+                .build();
+
+
+        //only set the active selection or active profile if we do not recreate the activity
+//        if (savedInstanceState == null) {
+//             set the selection to the item with the identifier 11
+//            navigationDrawer.setSelection(21, false);
+//
+//            set the active profile
+//            headerResult.setActiveProfile(profile3);
+//        }
+
+        //navigationDrawer.updateBadge(4, new StringHolder(10 + ""));
+
     }
 }
