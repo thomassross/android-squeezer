@@ -507,4 +507,7 @@ of your accepting any such warranty or additional liability.&lt;/p&gt;</string>
     <string name="skip_next">skip to next</string>
     <string name="skip_prev">skip to previous</string>
     <string name="touch_to_cast">Touch to Cast</string>
+    <string name="alarm_clock">Alarm Clock</string>
+    <string name="drawer_item_home">Home</string>
+    <string name="drawer_item_settings">Settings</string>
 </resources>

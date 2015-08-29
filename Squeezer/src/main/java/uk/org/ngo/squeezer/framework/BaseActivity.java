@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.framework;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,8 +32,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+//import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+//import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -63,7 +69,7 @@ import uk.org.ngo.squeezer.util.ThemeManager;
  *
  * @author Kurt Aaholst
  */
-public abstract class BaseActivity extends ActionBarActivity implements HasUiThread {
+public abstract class BaseActivity extends AppCompatActivity implements HasUiThread {
 
     @Nullable
     private ISqueezeService mService = null;
@@ -133,12 +139,12 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
 
         mTheme.onCreate(this);
         ActionBar actionBar = getSupportActionBar();
-
-        actionBar.setIcon(R.drawable.ic_launcher);
-        actionBar.setHomeButtonEnabled(true);
+//
+//        actionBar.setIcon(R.drawable.ic_launcher);
+//        actionBar.setHomeButtonEnabled(true);
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
-        Log.d(getTag(), "did bindService; serviceStub = " + getService());
+//        Log.d(getTag(), "did bindService; serviceStub = " + getService());
     }
 
     @Override
