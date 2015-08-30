@@ -50,7 +50,7 @@
         <item name="floatLabelColor">@color/float_label_dark</item>
     </style>
 
-    <style name="AppTheme.Light.DarkActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme.Light.DarkActionBar" parent="MaterialDrawerTheme.TranslucentStatus">
         <item name="ic_action_av_connect">@drawable/presence_online</item>
         <item name="ic_action_av_next">@drawable/ic_action_av_next_holo_light</item>
         <item name="ic_action_av_pause">@drawable/ic_action_av_pause_holo_light</item>
