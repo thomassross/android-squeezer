@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
 
@@ -38,6 +39,8 @@ public class ApplicationListActivity extends PluginListActivity {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(12, false);
         }
+
+        getSupportActionBar().setTitle(R.string.home_item_my_apps);
     }
 
     public static void show(Activity activity) {

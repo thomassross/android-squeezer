@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Year;
@@ -46,6 +47,7 @@ public class YearListActivity extends BaseListActivity<Year> {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(5, false);
         }
+        getSupportActionBar().setTitle(R.string.home_item_years);
     }
 
     public static void show(Context context) {

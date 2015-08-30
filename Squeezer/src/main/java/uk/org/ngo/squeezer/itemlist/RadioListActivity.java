@@ -55,6 +55,8 @@ public class RadioListActivity extends BaseListActivity<Plugin> {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(10, false);
         }
+
+        getSupportActionBar().setTitle(R.string.home_item_radios);
     }
 
     public static void show(Activity activity) {

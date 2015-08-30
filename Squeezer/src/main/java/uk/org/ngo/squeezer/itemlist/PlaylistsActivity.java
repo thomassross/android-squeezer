@@ -70,7 +70,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
             currentIndex = savedInstanceState.getInt(CURRENT_INDEX);
             currentPlaylist = savedInstanceState.getParcelable(CURRENT_PLAYLIST);
         }
-
+        getSupportActionBar().setTitle(R.string.home_item_playlists);
 
     }
 

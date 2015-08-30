@@ -84,6 +84,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(20, false);
         }
+        getSupportActionBar().setTitle(ServerString.ALARM.getLocalizedString());
 
         mNonEmptyView = findViewById(R.id.alarm_manager);
         mEmptyView = findViewById(android.R.id.empty);

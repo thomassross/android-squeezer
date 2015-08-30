@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
 import uk.org.ngo.squeezer.model.PluginItem;
@@ -45,6 +46,8 @@ public class FavoriteListActivity extends PluginItemListActivity {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(11, false);
         }
+
+        getSupportActionBar().setTitle(R.string.home_item_favorites);
     }
 
     public static void show(Activity activity) {

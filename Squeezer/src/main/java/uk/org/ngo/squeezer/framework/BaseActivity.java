@@ -539,7 +539,6 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("SQUEEZER TITLE");
 
         ProfileDrawerItem profile5 = new ProfileDrawerItem().withName("Batman").withEmail("batman@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile5));
 

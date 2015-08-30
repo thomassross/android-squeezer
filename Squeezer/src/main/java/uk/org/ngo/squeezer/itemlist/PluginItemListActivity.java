@@ -100,9 +100,10 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     }
 
     private void updateHeader(String headerText) {
-        TextView header = (TextView) findViewById(R.id.header);
-        header.setText(headerText);
-        header.setVisibility(View.VISIBLE);
+//        TextView header = (TextView) findViewById(R.id.header);
+//        header.setText(headerText);
+//        header.setVisibility(View.VISIBLE);
+        getSupportActionBar().setTitle(headerText);
     }
 
     public Plugin getPlugin() {

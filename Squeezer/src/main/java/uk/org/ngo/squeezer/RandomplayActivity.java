@@ -63,7 +63,7 @@ public class RandomplayActivity extends BaseActivity {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(7, false);
         }
-
+        getSupportActionBar().setTitle(R.string.home_item_random_mix);
         listView = (ListView) findViewById(R.id.item_list);
     }
 

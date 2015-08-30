@@ -146,31 +146,37 @@ public class AlbumListActivity extends BaseListActivity<Album>
             }
         }
 
-        TextView header = (TextView) findViewById(R.id.header);
-        @AlbumView.SecondLineDetails int details = AlbumView.DETAILS_ALL;
-        if (artist != null) {
-            details &= ~AlbumView.DETAILS_ARTIST;
-            header.setText(getString(R.string.albums_by_artist_header, artist.getName()));
-            header.setVisibility(View.VISIBLE);
-            ((AlbumView) getItemView()).setArtist(artist);
-        }
-        if (genre != null) {
-            details &= ~AlbumView.DETAILS_GENRE;
-            header.setText(getString(R.string.albums_by_genre_header, genre.getName()));
-            header.setVisibility(View.VISIBLE);
-        }
-        if (year != null) {
-            details &= ~AlbumView.DETAILS_YEAR;
-            header.setText(getString(R.string.albums_by_year_header, year.getName()));
-            header.setVisibility(View.VISIBLE);
-        }
-        ((AlbumView) getItemView()).setDetails(details);
-
         NavigationDrawer(savedInstanceState);
         if (savedInstanceState == null) {
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(3, false);
         }
+
+        getSupportActionBar().setTitle( R.string.home_item_albums);
+
+        TextView header = (TextView) findViewById(R.id.header);
+        @AlbumView.SecondLineDetails int details = AlbumView.DETAILS_ALL;
+        if (artist != null) {
+            details &= ~AlbumView.DETAILS_ARTIST;
+//            header.setText(getString(R.string.albums_by_artist_header, artist.getName()));
+//            header.setVisibility(View.VISIBLE);
+            ((AlbumView) getItemView()).setArtist(artist);
+            getSupportActionBar().setTitle(artist.getName());
+        }
+        if (genre != null) {
+            details &= ~AlbumView.DETAILS_GENRE;
+//            header.setText(getString(R.string.albums_by_genre_header, genre.getName()));
+            getSupportActionBar().setTitle(genre.getName());
+//            header.setVisibility(View.VISIBLE);
+        }
+        if (year != null) {
+            details &= ~AlbumView.DETAILS_YEAR;
+            getSupportActionBar().setTitle(year.getName());
+//            header.setText(getString(R.string.albums_by_year_header, year.getName()));
+//            header.setVisibility(View.VISIBLE);
+        }
+        ((AlbumView) getItemView()).setDetails(details);
+//
 
 
     }

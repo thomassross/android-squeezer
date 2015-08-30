@@ -183,6 +183,7 @@ public class SongListActivity extends BaseListActivity<Song>
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(1, false);
         }
+        getSupportActionBar().setTitle(R.string.home_item_songs);
 
         // Set the album header.
         if (album != null) {
@@ -216,9 +217,7 @@ public class SongListActivity extends BaseListActivity<Song>
             });
         } else
         if (artist != null) {
-            TextView header = (TextView) findViewById(R.id.header);
-            header.setVisibility(View.VISIBLE);
-            header.setText(getString(R.string.songs_by_header, artist.getName()));
+            getSupportActionBar().setTitle( artist.getName());
         }
 
         // Adapter has been created (or restored from the fragment) by this point,

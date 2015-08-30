@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.framework.Item;
 import uk.org.ngo.squeezer.framework.ItemView;
@@ -84,6 +85,8 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(2, false);
         }
+
+        getSupportActionBar().setTitle(R.string.home_item_artists);
 
         BaseMenuFragment.add(this, FilterMenuFragment.class);
 

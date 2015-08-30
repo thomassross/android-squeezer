@@ -79,9 +79,12 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             mFolder = extras.getParcelable(MusicFolderItem.class.getName());
-            TextView header = (TextView) findViewById(R.id.header);
-            header.setText(mFolder.getName());
-            header.setVisibility(View.VISIBLE);
+//            TextView header = (TextView) findViewById(R.id.header);
+//            header.setText(mFolder.getName());
+//            header.setVisibility(View.VISIBLE);
+            getSupportActionBar().setTitle(R.string.home_item_music_folder + mFolder.getName());
+        }else{
+            getSupportActionBar().setTitle(R.string.home_item_music_folder);
         }
     }
 
