@@ -25,6 +25,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,6 +51,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -142,6 +144,8 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
         return getClass().getSimpleName();
     }
 
+    protected Bundle _savedInstanceState = null;
+
     /**
      * @return The squeezeservice, or null if not bound
      */
@@ -185,9 +189,11 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
 
     @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
+        _savedInstanceState = savedInstanceState;
         super.onCreate(savedInstanceState);
 
         mTheme.onCreate(this);
+        createPlayerHeader();
 //        ActionBar actionBar = getSupportActionBar();
 
 //        actionBar.setIcon(R.drawable.ic_launcher);
@@ -312,6 +318,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
     protected void onServiceConnected(@NonNull ISqueezeService service) {
         supportInvalidateOptionsMenu();
         maybeRegisterOnEventBus(service);
+        addPlayersToMenu(service);
     }
 
     /**
@@ -536,53 +543,6 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
 
         ProfileDrawerItem profile5 = new ProfileDrawerItem().withName("Batman").withEmail("batman@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile5));
 
-        // Create the AccountHeader
-        navigationDrawerHeader = new AccountHeaderBuilder()
-                .withActivity(this)
-                .withHeaderBackground(R.drawable.header)
-                .addProfiles(
-                        profile5,
-                        new ProfileSettingDrawerItem().withName("Manage Players").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(200)
-                )
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
-                        //sample usage of the onProfileChanged listener
-                        //if the clicked item has the identifier 1 add a new profile ;)
-                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 200) {
-                            Intent intent = new Intent(BaseActivity.this, PlayerListActivity.class);
-                            BaseActivity.this.startActivity(intent);
-                        }
-                        //false if you have not consumed the event and it should close the drawer
-                        return false;
-                    }
-                })
-                .withSavedInstance(savedInstanceState)
-                .build();
-
-//        Log.d("players", String.valueOf(getService().getPlayers()));
-//
-//        List<Player> players = getService().getPlayers();
-//        if (savedInstanceState == null) {
-//            for (int i = 0; i < players.size(); i++) {
-//                TextDrawable image = TextDrawable.builder()
-//                        .buildRound(String.valueOf(players.get(i).getName().charAt(0)), Color.GREEN);
-//
-//                IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image);
-//
-//                if (navigationDrawerHeader.getProfiles() != null) {
-//                    //we know that there are 2 setting elements. set the new profile above them ;)
-//                    navigationDrawerHeader.addProfile(newProfile, navigationDrawerHeader.getProfiles().size() - 2);
-//                } else {
-//                    navigationDrawerHeader.addProfiles(newProfile);
-//                }
-//
-//                if (players.get(i).getConnected()) {
-//                    navigationDrawerHeader.setActiveProfile(newProfile);
-//                }
-//            }
-//        }
-
         //Create the drawer
         navigationDrawer = new DrawerBuilder().addDrawerItems()
                 .withActivity(this)
@@ -692,6 +652,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
     };
 
     public void onEventMainThread(HandshakeComplete event) {
+
         /**
         int[] icons = new int[]{
                 R.drawable.ic_artists,
@@ -754,6 +715,57 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
             // Nothing to do, don't crash.
         }
         */
+    }
+
+    private void createPlayerHeader(){
+        navigationDrawerHeader = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.header)
+                .addProfiles(
+//                        profile5,
+                        new ProfileSettingDrawerItem().withName("Manage Players").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(200)
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+                        //sample usage of the onProfileChanged listener
+                        //if the clicked item has the identifier 1 add a new profile ;)
+                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 200) {
+                            Intent intent = new Intent(BaseActivity.this, PlayerListActivity.class);
+                            BaseActivity.this.startActivity(intent);
+                        }
+                        //false if you have not consumed the event and it should close the drawer
+                        return false;
+                    }
+                })
+                .build();
+    }
+
+    private void addPlayersToMenu(@NonNull ISqueezeService service){
+        // Create the AccountHeader
+
+         Log.d("players", String.valueOf(service.getPlayers()));
+
+         List<Player> players = service.getPlayers();
+        if (_savedInstanceState == null) {
+             for (int i = 0; i < players.size(); i++) {
+                 TextDrawable image = TextDrawable.builder()
+                 .buildRound(String.valueOf(players.get(i).getName().charAt(0)), Color.GREEN);
+
+                 IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image);
+
+                 if (navigationDrawerHeader.getProfiles() != null) {
+                    //we know that there are 2 setting elements. set the new profile above them ;)
+                    navigationDrawerHeader.addProfile(newProfile, navigationDrawerHeader.getProfiles().size() - 1);
+                 } else {
+                    navigationDrawerHeader.addProfiles(newProfile);
+                 }
+
+                 if (players.get(i).getConnected()) {
+                    navigationDrawerHeader.setActiveProfile(newProfile);
+                 }
+             }
+        }
     }
 
 }
