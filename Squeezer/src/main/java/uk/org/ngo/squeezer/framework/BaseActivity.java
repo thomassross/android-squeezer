@@ -17,13 +17,14 @@
 package uk.org.ngo.squeezer.framework;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,9 +37,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.widget.Toolbar;
 //import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 //import android.support.v7.app.AppCompatActivity;
 //import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -49,33 +47,37 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
-import uk.org.ngo.squeezer.HomeActivity;
+import uk.org.ngo.squeezer.IconRowAdapter;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.RandomplayActivity;
 import uk.org.ngo.squeezer.SettingsActivity;
 import uk.org.ngo.squeezer.VolumePanel;
 import uk.org.ngo.squeezer.dialog.AboutDialog;
+import uk.org.ngo.squeezer.dialog.TipsDialog;
 import uk.org.ngo.squeezer.itemlist.AlarmsActivity;
 import uk.org.ngo.squeezer.itemlist.AlbumListActivity;
 import uk.org.ngo.squeezer.itemlist.ApplicationListActivity;
@@ -94,6 +96,7 @@ import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.service.ISqueezeService;
 import uk.org.ngo.squeezer.service.ServerString;
 import uk.org.ngo.squeezer.service.SqueezeService;
+import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 import uk.org.ngo.squeezer.service.event.PlayerVolume;
 import uk.org.ngo.squeezer.util.ImageFetcher;
 import uk.org.ngo.squeezer.util.SqueezePlayer;
@@ -150,6 +153,14 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
     public int getThemeId() {
         return mThemeId;
     }
+
+    private boolean mCanFavorites = false;
+
+    private boolean mCanMusicfolder = false;
+
+    private boolean mCanMyApps = false;
+
+    private boolean mCanRandomplay = false;
 
     /**
      * Use this to post Runnables to work off thread
@@ -361,7 +372,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                         NavUtils.navigateUpTo(this, upIntent);
                     }
                 } else {
-                    HomeActivity.show(this);
+                    SongListActivity.show(this);
                 }
                 return true;
             case R.id.menu_item_volume:
@@ -668,4 +679,81 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
         //navigationDrawer.updateBadge(4, new StringHolder(10 + ""));
 
     }
+
+    private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
+            if (drawerItem instanceof Nameable) {
+                Log.i("material-drawer", "DrawerItem: " + ((Nameable) drawerItem).getName() + " - toggleChecked: " + isChecked);
+            } else {
+                Log.i("material-drawer", "toggleChecked: " + isChecked);
+            }
+        }
+    };
+
+    public void onEventMainThread(HandshakeComplete event) {
+        /**
+        int[] icons = new int[]{
+                R.drawable.ic_artists,
+                R.drawable.ic_albums, R.drawable.ic_songs,
+                R.drawable.ic_genres, R.drawable.ic_years, R.drawable.ic_new_music,
+                R.drawable.ic_music_folder, R.drawable.ic_random,
+                R.drawable.ic_playlists, R.drawable.ic_internet_radio,
+                R.drawable.ic_favorites, R.drawable.ic_my_apps
+        };
+
+        String[] items = getResources().getStringArray(R.array.home_items);
+
+        if (getService() != null) {
+            mCanFavorites = event.canFavourites;
+            mCanMusicfolder = event.canMusicFolders;
+            mCanMyApps = event.canMyApps;
+            mCanRandomplay = event.canRandomPlay;
+        }
+
+        List<IconRowAdapter.IconRow> rows = new ArrayList<IconRowAdapter.IconRow>(MY_APPS + 1);
+        for (int i = ARTISTS; i <= MY_APPS; i++) {
+            if (i == MUSIC_FOLDER && !mCanMusicfolder) {
+                continue;
+            }
+
+            if (i == RANDOM_MIX && !mCanRandomplay) {
+                continue;
+            }
+
+            if (i == FAVORITES && !mCanFavorites) {
+                continue;
+            }
+
+            if (i == MY_APPS && !mCanMyApps) {
+                continue;
+            }
+
+            rows.add(new IconRowAdapter.IconRow(i, items[i], icons[i]));
+        }
+
+        listView.setAdapter(new IconRowAdapter(this, rows));
+        listView.setOnItemClickListener(onHomeItemClick);
+
+        // Show a tip about volume controls, if this is the first time this app
+        // has run. TODO: Add more robust and general 'tips' functionality.
+        PackageInfo pInfo;
+        try {
+            final SharedPreferences preferences = getSharedPreferences(Preferences.NAME,
+                    0);
+
+            pInfo = getPackageManager().getPackageInfo(getPackageName(),
+                    PackageManager.GET_META_DATA);
+            if (preferences.getLong("lastRunVersionCode", 0) == 0) {
+                new TipsDialog().show(getSupportFragmentManager(), "TipsDialog");
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putLong("lastRunVersionCode", pInfo.versionCode);
+                editor.commit();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // Nothing to do, don't crash.
+        }
+        */
+    }
+
 }

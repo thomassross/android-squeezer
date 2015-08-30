@@ -19,8 +19,10 @@ package uk.org.ngo.squeezer.itemlist;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,6 +35,11 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
+import de.cketti.library.changelog.ChangeLog;
+import uk.org.ngo.squeezer.BuildConfig;
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
@@ -97,6 +104,8 @@ public class SongListActivity extends BaseListActivity<Song>
 
     private Year year;
 
+    private GoogleAnalyticsTracker tracker;
+
     @Override
     public Year getYear() {
         return year;
@@ -129,6 +138,45 @@ public class SongListActivity extends BaseListActivity<Song>
     public void onCreate(Bundle savedInstanceState) {
         setListLayout();
         super.onCreate(savedInstanceState);
+
+        /**
+         * START old homeactivity
+         */
+
+
+        if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        final SharedPreferences preferences = getSharedPreferences(Preferences.NAME, 0);
+
+        // Enable Analytics if the option is on, and we're not running in debug
+        // mode so that debug tests don't pollute the stats.
+        if (preferences.getBoolean(Preferences.KEY_ANALYTICS_ENABLED, true)) {
+            if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                Log.v("NowPlayingActivity", "Tracking page view 'HomeActivity");
+                // Start the tracker in manual dispatch mode...
+                tracker = GoogleAnalyticsTracker.getInstance();
+                tracker.startNewSession("UA-46302445-3", this);
+                tracker.trackPageView("HomeActivity");
+            }
+        }
+
+        // Show the change log if necessary.
+        ChangeLog changeLog = new ChangeLog(this);
+        if (changeLog.isFirstRun()) {
+            if (changeLog.isFirstRunEver()) {
+                changeLog.skipLogDialog();
+            } else {
+                changeLog.getLogDialog().show();
+            }
+        }
+
+        /**
+         * END old homeactivity
+         */
+
 
         NavigationDrawer(savedInstanceState);
         if (savedInstanceState == null) {
@@ -449,6 +497,17 @@ public class SongListActivity extends BaseListActivity<Song>
             }
         }
         return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Send analytics stats (if enabled).
+        if (tracker != null) {
+            tracker.dispatch();
+            tracker.stopSession();
+        }
     }
 
 }

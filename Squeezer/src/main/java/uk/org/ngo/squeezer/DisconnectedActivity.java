@@ -30,6 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import uk.org.ngo.squeezer.dialog.InfoDialog;
 import uk.org.ngo.squeezer.dialog.ServerAddressView;
 import uk.org.ngo.squeezer.framework.BaseActivity;
+import uk.org.ngo.squeezer.itemlist.SongListActivity;
 import uk.org.ngo.squeezer.service.event.HandshakeComplete;
 
 /**
@@ -165,7 +166,7 @@ public class DisconnectedActivity extends BaseActivity {
         // The user requested a connection to the server, which succeeded.  There's
         // no prior activity to go to, so launch HomeActivity, with flags to
         // clear other activities so hitting "back" won't show this activity again.
-        final Intent intent = new Intent(this, HomeActivity.class)
+        final Intent intent = new Intent(this, SongListActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(intent);
