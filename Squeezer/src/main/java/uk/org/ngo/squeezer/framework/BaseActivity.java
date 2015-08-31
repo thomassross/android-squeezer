@@ -737,11 +737,21 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+
                         //sample usage of the onProfileChanged listener
                         //if the clicked item has the identifier 1 add a new profile ;)
                         if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 200) {
                             Intent intent = new Intent(BaseActivity.this, PlayerListActivity.class);
                             BaseActivity.this.startActivity(intent);
+                        } else {
+                            Log.d("profile-click", String.valueOf(profile.getIdentifier()));
+
+                            List<Player> players = getService().getPlayers();
+                            for (int i = 0; i < players.size(); i++) {
+                                if ((int) players.get(i).getIdAsLong() == profile.getIdentifier() && (int) getService().getActivePlayer().getIdAsLong() != profile.getIdentifier()) {
+                                    getService().setActivePlayer(players.get(i));
+                                }
+                            }
                         }
                         //false if you have not consumed the event and it should close the drawer
                         return false;
@@ -761,7 +771,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                  TextDrawable image = TextDrawable.builder()
                  .buildRound(String.valueOf(players.get(i).getName().charAt(0)), Color.GREEN);
 
-                 IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image);
+                 IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image).withIdentifier((int) players.get(i).getIdAsLong());
 
                  if (navigationDrawerHeader.getProfiles() != null) {
                     //we know that there are 2 setting elements. set the new profile above them ;)
