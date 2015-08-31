@@ -175,10 +175,12 @@ public class AlbumListActivity extends BaseListActivity<Album>
 //            header.setText(getString(R.string.albums_by_year_header, year.getName()));
 //            header.setVisibility(View.VISIBLE);
         }
+        if(sortOrder != null){
+            if(sortOrder.toString() == "sortOrder"){
+                getSupportActionBar().setTitle( R.string.home_item_new_music);
+            }
+        }
         ((AlbumView) getItemView()).setDetails(details);
-//
-
-
     }
 
     @Override

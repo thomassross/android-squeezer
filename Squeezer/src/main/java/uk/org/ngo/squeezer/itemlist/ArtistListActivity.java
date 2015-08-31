@@ -97,6 +97,7 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
                     album = extras.getParcelable(key);
                 } else if (Genre.class.getName().equals(key)) {
                     genre = extras.getParcelable(key);
+                    getSupportActionBar().setTitle(genre.getName());
                 } else {
                     Log.e(getTag(), "Unexpected extra value: " + key + "("
                             + extras.get(key).getClass().getName() + ")");

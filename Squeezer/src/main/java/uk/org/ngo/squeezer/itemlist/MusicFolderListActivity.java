@@ -82,7 +82,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
 //            TextView header = (TextView) findViewById(R.id.header);
 //            header.setText(mFolder.getName());
 //            header.setVisibility(View.VISIBLE);
-            getSupportActionBar().setTitle(R.string.home_item_music_folder + mFolder.getName());
+            getSupportActionBar().setTitle(mFolder.getName());
         }else{
             getSupportActionBar().setTitle(R.string.home_item_music_folder);
         }

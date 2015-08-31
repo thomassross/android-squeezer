@@ -183,8 +183,8 @@ public class SongListActivity extends BaseListActivity<Song>
             // set the selection to the item with the identifier 11
             navigationDrawer.setSelection(1, false);
         }
-        getSupportActionBar().setTitle(R.string.home_item_songs);
 
+        getSupportActionBar().setTitle(R.string.home_item_songs);
         // Set the album header.
         if (album != null) {
             ImageView artwork = (ImageView) findViewById(R.id.album);
@@ -215,9 +215,13 @@ public class SongListActivity extends BaseListActivity<Song>
                     v.showContextMenu();
                 }
             });
-        } else
-        if (artist != null) {
+            getSupportActionBar().setTitle(R.string.home_item_album);
+        } else if (artist != null) {
             getSupportActionBar().setTitle( artist.getName());
+        }else if (genre != null) {
+            getSupportActionBar().setTitle(genre.getName());
+        }else if (year != null) {
+            getSupportActionBar().setTitle(year.getName());
         }
 
         // Adapter has been created (or restored from the fragment) by this point,

@@ -18,7 +18,9 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -61,6 +63,21 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     private int currentPlaylistIndex;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+
+        NavigationDrawer(savedInstanceState);
+
+        getSupportActionBar().setTitle(R.string.menu_item_playlist);
+
+        navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
     /**
      * A list adapter that highlights the view that's currently playing.
