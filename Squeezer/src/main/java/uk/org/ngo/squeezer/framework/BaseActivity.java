@@ -621,6 +621,16 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                         return false;
                     }
                 })
+                .withOnDrawerNavigationListener(new Drawer.OnDrawerNavigationListener() {
+                    @Override
+                    public boolean onNavigationClickListener(View clickedView) {
+                        //this method is only called if the Arrow icon is shown. The hamburger is automatically managed by the MaterialDrawer
+                        //if the back arrow is shown. close the activity
+                        BaseActivity.this.finish();
+                        //return true if we have consumed the event
+                        return true;
+                    }
+                })
                 .withSavedInstance(savedInstanceState)
                 .withShowDrawerOnFirstLaunch(true)
                 .build();
