@@ -21,6 +21,13 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp" />
+
     <ExpandableListView
         android:id="@+id/search_expandable_list"
         android:layout_width="fill_parent"

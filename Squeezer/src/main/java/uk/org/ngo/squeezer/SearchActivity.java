@@ -57,7 +57,7 @@ public class SearchActivity extends ItemListActivity {
         resultsExpandableListView.setOnChildClickListener(new OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
-                    int childPosition, long id) {
+                                        int childPosition, long id) {
                 searchResultsAdapter.onChildClick(groupPosition, childPosition);
                 return true;
             }
@@ -67,6 +67,13 @@ public class SearchActivity extends ItemListActivity {
         resultsExpandableListView.setOnScrollListener(new ScrollListener());
 
         handleIntent(getIntent());
+
+        NavigationDrawer(savedInstanceState);
+
+        getSupportActionBar().setTitle(R.string.menu_item_search_label);
+
+        navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
