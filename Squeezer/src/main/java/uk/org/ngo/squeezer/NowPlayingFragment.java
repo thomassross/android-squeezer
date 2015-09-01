@@ -251,6 +251,14 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View v;
+//        Log.d("check-element-play", String.valueOf(findViewById(R.id.controls_container)));
+//        Log.d("check-element-play", getActivity().getLocalClassName());
+//        Log.d("check-element-play", String.valueOf(getActivity().getLocalClassName() == "NowPlayingActivity"));
+//        Log.d("check-element-play", String.valueOf(getActivity().getLocalClassName().toLowerCase().contains("itemlist")));
+        Log.d("check-element-play", String.valueOf(!getActivity().getLocalClassName().toLowerCase().contains("itemlist")));
+        if(!getActivity().getLocalClassName().toLowerCase().contains("itemlist")){
+            mFullHeightLayout = true;
+        }
 
         if (mFullHeightLayout) {
             v = inflater.inflate(R.layout.now_playing_fragment_full, container, false);
@@ -273,6 +281,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 //                    v.showContextMenu();
 //                }
 //            });
+
         } else {
             v = inflater.inflate(R.layout.now_playing_fragment_mini, container, false);
 
