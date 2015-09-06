@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.framework;
 
 import android.os.Parcelable.Creator;
 import android.support.annotation.IntDef;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -302,17 +303,21 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
             viewHolder.text2.setVisibility(
                     (viewParams & VIEW_PARAM_TWO_LINE) != 0 ? View.VISIBLE : View.GONE);
 
-            if ((viewParams & VIEW_PARAM_CONTEXT_BUTTON) != 0) {
-                viewHolder.btnContextMenu.setVisibility(View.VISIBLE);
-                viewHolder.btnContextMenu.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        v.showContextMenu();
-                    }
-                });
-            } else {
-                viewHolder.btnContextMenu.setVisibility(View.GONE);
-            }
+//            if ((viewParams & VIEW_PARAM_CONTEXT_BUTTON) != 0) {
+//                viewHolder.btnContextMenu.setVisibility(View.VISIBLE);
+//                viewHolder.btnContextMenu.setOnClickListener(new OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Log.d("click-search", "baseitemview - getAdapterView | btnContextMenu");
+//                        v.showContextMenu();
+//                    }
+//                });
+//                /**
+//                 * TODO misschien een click voor context
+//                 */
+//            } else {
+//                viewHolder.btnContextMenu.setVisibility(View.GONE);
+//            }
 
             viewHolder.viewParams = viewParams;
         }

@@ -119,8 +119,30 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
             }
         });
 
+        mListView.setLongClickable(true);
+
         // Delegate context menu creation to the adapter.
         mListView.setOnCreateContextMenuListener(getItemAdapter());
+
+        mListView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                v.showContextMenu();
+                return false;
+            }
+        });
+
+//        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//
+//            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+//                                           int pos, long id) {
+//                arg0.showContextMenu();
+//
+//                Log.d("click search", "baselistactivity | oncreate mlistview");
+//                return true;
+//            }
+//
+//        });
     }
 
     public void onEventMainThread(HandshakeComplete event) {
