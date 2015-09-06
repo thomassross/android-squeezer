@@ -21,6 +21,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -73,9 +75,14 @@ public class DisconnectedActivity extends BaseActivity {
         mHeaderMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("click-search", "disconnectedactivity - onCreate | mHeaderMessage");
                 InfoDialog.show(getSupportFragmentManager(), R.string.login_failed_info_text);
             }
         });
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.disconnected_text);
     }
 
     /**

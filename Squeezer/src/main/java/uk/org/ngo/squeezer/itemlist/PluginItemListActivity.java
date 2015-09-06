@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -66,6 +67,15 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        NavigationDrawer(savedInstanceState);
+        navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(10, false);
+        }
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             plugin = extras.getParcelable(Plugin.class.getName());
@@ -96,7 +106,13 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
                     }
                 }
             });
+
+            getSupportActionBar().setTitle(plugin.getName());
+        }else{
+            getSupportActionBar().setTitle(R.string.home_item_my_apps);
         }
+
+
     }
 
     private void updateHeader(String headerText) {

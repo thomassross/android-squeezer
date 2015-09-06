@@ -33,6 +33,13 @@ public class NowPlayingActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.now_playing);
+
+
+        NavigationDrawer(savedInstanceState);
+        getSupportActionBar().setTitle(R.string.menu_item_search_label);
+
+        navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public static void show(Context context) {

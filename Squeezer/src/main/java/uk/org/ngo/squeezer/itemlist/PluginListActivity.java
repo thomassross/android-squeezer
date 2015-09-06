@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -86,12 +87,21 @@ public class PluginListActivity extends BaseListActivity<Plugin>
             searchButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d("click-search", "plugnilistActivity - onCreate | searchButton");
                     if (getService() != null) {
                         clearAndReOrderItems(searchCriteriaText.getText().toString());
                     }
                 }
             });
         }
+
+        NavigationDrawer(savedInstanceState);
+        if (savedInstanceState == null) {
+            // set the selection to the item with the identifier 11
+            navigationDrawer.setSelection(12, false);
+        }
+
+        getSupportActionBar().setTitle(R.string.home_item_my_apps);
     }
 
     private void updateHeader(String headerText) {
