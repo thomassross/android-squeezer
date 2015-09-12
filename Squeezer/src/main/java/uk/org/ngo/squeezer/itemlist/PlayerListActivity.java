@@ -110,6 +110,11 @@ public class PlayerListActivity extends ItemListActivity implements
         mResultsExpandableListView.setOnScrollListener(new ItemListActivity.ScrollListener());
 
         setIgnoreVolumeChange(true);
+
+        NavigationDrawer(savedInstanceState);
+        navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.home_item_songs);
     }
 
     @Override
