@@ -768,10 +768,23 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
          List<Player> players = service.getPlayers();
         if (_savedInstanceState == null) {
              for (int i = 0; i < players.size(); i++) {
-                 TextDrawable image = TextDrawable.builder()
-                 .buildRound(String.valueOf(players.get(i).getName().charAt(0)), Color.GREEN);
 
-                 IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(players.get(i).getName()).withEmail(players.get(i).getIp()).withIcon(image).withIdentifier((int) players.get(i).getIdAsLong());
+                 String name = players.get(i).getName();
+                 String ip = players.get(i).getIp();
+
+                 TextDrawable image = TextDrawable.builder()
+                         .beginConfig()
+                            .width(380)  // width in px
+                            .height(380) // height in px
+                         .endConfig()
+                         .buildRound(String.valueOf(name.charAt(0)), Color.GREEN);
+
+                 IProfile newProfile = new ProfileDrawerItem()
+                         .withNameShown(true)
+                         .withName(name)
+                         .withEmail(ip)
+                         .withIcon(image)
+                         .withIdentifier((int) players.get(i).getIdAsLong());
 
                  if (navigationDrawerHeader.getProfiles() != null) {
                     //we know that there are 2 setting elements. set the new profile above them ;)
