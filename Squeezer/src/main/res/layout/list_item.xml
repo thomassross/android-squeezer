@@ -16,61 +16,68 @@
  limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/media_item_height">
+<!--
+General layout for list items.
+
+The layout contains:
+
+ * @id/icon - SquareImageView, suitable for showing album artwork or other
+   icons.
+
+ * @id/text1 - TextView, main entry text.
+
+ * @id/text2 - TextView, detail entry text.
+
+ * @id/context_menu - ListImageButton, displaying an indicator for a drop
+   down menu.
+
+The individual visibility of the views is controlled by code, see
+BaseItemView#getAdapterView(View, ViewGroup, EnumSet<ViewParams>)
+for the implementation.
+
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:minHeight="72dp"
+    android:orientation="horizontal"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp">
 
     <uk.org.ngo.squeezer.widget.SquareImageView
         android:id="@+id/icon"
-
         android:layout_width="@dimen/album_art_icon_width"
         android:layout_height="@dimen/album_art_icon_height"
+        android:contentDescription="@string/app_name"
         android:maxHeight="@dimen/album_art_icon_height"
         android:maxWidth="@dimen/album_art_icon_width"
         android:minHeight="@dimen/album_art_icon_height"
         android:minWidth="@dimen/album_art_icon_width"
-        android:layout_marginRight="8dp"
-
-
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/media_item_icon_margin_start"
-        android:tintMode="src_in"
-        android:tint="@color/media_item_icon_not_playing"
-        android:contentDescription="@string/play_item"/>
+        android:layout_marginRight="8dp"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/media_item_text_margin_start"
-        android:layout_centerVertical="true"
+        android:layout_weight="1"
+        android:minHeight="48dp"
         android:orientation="vertical">
-
 
         <TextView
             android:id="@+id/text1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textAppearance="@style/SqueezerTextAppearance.ListItem.Primary"
-            android:textColor="?android:attr/textColorPrimary"/>
+            android:textAppearance="@style/SqueezerTextAppearance.ListItem.Primary"/>
 
         <TextView
             android:id="@+id/text2"
-            tools:text="John Doe, his brothers, his sisters, his pets and his more than amazing band"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"
-            />
+            android:textAppearance="@style/SqueezerTextAppearance.ListItem.Secondary"
+            android:visibility="visible"/>
     </LinearLayout>
 
-    <!--<include-->
-        <!--layout="@layout/context_menu_image_button"-->
-        <!--android:visibility="gone"/>-->
-</RelativeLayout>
+</LinearLayout>

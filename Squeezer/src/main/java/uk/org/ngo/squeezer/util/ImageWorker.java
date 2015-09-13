@@ -115,12 +115,19 @@ public abstract class ImageWorker {
      * @param imageView The ImageView to bind the downloaded image to
      */
     public void loadImage(final Object data, final ImageView imageView) {
+        Log.d("imagedebug-1", "imageworker");
+        Log.d("imagedebug-1", data.toString());
+
         if (data == null) {
             return;
         }
 
         int width = imageView.getWidth();
         int height = imageView.getHeight();
+
+        Log.d("imagedebug-1", "width: " + String.valueOf(width));
+        Log.d("imagedebug-1", "height: " + String.valueOf(height));
+
 
         // If the dimensions aren't known yet then the view hasn't been measured. Get a
         // ViewTreeObserver and listen for the PreDraw message. Using a GlobalLayoutListener
@@ -162,14 +169,19 @@ public abstract class ImageWorker {
         Bitmap bitmap = null;
         String memCacheKey = hashKeyForMemory(String.valueOf(data), width, height);
 
+        Log.d("imagedebug-1", "cache key:" + memCacheKey);
+
         if (mImageCache != null) {
             bitmap = mImageCache.getBitmapFromMemCache(memCacheKey);
         }
 
+        Log.d("imagedebug-1", String.valueOf((bitmap != null)));
+
+
         if (bitmap != null) {
             // Bitmap found in memory cache
             if (BuildConfig.DEBUG) {
-                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
+//                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
             }
             imageView.setImageBitmap(bitmap);
         } else if (cancelPotentialWork(data, imageView)) {
@@ -219,7 +231,7 @@ public abstract class ImageWorker {
         if (bitmap != null) {
             // Bitmap found in memory cache
             if (BuildConfig.DEBUG) {
-                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
+//                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
             }
             callback.process(data, bitmap);
         } else {
@@ -256,7 +268,7 @@ public abstract class ImageWorker {
         if (bitmap != null) {
             // Bitmap found in memory cache
             if (BuildConfig.DEBUG) {
-                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
+//                addDebugSwatch(new Canvas(bitmap), mCacheDebugColorMemory);
             }
             remoteViews.setImageViewBitmap(viewId, bitmap);
             nm.notify(notificationId, notification);
@@ -307,6 +319,8 @@ public abstract class ImageWorker {
     }
 
     /**
+     * TODOME oplossen debug modus tijdelijk de functie aanroep weggehaald
+     *
      * Adds a debug swatch to a canvas. The marker is a triangle pointing north-west
      * on the top left corner, the edges are 25% of the canvas' width and height.
      *
@@ -580,9 +594,9 @@ public abstract class ImageWorker {
 
             if (BuildConfig.DEBUG && scaledBitmap != null) {
                 if (loadedFromNetwork) {
-                    addDebugSwatch(new Canvas(scaledBitmap), mCacheDebugColorNetwork);
+//                    addDebugSwatch(new Canvas(scaledBitmap), mCacheDebugColorNetwork);
                 } else {
-                    addDebugSwatch(new Canvas(scaledBitmap), mCacheDebugColorDisk);
+//                    addDebugSwatch(new Canvas(scaledBitmap), mCacheDebugColorDisk);
                 }
 
             }
