@@ -45,6 +45,8 @@
         tools:src="@drawable/ic_launcher"
         android:layout_width="@dimen/playback_controls_albumart_size"
         android:layout_height="@dimen/playback_controls_albumart_size"
+        android:minWidth="@dimen/playback_controls_albumart_size"
+        android:minHeight="@dimen/playback_controls_albumart_size"
         android:layout_below="@id/progressbar"
         android:scaleType="centerCrop"
         android:contentDescription="@string/currently_playing_song"

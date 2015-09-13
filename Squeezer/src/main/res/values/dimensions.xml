@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Icons in list rows. -->
-    <dimen name="album_art_icon_width">48dp</dimen>
-    <dimen name="album_art_icon_height">48dp</dimen>
+    <dimen name="album_art_icon_width">40dp</dimen>
+    <dimen name="album_art_icon_height">40dp</dimen>
 
     <!-- Icons in list headers. -->
     <dimen name="album_art_large_icon_width">96dp</dimen>
