@@ -58,6 +58,8 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
     private String search;
 
+    private String TAG_search = "search";
+
     @Override
     public ItemView<PluginItem> createItemView() {
         return new PluginItemView(this);
@@ -66,7 +68,6 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         NavigationDrawer(savedInstanceState);
         navigationDrawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -80,6 +81,12 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         if (extras != null) {
             plugin = extras.getParcelable(Plugin.class.getName());
             parent = extras.getParcelable(PluginItem.class.getName());
+
+            if (extras.containsKey(TAG_search)) {
+                search = extras.getString(TAG_search);
+                clearAndReOrderItems(extras.getString(TAG_search));
+            }
+
             findViewById(R.id.search_view).setVisibility(
                     plugin.isSearchable() ? View.VISIBLE : View.GONE);
 
@@ -101,6 +108,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
             searchButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d("click-search", "pluginitemlistActivity - onCreate | searchButton");
                     if (getService() != null) {
                         clearAndReOrderItems(searchCriteriaText.getText().toString());
                     }
@@ -119,6 +127,10 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 //        TextView header = (TextView) findViewById(R.id.header);
 //        header.setText(headerText);
 //        header.setVisibility(View.VISIBLE);
+        if(search != ""){
+            headerText = headerText + ": " + search;
+        }
+
         getSupportActionBar().setTitle(headerText);
     }
 
@@ -158,6 +170,15 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         intent.putExtra(plugin.getClass().getName(), plugin);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    public void show(PluginItem pluginItem, String searchQuery) {
+        final Intent intent = new Intent(this, PluginItemListActivity.class);
+        intent.putExtra(plugin.getClass().getName(), plugin);
+        intent.putExtra(pluginItem.getClass().getName(), pluginItem);
+        intent.putExtra(TAG_search, searchQuery);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     @Override

@@ -16,10 +16,14 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import uk.org.ngo.squeezer.R;
@@ -33,6 +37,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
 
     public PluginItemView(PluginItemListActivity activity) {
         super(activity);
+
         mActivity = activity;
 
         setViewParams(VIEW_PARAM_ICON | VIEW_PARAM_CONTEXT_BUTTON);
@@ -42,11 +47,9 @@ public class PluginItemView extends BaseItemView<PluginItem> {
     @Override
     public void bindView(View view, PluginItem item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-
         viewHolder.text1.setText(item.getName());
-
         // Show/hide the context menu if this item is playable.
-        viewHolder.btnContextMenu.setVisibility(item.isAudio() ? View.VISIBLE : View.GONE);
+//        viewHolder.btnContextMenu.setVisibility(item.isAudio() ? View.VISIBLE : View.GONE);
 
         // If the item has an image, then fetch and display it
         if (item.getImage() != null) {
@@ -74,22 +77,50 @@ public class PluginItemView extends BaseItemView<PluginItem> {
 
     @Override
     public String getQuantityString(int quantity) {
+        Log.d("flow" , "pluginitemview | getQuantityString");
         return null;
     }
 
     @Override
     public boolean isSelectable(PluginItem item) {
+        Log.d("flow" , "pluginitemview | isSelectable");
         return item.isHasitems();
     }
 
     @Override
-    public void onItemSelected(int index, PluginItem item) {
-        mActivity.show(item);
+    public void onItemSelected(int index, final PluginItem item) {
+        Log.d("flow" , "pluginitemview | onItemSelected");
+        //TODOme controleren op type search en dan popup tonen voor zoekvraag die ook mee posten naar de show
+        if(item.getType().toString().toLowerCase().contains("search")){
+            Log.d("click-item","search item");
+            AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
+
+            final EditText edittext= new EditText(mActivity);
+            alert.setMessage("Enter Your Message");
+            alert.setTitle("Enter Your Title");
+            alert.setView(edittext);
+            alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String YouEditTextValue = String.valueOf(edittext.getText());
+                    Log.d("search-text", YouEditTextValue);
+                    mActivity.show(item, YouEditTextValue);
+                }
+            });
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+
+            alert.show();
+        }else{
+            mActivity.show(item);
+        }
     }
 
-    // XXX: Make this a menu resource.
+    // : Make this a menu resource.
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        Log.d("flow" , "pluginitemview | onCreateContextMenu");
         if (((PluginItem) menuInfo.item).isAudio()) {
             super.onCreateContextMenu(menu, v, menuInfo);
 
@@ -101,6 +132,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
 
     @Override
     public boolean doItemContext(MenuItem menuItem, int index, PluginItem selectedItem) {
+        Log.d("flow" , "pluginitemview | doItemContext");
         switch (menuItem.getItemId()) {
             case R.id.play_now:
                 if (mActivity.play(selectedItem)) {
