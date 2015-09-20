@@ -24,8 +24,10 @@ package uk.org.ngo.squeezer;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,6 +35,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -69,6 +72,7 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
     private final ImageView mLargeStreamIcon;
 
     private final SeekBar mSeekbar;
+    private final View mLayout;
 
     @SuppressLint({"InflateParams"}) // OK, as view is passed to Dialog.setView()
     public VolumePanel(BaseActivity activity) {
@@ -84,6 +88,10 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
                 return false;
             }
         });
+
+        mLayout = (LinearLayout) mView.findViewById(R.id.volume_adjust_root);
+
+        Configuration configuration = activity.getResources().getConfiguration();
 
         mMessage = (TextView) mView.findViewById(R.id.message);
         mAdditionalMessage = (TextView) mView.findViewById(R.id.additional_message);
