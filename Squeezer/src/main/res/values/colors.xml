@@ -36,4 +36,8 @@
 
     <color name="media_item_icon_not_playing">#ccc</color>
     <color name="bt_accent">#00B8D4</color>
+
+    <color name="squeezer_main">#008E8A</color>
+    <color name="squeezer_main_dark">#003A38</color>
+    <color name="squeezer_second">#CC4C1A</color>
 </resources>

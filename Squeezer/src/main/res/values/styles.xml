@@ -19,6 +19,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Base application theme. -->
     <style name="AppTheme" parent="MaterialDrawerTheme.TranslucentStatus">
+        <item name="colorPrimary">@color/squeezer_main</item>
+        <item name="colorPrimaryDark">@color/squeezer_main_dark</item>
+        <item name="colorAccent">@color/squeezer_second</item>
+
         <item name="ic_action_av_connect">@drawable/presence_online</item>
         <item name="ic_action_av_next">@drawable/ic_action_next</item>
         <item name="ic_action_av_pause">@drawable/ic_action_pause</item>
@@ -50,7 +54,12 @@
         <item name="floatLabelColor">@color/float_label_dark</item>
     </style>
 
-    <style name="AppTheme.Light.DarkActionBar" parent="MaterialDrawerTheme.TranslucentStatus">
+    <style name="AppTheme.Light.DarkActionBar" parent="MaterialDrawerTheme.Light.TranslucentStatus">
+        <item name="colorPrimary">@color/squeezer_main</item>
+        <item name="colorPrimaryDark">@color/squeezer_main_dark</item>
+        <item name="colorAccent">@color/squeezer_second</item>
+
+
         <item name="ic_action_av_connect">@drawable/presence_online</item>
         <item name="ic_action_av_next">@drawable/ic_action_av_next_holo_light</item>
         <item name="ic_action_av_pause">@drawable/ic_action_av_pause_holo_light</item>
