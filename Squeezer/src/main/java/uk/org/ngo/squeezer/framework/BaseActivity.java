@@ -777,7 +777,7 @@ public abstract class BaseActivity extends AppCompatActivity implements HasUiThr
                             .width(380)  // width in px
                             .height(380) // height in px
                          .endConfig()
-                         .buildRound(String.valueOf(name.charAt(0)), Color.GREEN);
+                         .buildRound(String.valueOf(name.charAt(0)), R.color.squeezer_main);
 
                  IProfile newProfile = new ProfileDrawerItem()
                          .withNameShown(true)
