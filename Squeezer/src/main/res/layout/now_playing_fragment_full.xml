@@ -25,6 +25,13 @@
     android:background="@color/black"
     android:fitsSystemWindows="true">
 
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="?attr/colorPrimary"-->
+        <!--android:elevation="4dp" />-->
+
     <uk.org.ngo.squeezer.widget.SquareImageView
         android:id="@+id/album"
         android:layout_width="fill_parent"
@@ -88,13 +95,25 @@
             android:textColor="#E5CCCCCC"
             style="@style/SqueezerWidget.NowPlaying.ArtistName"/>
 
+        <!--<uk.org.ngo.squeezer.widget.ListItemImageButton-->
+            <!--android:id="@+id/context_menu"-->
+            <!--android:layout_width="48dp"-->
+            <!--android:layout_height="48dp"-->
+            <!--android:layout_alignBottom="@+id/artistname"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:background="@drawable/list_selector_holo_dark"-->
+            <!--android:contentDescription="@string/app_name"-->
+            <!--android:minWidth="48dp"-->
+            <!--android:visibility="gone"-->
+            <!--android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"/>-->
+
         <LinearLayout
             android:id="@+id/controllers"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:visibility="invisible">
+            android:visibility="visible">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -140,6 +159,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp">
 
+                <ImageButton
+                    android:id="@+id/shuffle"
+                    style="@style/SqueezerWidget.MediaButton.Shuffle"/>
+
                 <uk.org.ngo.squeezer.widget.RepeatingImageButton
                     android:id="@+id/prev"
                     android:layout_width="0dp"
@@ -170,6 +193,10 @@
                     android:contentDescription="@string/skip_next"
                     style="@style/SqueezerWidget.MediaButton.Next"/>
 
+                <ImageButton
+                    android:id="@+id/repeat"
+                    style="@style/SqueezerWidget.MediaButton.Repeat"/>
+                <!-- -->
             </LinearLayout>
 
         </LinearLayout>
@@ -195,37 +222,7 @@
         android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-    <!--<uk.org.ngo.squeezer.widget.ListItemImageButton-->
-        <!--android:id="@+id/context_menu"-->
-        <!--android:layout_width="48dp"-->
-        <!--android:layout_height="48dp"-->
-        <!--android:layout_alignBottom="@+id/artistname"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_below="@id/track_wrapper"-->
-        <!--android:background="@drawable/list_selector_holo_dark"-->
-        <!--android:contentDescription="@string/app_name"-->
-        <!--android:minWidth="48dp"-->
-        <!--android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"/>-->
 
-    <!--<LinearLayout-->
-        <!--android:id="@+id/media_buttons"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_below="@id/seekbar"-->
-        <!--android:gravity="center"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:paddingBottom="4dp"-->
-        <!--android:paddingRight="8dp">-->
-
-        <!--<ImageButton-->
-            <!--android:id="@+id/shuffle"-->
-            <!--style="@style/SqueezerWidget.MediaButton.Shuffle"/>-->
-
-        <!--<ImageButton-->
-            <!--android:id="@+id/repeat"-->
-            <!--style="@style/SqueezerWidget.MediaButton.Repeat"/>-->
-    <!--</LinearLayout>-->
 </RelativeLayout>
 
 
