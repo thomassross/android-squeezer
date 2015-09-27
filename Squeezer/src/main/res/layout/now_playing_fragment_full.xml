@@ -74,8 +74,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:visibility="visible">
+            android:layout_alignParentBottom="true">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -129,7 +128,13 @@
 
                 <ImageButton
                     android:id="@+id/shuffle"
-                    style="@style/SqueezerWidget.MediaButton.Shuffle"/>
+                    android:src="@drawable/btn_shuffle_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/skip_prev"
+                    style="@style/SqueezerWidget.MediaButton.Previous"/>
 
                 <uk.org.ngo.squeezer.widget.RepeatingImageButton
                     android:id="@+id/prev"
@@ -163,7 +168,14 @@
 
                 <ImageButton
                     android:id="@+id/repeat"
-                    style="@style/SqueezerWidget.MediaButton.Repeat"/>
+                    android:src="@drawable/btn_repeat_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/skip_next"
+                    style="@style/SqueezerWidget.MediaButton.Next"
+                    />
                 <!-- -->
             </LinearLayout>
 
