@@ -53,7 +53,7 @@ dependencies {
     // JVM tests
     testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services-cast:6.5.87'
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:23.0.0'
     compile 'com.android.support:mediarouter-v7:21.0.2'
     //    compile 'com.google.sample.castcompanionlibrary'
     //    compile (name:'CastCompanionLibrary-debug', ext:'aar')
@@ -67,6 +67,11 @@ dependencies {
     compile 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
 
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+
+
+//
+    compile 'com.android.support:design:23.0.0'
+    compile 'com.android.support:recyclerview-v7:23.0.0'
 }
 
 android {
