@@ -17,6 +17,9 @@
   -->
 
 <resources>
+    <color name="color_red">#F44336</color>
+    <color name="blue_color">#218eed</color>
+
     <color name="black">#000000</color>
     <color name="panel_background_color">#444</color>
     <color name="alarm_list_background">#1c1e20</color>

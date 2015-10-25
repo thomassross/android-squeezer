@@ -414,8 +414,10 @@ of your accepting any such warranty or additional liability.&lt;/p&gt;</string>
 
     <string name="home_item_artists">Artists</string>
     <string name="home_item_albums">Albums</string>
+    <string name="home_item_album">Album</string>
     <string name="home_item_songs">Songs</string>
     <string name="home_item_genres">Genres</string>
+    <string name="home_item_genre">Genre </string>
     <string name="home_item_years">Years</string>
     <string name="home_item_new_music">New Music</string>
     <string name="home_item_music_folder">Music Folder</string>
