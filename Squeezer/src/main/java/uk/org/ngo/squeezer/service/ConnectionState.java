@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
-import de.greenrobot.event.EventBus;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.service.event.ConnectionChanged;
 
@@ -108,7 +107,7 @@ public class ConnectionState {
 
     private final AtomicReference<String[]> mediaDirs = new AtomicReference<String[]>();
 
-    void disconnect(EventBus eventBus, boolean loginFailed) {
+    void disconnect(SqueezeService.EventBus eventBus, boolean loginFailed) {
         Log.v(TAG, "disconnect" + (loginFailed ? ": authentication failure" : ""));
         currentConnectionGeneration.incrementAndGet();
         Socket socket = socketRef.get();
@@ -137,7 +136,7 @@ public class ConnectionState {
      * @param eventBus The eventbus to post the event to.
      * @param connectionState The new connection state.
      */
-    void setConnectionState(@NonNull EventBus eventBus,
+    void setConnectionState(@NonNull SqueezeService.EventBus eventBus,
             @ConnectionStates int connectionState) {
         Log.d(TAG, "Setting connection state to: " + connectionState);
         mConnectionState = connectionState;
@@ -233,7 +232,7 @@ public class ConnectionState {
         return mConnectionState == CONNECTION_STARTED;
     }
 
-    void startListeningThread(@NonNull EventBus eventBus, @NonNull Executor executor, CliClient cli) {
+    void startListeningThread(@NonNull SqueezeService.EventBus eventBus, @NonNull Executor executor, CliClient cli) {
         Thread listeningThread = new ListeningThread(eventBus, executor, cli, socketRef.get(),
                 currentConnectionGeneration.incrementAndGet());
         listeningThread.start();
@@ -241,7 +240,7 @@ public class ConnectionState {
 
     private class ListeningThread extends Thread {
 
-        @NonNull private final EventBus mEventBus;
+        @NonNull private final SqueezeService.EventBus mEventBus;
 
         @NonNull private final Executor mExecutor;
 
@@ -251,7 +250,7 @@ public class ConnectionState {
 
         private final int generationNumber;
 
-        private ListeningThread(@NonNull EventBus eventBus, @NonNull Executor executor, CliClient cli, Socket socket, int generationNumber) {
+        private ListeningThread(@NonNull SqueezeService.EventBus eventBus, @NonNull Executor executor, CliClient cli, Socket socket, int generationNumber) {
             mEventBus = eventBus;
             mExecutor = executor;
             this.cli = cli;
@@ -311,7 +310,7 @@ public class ConnectionState {
         }
     }
 
-    void startConnect(final SqueezeService service, @NonNull final EventBus eventBus,
+    void startConnect(final SqueezeService service, @NonNull final SqueezeService.EventBus eventBus,
                       @NonNull final Executor executor,
                       final CliClient cli, String hostPort, final String userName,
                       final String password) {
@@ -389,7 +388,7 @@ public class ConnectionState {
      * therefore a disconnect when handshake (the next step after authentication) is not completed,
      * is considered an authentication failure.
      */
-    void onCliPortConnectionEstablished(final EventBus eventBus, final CliClient cli, final String userName, final String password) {
+    void onCliPortConnectionEstablished(final SqueezeService.EventBus eventBus, final CliClient cli, final String userName, final String password) {
         setConnectionState(eventBus, ConnectionState.LOGIN_STARTED);
         cli.sendCommandImmediately("login " + Util.encode(userName) + " " + Util.encode(password));
     }

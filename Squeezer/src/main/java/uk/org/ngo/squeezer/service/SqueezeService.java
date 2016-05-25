@@ -43,6 +43,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import org.greenrobot.eventbus.EventBusBuilder;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +64,7 @@ import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.RandomplayActivity;
 import uk.org.ngo.squeezer.Squeezer;
+import uk.org.ngo.squeezer.SqueezerEventBusIndex;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.BaseActivity;
 import uk.org.ngo.squeezer.framework.FilterItem;
@@ -216,7 +219,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         setWifiLock(((WifiManager) getSystemService(Context.WIFI_SERVICE)).createWifiLock(
                 WifiManager.WIFI_MODE_FULL, "Squeezer_WifiLock"));
 
-        mEventBus.register(this, 1);  // Get events before other subscribers
+        mEventBus.register(this);  // Get events before other subscribers
         cli.initialize();
     }
 
@@ -326,6 +329,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * player didn't have a sleep duration set, and now does).
      * @param event
      */
+    @Subscribe(priority = 1)
     public void onEvent(PlayerStateChanged event) {
         updatePlayerSubscription(event.player, calculateSubscriptionTypeFor(event.player));
     }
@@ -335,6 +339,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * <p>
      * Updates the Wi-Fi lock and ongoing status notification as necessary.
      */
+    @Subscribe(priority = 1)
     public void onEvent(PlayStatusChanged event) {
         if (event.player.equals(mActivePlayer.get())) {
             updateWifiLock(event.player.getPlayerState().isPlaying());
@@ -663,6 +668,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         mNotifiedPlayerState = null;
     }
 
+    @Subscribe(sticky = true, priority = 1)
     public void onEvent(ConnectionChanged event) {
         if (event.connectionState == ConnectionState.DISCONNECTED) {
             mPlayers.clear();
@@ -673,17 +679,20 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
     }
 
+    @Subscribe(sticky = true, priority = 1)
     public void onEvent(HandshakeComplete event) {
         mHandshakeComplete = true;
         strings();
     }
 
+    @Subscribe(sticky = true, priority = 1)
     public void onEvent(MusicChanged event) {
         if (event.player.equals(mActivePlayer.get())) {
             updateOngoingNotification();
         }
     }
 
+    @Subscribe(priority = 1)
     public void onEvent(PlayersChanged event) {
         mPlayers.clear();
         mPlayers.putAll(event.players);
@@ -1670,54 +1679,63 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     }
 
     /**
-     * Calculate and set player subscription states every time a client of the bus
+     * Squeezer Eventbus.
+     * <p>
+     * Specialisation of {@link org.greenrobot.eventbus.EventBus} that calculates
+     * and sets player subscription states every time a client of the bus
      * un/registers.
      * <p>
      * For example, this ensures that if a new client subscribes and needs real
      * time updates, the player subscription states will be updated accordingly.
      */
-    class EventBus extends de.greenrobot.event.EventBus {
+    public class EventBus {
+        // EventBus uses the builder pattern, which makes it a pain to subclass.
+        // Instead of subclassing, keep a private instance of the bus, and forward
+        // method calls to it.
+        //
+        // This class deliberately does not extend org.greenrobot.eventbus.EventBus,
+        // as if it did, unimplemented methods in this class would call the superclass
+        // instance, which is a different bus.
+        private org.greenrobot.eventbus.EventBus mBus;
 
-        @Override
+        public EventBus() {
+            EventBusBuilder builder = org.greenrobot.eventbus.EventBus.builder();
+
+            // On API >= 9, use SqueezerEventBusIndex. On earlier API levels, this
+            // calls getDeclaredMethod(), which does not exist before API 9.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                builder.addIndex(new SqueezerEventBusIndex());
+            }
+
+            mBus = builder.build();
+        }
+
         public void register(Object subscriber) {
-            super.register(subscriber);
+            mBus.register(subscriber);
             updateAllPlayerSubscriptionStates();
         }
 
-        @Override
-        public void register(Object subscriber, int priority) {
-            super.register(subscriber, priority);
-            updateAllPlayerSubscriptionStates();
-        }
-
-        @Override
         public void post(Object event) {
             Log.v("EventBus", "post() " + event.getClass().getSimpleName() + ": " + event);
-            super.post(event);
+            mBus.post(event);
         }
 
-        @Override
         public void postSticky(Object event) {
             Log.v("EventBus", "postSticky() " + event.getClass().getSimpleName() + ": " + event);
-            super.postSticky(event);
+            mBus.postSticky(event);
         }
 
-        @Override
-        public void registerSticky(Object subscriber) {
-            super.registerSticky(subscriber);
-            updateAllPlayerSubscriptionStates();
-        }
-
-        @Override
-        public void registerSticky(Object subscriber, int priority) {
-            super.registerSticky(subscriber, priority);
-            updateAllPlayerSubscriptionStates();
-        }
-
-        @Override
         public synchronized void unregister(Object subscriber) {
-            super.unregister(subscriber);
+            mBus.unregister(subscriber);
             updateAllPlayerSubscriptionStates();
+        }
+
+        public boolean hasSubscriberForEvent(Class<?> eventClass) {
+            return mBus.hasSubscriberForEvent(eventClass);
+        }
+
+        public void removeAllStickyEvents() {
+            mBus.removeAllStickyEvents();
         }
     }
 }

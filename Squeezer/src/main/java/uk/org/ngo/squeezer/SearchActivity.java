@@ -25,6 +25,9 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ExpandableListView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +95,7 @@ public class SearchActivity extends ItemListActivity {
      * the server.  Only do this after the handshake has completed.  When done, perform the
      * search.
      */
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(HandshakeComplete event) {
         resultsExpandableListView.setAdapter(searchResultsAdapter);
         doSearch();

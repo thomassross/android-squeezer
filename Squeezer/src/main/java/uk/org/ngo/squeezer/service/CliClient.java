@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Pattern;
 
-import de.greenrobot.event.EventBus;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Squeezer;
 import uk.org.ngo.squeezer.Util;
@@ -98,7 +97,7 @@ class CliClient implements IClient {
     private String mUrlPrefix;
 
     /** Shared event bus for status changes. */
-    @NonNull private final EventBus mEventBus;
+    @NonNull private final SqueezeService.EventBus mEventBus;
 
     /** Executor for off-main-thread work. */
     @NonNull
@@ -362,7 +361,7 @@ class CliClient implements IClient {
 
     private final int pageSize = Squeezer.getContext().getResources().getInteger(R.integer.PageSize);
 
-    CliClient(@NonNull EventBus eventBus) {
+    CliClient(@NonNull SqueezeService.EventBus eventBus) {
         mEventBus = eventBus;
     }
 

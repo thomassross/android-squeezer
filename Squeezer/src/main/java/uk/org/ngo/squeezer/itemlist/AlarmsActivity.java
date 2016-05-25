@@ -32,6 +32,9 @@ import com.android.datetimepicker.time.RadialPickerLayout;
 import com.android.datetimepicker.time.TimePickerDialog;
 import com.google.common.collect.ImmutableList;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -204,6 +207,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         }
     };
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlayerPrefReceived event) {
         if (!event.player.equals(getService().getActivePlayer())) {
             return;
@@ -230,6 +234,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         }
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlayersChanged event) {
         // Only include players that are connected to the server.
         ArrayList<Player> connectedPlayers = new ArrayList<>();

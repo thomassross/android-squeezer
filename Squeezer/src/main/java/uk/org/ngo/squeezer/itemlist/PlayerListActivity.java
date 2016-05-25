@@ -27,6 +27,9 @@ import android.widget.ExpandableListView;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,12 +150,14 @@ public class PlayerListActivity extends ItemListActivity implements
         // initially connected to the server.
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(HandshakeComplete event) {
         if (mResultsExpandableListView.getExpandableListAdapter() == null)
             mResultsExpandableListView.setAdapter(mResultsAdapter);
         updateAndExpandPlayerList();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlayerStateChanged event) {
         if (!mTrackingTouch) {
             updateAndExpandPlayerList();
@@ -161,6 +166,7 @@ public class PlayerListActivity extends ItemListActivity implements
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlayerVolume event) {
         if (!mTrackingTouch) {
             mResultsAdapter.notifyDataSetChanged();

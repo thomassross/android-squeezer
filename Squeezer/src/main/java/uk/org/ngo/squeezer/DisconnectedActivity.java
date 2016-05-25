@@ -24,6 +24,9 @@ import android.support.annotation.IntDef;
 import android.view.View;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -161,6 +164,7 @@ public class DisconnectedActivity extends BaseActivity {
         fragment.startVisibleConnection();
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(HandshakeComplete event) {
         // The user requested a connection to the server, which succeeded.  There's
         // no prior activity to go to, so launch HomeActivity, with flags to

@@ -21,7 +21,6 @@ import android.support.annotation.Nullable;
 
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
 import uk.org.ngo.squeezer.framework.FilterItem;
 import uk.org.ngo.squeezer.framework.PlaylistItem;
 import uk.org.ngo.squeezer.itemlist.IServiceItemListCallback;
@@ -43,7 +42,8 @@ public interface ISqueezeService {
     /**
      * @return the EventBus the activity posts events to.
      */
-    @NonNull EventBus getEventBus();
+    @NonNull
+    SqueezeService.EventBus getEventBus();
 
     // Instructing the service to connect to the SqueezeCenter server:
     // hostPort is the port of the CLI interface.

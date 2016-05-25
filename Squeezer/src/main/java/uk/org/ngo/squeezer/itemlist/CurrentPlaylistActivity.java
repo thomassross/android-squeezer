@@ -28,6 +28,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 import java.util.Map;
 
@@ -258,11 +261,13 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
+    @Subscribe(sticky = true)
     public void onEvent(HandshakeComplete event) {
         super.onEvent(event);
         player = getService().getActivePlayer();
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(MusicChanged event) {
         if (event.player.equals(getService().getActivePlayer())) {
             Log.d(getTag(), "onMusicChanged " + event.playerState.getCurrentSong());
@@ -271,6 +276,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
         }
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlayersChanged event) {
         supportInvalidateOptionsMenu();
 
@@ -288,11 +294,13 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
         }
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlaylistTracksAdded event) {
         clearAndReOrderItems();
         getItemAdapter().notifyDataSetChanged();
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEventMainThread(PlaylistTracksDeleted event) {
         // TODO: Investigate feasibility of deleting single items from the adapter.
         clearAndReOrderItems();
