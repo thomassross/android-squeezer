@@ -23,7 +23,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -401,9 +400,9 @@ class CliClient implements IClient {
 
         // Make sure that username/password do not make it to Crashlytics.
         if (commands[0].startsWith("login ")) {
-            Crashlytics.setString("lastCommands", "login [username] [password]");
+            Util.crashlyticsSetString("lastCommands", "login [username] [password]");
         } else {
-            Crashlytics.setString("lastCommands", formattedCommands);
+            Util.crashlyticsSetString("lastCommands", formattedCommands);
         }
 
         writer.println(formattedCommands);
@@ -1016,11 +1015,14 @@ class CliClient implements IClient {
             public void handle(List<String> tokens) {
                 Timber.i("Version received: %s", tokens);
                 mUrlPrefix = "http://" + getCurrentHost() + ":" + getHttpPort();
-                Crashlytics.setString("server_version", tokens.get(1));
+                String version = tokens.get(1);
+                connectionState.setServerVersion(version);
+                Util.crashlyticsSetString("server_version", version);
 
                 mEventBus.postSticky(new HandshakeComplete(
                         connectionState.canFavorites(), connectionState.canMusicfolder(),
-                        connectionState.canMusicfolder(), connectionState.canRandomplay()));
+                        connectionState.canMusicfolder(), connectionState.canRandomplay(),
+                        version));
             }
         });
 
@@ -1170,6 +1172,7 @@ class CliClient implements IClient {
                     boolean changedPower = playerState.setPoweredOn(Util.parseDecimalIntOrZero(tokenMap.get("power")) == 1);
                     boolean changedShuffleStatus = playerState.setShuffleStatus(tokenMap.get("playlist shuffle"));
                     boolean changedRepeatStatus = playerState.setRepeatStatus(tokenMap.get("playlist repeat"));
+                    boolean changedCurrentPlaylistTracksNum = playerState.setCurrentPlaylistTracksNum(Util.parseDecimalIntOrZero(tokenMap.get("playlist_tracks")));
                     boolean changedCurrentPlaylistIndex = playerState.setCurrentPlaylistIndex(Util.parseDecimalIntOrZero(tokenMap.get("playlist_cur_index")));
                     boolean changedCurrentPlaylist = playerState.setCurrentPlaylist(tokenMap.get("playlist_name"));
                     boolean changedSleep = playerState.setSleep(Util.parseDecimalIntOrZero(tokenMap.get("will_sleep_in")));
@@ -1262,7 +1265,6 @@ class CliClient implements IClient {
 
                     @Player.Pref.Name String pref = tokens.get(3);
                     if (Player.Pref.VALID_PLAYER_PREFS.contains(pref)) {
-                        String value = Util.decode(tokens.get(4));
                         mEventBus.post(new PlayerPrefReceived(player, pref, Util.decode(tokens.get(4))));
                     }
                 }
@@ -1294,9 +1296,9 @@ class CliClient implements IClient {
 
         // Make sure that username/password do not make it to Crashlytics.
         if (serverLine.startsWith("login ")) {
-            Crashlytics.setString("lastReceivedLine", "login [username] [password]");
+            Util.crashlyticsSetString("lastReceivedLine", "login [username] [password]");
         } else {
-            Crashlytics.setString("lastReceivedLine", serverLine);
+            Util.crashlyticsSetString("lastReceivedLine", serverLine);
         }
 
         List<String> tokens = Arrays.asList(serverLine.split(" "));
@@ -1379,17 +1381,16 @@ class CliClient implements IClient {
         String notification = tokens.get(2);
         if ("newsong".equals(notification)) {
             sendCommand(tokens.get(0), "status - 1 tags:" + SqueezeService.SONGTAGS);
-        } else if ("play".equals(notification)) {
-            updatePlayStatus(Util.decode(tokens.get(0)), PlayerState.PLAY_STATE_PLAY);
-        } else if ("stop".equals(notification)) {
-            updatePlayStatus(Util.decode(tokens.get(0)), PlayerState.PLAY_STATE_STOP);
-        } else if ("pause".equals(notification)) {
-            updatePlayStatus(Util.decode(tokens.get(0)), parsePause(tokens.size() >= 4 ? tokens.get(3) : null));
         } else if ("addtracks".equals(notification)) {
             mEventBus.postSticky(new PlaylistTracksAdded());
         } else if ("delete".equals(notification)) {
             mEventBus.postSticky(new PlaylistTracksDeleted());
         }
+
+        // Ignore "play", "stop", "pause" playlist notifications that come through here,
+        // as they come through every time a track changes, causing the notification to
+        // briefly disappear and re-appear. The top level "play", "stop", and "pause"
+        // messages don't have this problem.
     }
 
     private void updatePlayerVolume(String playerId, int newVolume) {
@@ -1506,6 +1507,10 @@ class CliClient implements IClient {
 
     String[] getMediaDirs() {
         return connectionState.getMediaDirs();
+    }
+
+    public String getServerVersion() {
+        return connectionState.getServerVersion();
     }
 
     public String getPreferredAlbumSort() {
