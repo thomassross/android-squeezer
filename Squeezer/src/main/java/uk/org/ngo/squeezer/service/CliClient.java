@@ -1256,14 +1256,14 @@ class CliClient implements IClient {
             @Override
             public void handle(List<String> tokens) {
                 Log.v(TAG, "Prefset received: " + tokens);
-                if (tokens.size() == 5 && tokens.get(2).equals("server")) {
+                if (tokens.size() == 5 && "server".equals(tokens.get(2))) {
                     String playerId = Util.decode(tokens.get(0));
                     Player player = mPlayers.get(playerId);
                     if (player == null) {
                         return;
                     }
 
-                    if (tokens.get(3).equals("volume")) {
+                    if ("volume".equals(tokens.get(3))) {
                         updatePlayerVolume(playerId, Util.parseDecimalIntOrZero(tokens.get(4)));
                     }
 
