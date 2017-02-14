@@ -72,7 +72,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     public boolean isSelectable(MusicFolderItem item) {
         if ("track".equals(item.getType())) {
             return super.isSelectable(item);
-        } else
+        }
         if ("folder".equals(item.getType())) {
             return true;
         }

@@ -222,7 +222,8 @@ public final class DiskLruCache implements Closeable {
             int c = in.read();
             if (c == -1) {
                 throw new EOFException();
-            } else if (c == '\n') {
+            }
+            if (c == '\n') {
                 break;
             }
 

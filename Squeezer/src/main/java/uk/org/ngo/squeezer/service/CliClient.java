@@ -1381,7 +1381,8 @@ class CliClient implements IClient {
         if ("0".equals(explicitPause)) {
             return PlayerState.PLAY_STATE_PLAY;
             //updatePlayStatus(PlayerState.PlayStatus.play);
-        } else if ("1".equals(explicitPause)) {
+        }
+        if ("1".equals(explicitPause)) {
             return PlayerState.PLAY_STATE_PAUSE;
             //updatePlayStatus(PlayerState.PlayStatus.pause);
         }

@@ -84,7 +84,8 @@ public abstract class BaseViewDialog<
                                        textView.setText(listLayout.getText(getActivity()));
                                        textView.setChecked(listLayout == activity.getListLayout());
                                        return textView;
-                                   } else if (position > positionSortLabel) {
+                                   }
+                                   if (position > positionSortLabel) {
                                        CheckedTextView textView = (CheckedTextView) getActivity()
                                                .getLayoutInflater()
                                                .inflate(android.R.layout.select_dialog_singlechoice,
