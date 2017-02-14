@@ -38,6 +38,7 @@ public class SpinnerItemAdapter<T extends Item> extends ItemAdapter<T> implement
         mItemView = itemView;
     }
 
+    @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         T item = getItem(position);
         if (item != null) {

@@ -107,10 +107,12 @@ public class Alarm extends Item {
     }
 
     public static final Creator<Alarm> CREATOR = new Creator<Alarm>() {
+        @Override
         public Alarm[] newArray(int size) {
             return new Alarm[size];
         }
 
+        @Override
         public Alarm createFromParcel(Parcel source) {
             return new Alarm(source);
         }
@@ -125,6 +127,7 @@ public class Alarm extends Item {
         url = source.readString();
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeInt(tod);

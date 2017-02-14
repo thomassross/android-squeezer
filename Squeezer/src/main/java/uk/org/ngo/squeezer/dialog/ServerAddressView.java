@@ -108,6 +108,7 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
                 startNetworkScan(context);
                 Button scanButton = (Button) findViewById(R.id.scan_button);
                 scanButton.setOnClickListener(new OnClickListener() {
+                    @Override
                     public void onClick(View v) {
                         startNetworkScan(context);
                     }
@@ -159,6 +160,7 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
      * Called when server scanning has finished.
      * @param serverMap Discovered servers, key is the server name, value is the IP address.
      */
+    @Override
     public void onScanFinished(TreeMap<String, String> serverMap) {
         mScanResults.setVisibility(VISIBLE);
         mServerName.setVisibility(GONE);
@@ -243,11 +245,13 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
      * Inserts the selected address in to the edit text widget.
      */
     private class MyOnItemSelectedListener implements OnItemSelectedListener {
+        @Override
         public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
             String serverAddress = mDiscoveredServers.get(parent.getItemAtPosition(pos).toString());
             setServerAddress(serverAddress);
         }
 
+        @Override
         public void onNothingSelected(AdapterView<?> parent) {
             // Do nothing.
         }

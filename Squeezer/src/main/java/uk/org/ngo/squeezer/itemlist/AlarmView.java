@@ -83,6 +83,7 @@ public class AlarmView extends BaseItemView<Alarm> {
         mDensity = mResources.getDisplayMetrics().density;
     }
 
+    @Override
     public String getQuantityString(int quantity) {
         return null;
     }

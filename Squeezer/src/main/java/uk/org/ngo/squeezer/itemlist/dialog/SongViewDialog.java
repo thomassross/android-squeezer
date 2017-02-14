@@ -69,6 +69,7 @@ public class SongViewDialog extends BaseViewDialog<Song, SongViewDialog.SongList
         /** Supported since (server version) */
         private final String since;
 
+        @Override
         public boolean can(String version) {
             return (version.compareTo(since) >= 0);
         }

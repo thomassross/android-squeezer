@@ -57,10 +57,12 @@ public class AlarmPlaylist extends Item {
     }
 
     public static final Creator<AlarmPlaylist> CREATOR = new Creator<AlarmPlaylist>() {
+        @Override
         public AlarmPlaylist[] newArray(int size) {
             return new AlarmPlaylist[size];
         }
 
+        @Override
         public AlarmPlaylist createFromParcel(Parcel source) {
             return new AlarmPlaylist(source);
         }
@@ -73,6 +75,7 @@ public class AlarmPlaylist extends Item {
         singleton = (source.readInt() == 1);
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(title);

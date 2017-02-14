@@ -71,6 +71,7 @@ public class SqueezeServiceTest extends ServiceTestCase<SqueezeService> {
         mService.getEventBus().register(this);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         mService.getEventBus().unregister(this);
         shutdownService();

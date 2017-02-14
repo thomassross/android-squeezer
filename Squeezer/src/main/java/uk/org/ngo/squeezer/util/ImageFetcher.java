@@ -87,6 +87,7 @@ public class ImageFetcher extends ImageWorker {
      *
      * @return Undecoded bytes for the requested bitmap, null if downloading failed.
      */
+    @Override
     @Nullable
     protected byte[] processBitmap(BitmapWorkerTaskParams params) {
         String data = params.data.toString();

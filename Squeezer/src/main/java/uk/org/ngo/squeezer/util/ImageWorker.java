@@ -687,6 +687,7 @@ public abstract class ImageWorker {
             }
         }
 
+        @Override
         protected boolean shouldCancel() {
             return super.shouldCancel() && getAttachedImageView() == null;
         }

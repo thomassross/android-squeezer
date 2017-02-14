@@ -441,6 +441,7 @@ class CliClient implements IClient {
      *
      * @param command The command to send
      */
+    @Override
     public void sendPlayerCommand(final Player player, final String command) {
         sendCommand(Util.encode(player.getId()) + " " + command);
     }
