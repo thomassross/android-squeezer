@@ -35,7 +35,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 /**
  * Display a list of Squeezebox music folders.
  * <p>
- * If the <code>extras</code> bundle contains a key that matches <code>MusicFolder.class.getName()</code>
+ * If the <code>extras</code> bundle contains a key that matches {@code MusicFolder.class.getName()}
  * the value is assumed to be an instance of that class, and that folder will be displayed.
  * <p>
  * Otherwise the root music folder is shown.
@@ -119,7 +119,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
     }
 
     /**
-     * Fetch the contents of a folder. Fetches the contents of <code>mFolder</code> if non-null, the
+     * Fetch the contents of a folder. Fetches the contents of {@code mFolder} if non-null, the
      * root folder otherwise.
      *
      * @param start Where in the list of folders to start fetching.

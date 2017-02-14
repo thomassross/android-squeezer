@@ -122,13 +122,13 @@ class CliClient implements IClient {
      * <p>
      * Extended queries have the following structure:
      * <p>
-     * <code>[&lt;playerid>] &lt;command> &lt;start> &lt;itemsPerResponse> &lt;tagged-params> ...</code>
+     * {@code [<playerid>] <command> <start> <itemsPerResponse> <tagged-params> ...}
      * <ul>
-     *     <li><code>&lt;playerid></code> - unique player identifier</li>
-     *     <li><code>&lt;command></code> - command to send</li>
-     *     <li><code>&lt;start></code> - 0-based index of the first item to return</li>
-     *     <li><code>&lt;itemsPerResponse></code> - number of items to return per chunk</li>
-     *     <li><code>&lt;tagged-params></code> - one or more <code>tag:value</code> pairs</li>
+     *     <li>{@code <playerid>} - unique player identifier</li>
+     *     <li>{@code <command>} - command to send</li>
+     *     <li>{@code <start>} - 0-based index of the first item to return</li>
+     *     <li>{@code <itemsPerResponse>} - number of items to return per chunk</li>
+     *     <li>{@code <tagged-params>} - one or more {@code tag:value} pairs</li>
      * </ul>
      */
     static class ExtendedQueryFormatCmd {
@@ -504,7 +504,7 @@ class CliClient implements IClient {
     /**
      * Send an asynchronous request to the SqueezeboxServer for the specified items.
      * <p>
-     * Items are requested in chunks of <code>R.integer.PageSize</code>, and returned
+     * Items are requested in chunks of {@code R.integer.PageSize}, and returned
      * to the caller via the specified callback.
      * <p>
      * If start is zero, this will order one item, to quickly learn the number of items
@@ -747,7 +747,7 @@ class CliClient implements IClient {
     private class ArtistListHandler extends BaseListHandler<Artist> {}
 
     /**
-     * Handler that adds <code>artwork_url</code> tags to items.
+     * Handler that adds {@code artwork_url} tags to items.
      */
     private class AlbumListHandler extends BaseListHandler<Album> {
         @Override
@@ -758,7 +758,7 @@ class CliClient implements IClient {
     }
 
     /**
-     * Handler that adds <code>download_url</code> tags to items.
+     * Handler that adds {@code download_url} tags to items.
      */
     private class MusicFolderListHandler extends BaseListHandler<MusicFolderItem> {
         @Override
@@ -769,7 +769,7 @@ class CliClient implements IClient {
     }
 
     /**
-     * Handler that adds <code>artwork_url</code> and <code>download_url</code> tags to items.
+     * Handler that adds <code>artwork_url</code> and {@code download_url} tags to items.
      */
     private class SongListHandler extends BaseListHandler<Song> {
         @Override
@@ -797,11 +797,11 @@ class CliClient implements IClient {
     }
 
     /**
-     * Adds a <code>artwork_url</code> entry for the item passed in.
+     * Adds a {@code artwork_url} entry for the item passed in.
      * <p>
-     * If an <code>artwork_url</code> entry already exists and is absolute it is preserved.
+     * If an {@code artwork_url} entry already exists and is absolute it is preserved.
      * If it exists but is relative it is canonicalised.  Otherwise it is synthesised from
-     * the <code>artwork_track_id</code> tag (if it exists) otherwise the item's <code>id</code>.
+     * the <code>artwork_track_id</code> tag (if it exists) otherwise the item's {@code id}.
      *
      * @param record The record to modify.
      */
@@ -837,7 +837,7 @@ class CliClient implements IClient {
     }
 
     /**
-     * Adds a <code>download_url</code> entry for the item passed in.
+     * Adds a {@code download_url} entry for the item passed in.
      *
      * @param record The record to modify.
      */
@@ -1011,7 +1011,7 @@ class CliClient implements IClient {
         });
         handlers.put("version", new CmdHandler() {
             /**
-             * Seeing the <code>version</code> result indicates that the
+             * Seeing the {@code version} result indicates that the
              * handshake has completed (see
              * {@link SqueezeService#onCliPortConnectionEstablished(String, String)}),
              * post a {@link HandshakeComplete} event.
@@ -1087,7 +1087,7 @@ class CliClient implements IClient {
         });
         handlers.put("pause", new CmdHandler() {
             /**
-             * <code>&lt;playerid> pause &lt;0|1|></code>
+             * {@code <playerid> pause <0|1|>}
              * @param tokens
              */
             @Override
@@ -1138,7 +1138,7 @@ class CliClient implements IClient {
             }
         }
 
-        // &lt;playerid> client &lt;new|disconnect|reconnect>
+        /** @{code <playerid> client <new|disconnect|reconnect> */
         handlers.put("client", new CmdHandler() {
             @Override
             public void handle(List<String> tokens) {

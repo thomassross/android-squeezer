@@ -33,11 +33,11 @@ public class Reflection {
      * class can't be resolved. See {@link #genericTypeResolver(Class, Class)} for details on what
      * can't be resolved, and how to work around it.
      *
-     * @param currentClass The current class which must extend or implement <code>base</code>
+     * @param currentClass The current class which must extend or implement {@code base}
      * @param base Generic base class or interface which type variable we wish to resolve.
      * @param genericArgumentNumber The position of the type variable we are interested in.
      *
-     * @return The actual type parameter at the supplied position in <code>base</code> as a class or
+     * @return The actual type parameter at the supplied position in {@code base} as a class or
      * null.
      *
      * @see #genericTypeResolver(Class, Class)
@@ -65,10 +65,10 @@ public class Reflection {
      * collection)
      * </pre>
      *
-     * @param currentClass The current class which must extend or implement <code>base</code>
+     * @param currentClass The current class which must extend or implement {@code base}
      * @param base Generic base class or interface which type variables we wish to resolve.
      *
-     * @return Actual type arguments for <code>base</code> used in <code>currentClass</code>.
+     * @return Actual type arguments for <code>base</code> used in {@code currentClass}.
      *
      * @see #getGenericClass(Class, Class, int)
      */
@@ -103,12 +103,12 @@ public class Reflection {
      * Resolve actual type arguments of the supplied class for the type variables in the supplied
      * generic interface.
      *
-     * @param currentClass The current class which may implement <code>base</code>
+     * @param currentClass The current class which may implement {@code base}
      * @param baseInterface Generic interface which type variables we wish to resolve.
      * @param actualTypeArguments Resolved type arguments from parent
      *
-     * @return Actual type arguments for <code>baseInterface</code> used in
-     * <code>currentClass</code> or null.
+     * @return Actual type arguments for {@code baseInterface} used in
+     * {@code currentClass} or null.
      *
      * @see #getGenericClass(Class, Class, int)
      */
@@ -142,8 +142,8 @@ public class Reflection {
      * superclass or direct interface.
      *
      * @param currentClass The class with the supplied resolved type arguments
-     * @param type Superclass or direct interface of <code>currentClass</code>
-     * @param actualTypeArguments Resolved type arguments of of <code>currentClass</code>
+     * @param type Superclass or direct interface of {@code currentClass}
+     * @param actualTypeArguments Resolved type arguments of of {@code currentClass}
      *
      * @return The resolved type arguments mapped to the given superclass or direct interface
      */

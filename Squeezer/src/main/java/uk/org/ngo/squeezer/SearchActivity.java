@@ -121,7 +121,7 @@ public class SearchActivity extends ItemListActivity {
     }
 
     /**
-     * Saves the search query, and attempts to query the service for <code>searchString</code>. If
+     * Saves the search query, and attempts to query the service for {@code searchString}. If
      * the service binding has not completed yet then {@link #onEventMainThread(HandshakeComplete)}
      * will re-query for the saved search query.
      *

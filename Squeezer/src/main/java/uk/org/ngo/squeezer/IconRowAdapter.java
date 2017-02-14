@@ -67,9 +67,9 @@ public class IconRowAdapter extends BaseAdapter {
 
     /**
      * Creates an IconRowAdapter where the id of each item corresponds to its index in
-     * <code>items</code>.
+     * {@code items}.
      * <p>
-     * <code>items</code> and <code>icons</item> must be the same size.
+     * {@code items} and {@code icons} must be the same size.
      *
      * @param context
      * @param items Item text.
@@ -85,7 +85,7 @@ public class IconRowAdapter extends BaseAdapter {
     }
 
     /**
-     * Creates an IconRowAdapter from the list of <code>rows</code>.
+     * Creates an IconRowAdapter from the list of {@code rows}.
      *
      * @param context
      * @param rows Rows to appear in the list.
@@ -115,7 +115,7 @@ public class IconRowAdapter extends BaseAdapter {
      * Helper class to represent a row. Each row has an identifier, a string, and an icon.
      * <p>
      * The identifier should be unique across all rows in a given {@link IconRowAdapter}, and will
-     * be used as the <code>id</code> parameter to the <code>OnItemClickListener</code>.
+     * be used as the <code>id</code> parameter to the {@code OnItemClickListener}.
      */
     public static class IconRow {
 

@@ -61,14 +61,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * not constitute a generic threading framework. AsyncTasks should ideally be used for short
  * operations (a few seconds at the most.) If you need to keep threads running for long periods of
  * time, it is highly recommended you use the various APIs provided by the
- * <code>java.util.concurrent</code> pacakge such as {@link Executor}, {@link ThreadPoolExecutor}
+ * {@code java.util.concurrent} pacakge such as {@link Executor}, {@link ThreadPoolExecutor}
  * and {@link FutureTask}.</p>
  * <p>
  * <p>An asynchronous task is defined by a computation that runs on a background thread and whose
  * result is published on the UI thread. An asynchronous task is defined by 3 generic types, called
- * <code>Params</code>, <code>Progress</code> and <code>Result</code>, and 4 steps, called
- * <code>onPreExecute</code>, <code>doInBackground</code>, <code>onProgressUpdate</code> and
- * <code>onPostExecute</code>.</p>
+ * <code>Params</code>, <code>Progress</code> and {@code Result}, and 4 steps, called
+ * <code>onPreExecute</code>, <code>doInBackground</code>, {@code onProgressUpdate} and
+ * {@code onPostExecute}.</p>
  * <p>
  * <div class="special reference"> <h3>Developer Guides</h3> <p>For more information about using
  * tasks and threads, read the <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes
@@ -94,9 +94,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * DownloadFilesTask().execute(url1, url2, url3); </pre>
  * <p>
  * <h2>AsyncTask's generic types</h2> <p>The three types used by an asynchronous task are the
- * following:</p> <ol> <li><code>Params</code>, the type of the parameters sent to the task upon
- * execution.</li> <li><code>Progress</code>, the type of the progress units published during the
- * background computation.</li> <li><code>Result</code>, the type of the result of the background
+ * following:</p> <ol> <li>{@code Params}, the type of the parameters sent to the task upon
+ * execution.</li> <li>{@code Progress}, the type of the progress units published during the
+ * background computation.</li> <li>{@code Result}, the type of the result of the background
  * computation.</li> </ol> <p>Not all types are always used by an asynchronous task. To mark a type
  * as unused, simply use the type {@link Void}:</p> <pre> private class MyTask extends
  * AsyncTask&lt;Void, Void, Void&gt; { ... } </pre>
@@ -382,7 +382,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * #doInBackground(Object[])} has finished.</p>
      * <p>
      * <p>The default implementation simply invokes {@link #onCancelled()} and ignores the result.
-     * If you write your own implementation, do not call <code>super.onCancelled(result)</code>.</p>
+     * If you write your own implementation, do not call {@code super.onCancelled(result)}.</p>
      *
      * @param result The result, if any, computed in {@link #doInBackground(Object[])}, can be null
      *

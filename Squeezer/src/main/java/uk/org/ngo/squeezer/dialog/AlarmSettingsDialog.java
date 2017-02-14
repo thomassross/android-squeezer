@@ -54,7 +54,7 @@ public class AlarmSettingsDialog extends DialogFragment {
         /**
          * @param playerPref the name of the preference to get
          * @param def the default value to return if the preference does not exist
-         * @return The value of the PlayerPref identified by <code>playerPref</code>
+         * @return The value of the PlayerPref identified by {@code playerPref}
          */
         @NonNull
         String getPlayerPref(@NonNull @Player.Pref.Name String playerPref, @NonNull String def);
