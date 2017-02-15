@@ -51,7 +51,7 @@ public abstract class Item implements Parcelable {
 
     @Override
     public int hashCode() {
-        return (getId() != null ? getId().hashCode() : 0);
+        return (id != null ? id.hashCode() : 0);
     }
 
     @Override
@@ -71,15 +71,15 @@ public abstract class Item implements Parcelable {
 
         // Both might be empty items. For example a Song initialised
         // with an empty token map, because no song is currently playing.
-        if (getId() == null && ((Item) o).getId() == null) {
+        if (id == null && ((Item) o).id == null) {
             return true;
         }
 
-        return getId() != null && getId().equals(((Item) o).getId());
+        return id != null && id.equals(((Item) o).id);
     }
 
     protected String toStringOpen() {
-        return getClass().getSimpleName() + " { id: " + getId() + ", name: " + getName();
+        return getClass().getSimpleName() + " { id: " + id + ", name: " + getName();
     }
 
     @NonNull

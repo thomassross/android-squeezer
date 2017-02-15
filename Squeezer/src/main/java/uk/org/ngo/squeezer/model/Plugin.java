@@ -144,7 +144,7 @@ public class Plugin extends Item {
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + "type: " + getType() + ", weight: " + getWeight();
+        return super.toStringOpen() + "type: " + type + ", weight: " + weight;
     }
 
 }

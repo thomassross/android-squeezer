@@ -145,7 +145,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
 
         bindService(new Intent(this, SqueezeService.class), serviceConnection,
                 Context.BIND_AUTO_CREATE);
-        Log.d(getTag(), "did bindService; serviceStub = " + getService());
+        Log.d(getTag(), "did bindService; serviceStub = " + mService);
     }
 
     @Override
@@ -390,7 +390,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     private boolean changeVolumeBy(int delta) {
-        ISqueezeService service = getService();
+        ISqueezeService service = mService;
         if (service == null) {
             return false;
         }

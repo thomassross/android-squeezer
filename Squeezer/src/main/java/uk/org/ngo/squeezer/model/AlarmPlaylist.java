@@ -85,6 +85,6 @@ public class AlarmPlaylist extends Item {
 
     @Override
     public String toString() {
-        return "url=" + getId() + ", title=" + getName();
+        return "url=" + getId() + ", title=" + title;
     }
 }

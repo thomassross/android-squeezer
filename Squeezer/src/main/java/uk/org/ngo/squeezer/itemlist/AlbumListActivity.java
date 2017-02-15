@@ -196,8 +196,8 @@ public class AlbumListActivity extends BaseListActivity<Album>
             }
         }
 
-        service.albums(this, start, sortOrder.name().replace("__", ""), getSearchString(),
-                artist, getYear(), getGenre(), song);
+        service.albums(this, start, sortOrder.name().replace("__", ""), searchString,
+                artist, year, genre, song);
     }
 
     @Nullable

@@ -98,7 +98,7 @@ public class IconRowAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View row = getActivity().getLayoutInflater().inflate(rowLayout, parent, false);
+        View row = activity.getLayoutInflater().inflate(rowLayout, parent, false);
         TextView text1 = (TextView) row.findViewById(textId);
         ImageView icon = (ImageView) row.findViewById(iconId);
 

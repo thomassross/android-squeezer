@@ -297,7 +297,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
                         : null;
 
         if (viewHolder == null) {
-            convertView = getLayoutInflater().inflate(layoutResource, parent, false);
+            convertView = mLayoutInflater.inflate(layoutResource, parent, false);
             viewHolder = createViewHolder();
             viewHolder.text1 = (TextView) convertView.findViewById(R.id.text1);
             viewHolder.text2 = (TextView) convertView.findViewById(R.id.text2);

@@ -89,7 +89,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
             return;
         }
 
-        service.playlistsDelete(getPlaylist());
+        service.playlistsDelete(playlist);
         setResult(PlaylistsActivity.PLAYLIST_DELETED);
         finish();
     }

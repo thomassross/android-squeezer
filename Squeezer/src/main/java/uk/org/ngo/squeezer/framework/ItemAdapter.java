@@ -245,8 +245,8 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
      */
     @NonNull
     public String getHeader() {
-        String item_text = getQuantityString(getCount());
-        return getActivity().getString(R.string.browse_items_text, item_text, getCount());
+        String item_text = getQuantityString(count);
+        return getActivity().getString(R.string.browse_items_text, item_text, count);
     }
 
     /**
@@ -269,7 +269,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         int offset = (mEmptyItem ? 1 : 0);
         count += offset;
         start += offset;
-        if (count == 0 || count != getCount()) {
+        if (count == 0 || count != this.count) {
             this.count = count;
             onCountUpdated();
         }
@@ -282,7 +282,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
      * @return The position of the given item in this adapter or 0 if not found
      */
     public int findItem(@Nullable T item) {
-        for (int pos = 0; pos < getCount(); pos++) {
+        for (int pos = 0; pos < count; pos++) {
             if (getItem(pos) == null) {
                 if (item == null) {
                     return pos;

@@ -146,7 +146,7 @@ public class PluginItem extends Item {
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + ", type: " + getType() + ", hasItems: " + isHasitems() +
-                ", audio: " + isAudio() + ", description: " + getDescription();
+        return super.toStringOpen() + ", type: " + type + ", hasItems: " + hasitems +
+                ", audio: " + audio + ", description: " + description;
     }
 }

@@ -106,7 +106,7 @@ public class FloatLabelLayout extends FrameLayout {
         bundle.putInt(SAVED_LABEL_VISIBILITY, mLabel.getVisibility());
         bundle.putCharSequence(SAVED_HINT, mHint);
         bundle.putInt(SAVED_TRIGGER, mTrigger.getValue());
-        bundle.putBoolean(SAVED_FOCUS, getEditText().isFocused());
+        bundle.putBoolean(SAVED_FOCUS, mEditText.isFocused());
         return bundle;
     }
 
@@ -123,11 +123,11 @@ public class FloatLabelLayout extends FrameLayout {
             if (mTrigger == Trigger.FOCUS) {
                 if (bundle.getBoolean(SAVED_FOCUS)) {
                     mEditText.requestFocus();
-                } else if (!TextUtils.isEmpty(getEditText().getText())) {
+                } else if (!TextUtils.isEmpty(mEditText.getText())) {
                     showLabel();
                 }
             } else if (mTrigger == Trigger.TYPE){
-                if (TextUtils.isEmpty(getEditText().getText())) {
+                if (TextUtils.isEmpty(mEditText.getText())) {
                     showLabel();
                 } else {
                     hideLabel();
@@ -327,7 +327,7 @@ public class FloatLabelLayout extends FrameLayout {
         public static Trigger fromValue(int value) {
             Trigger[] triggers = Trigger.values();
             for (int i = 0; i < triggers.length; i++) {
-                if (triggers[i].getValue() == value) {
+                if (triggers[i].mValue == value) {
                     return triggers[i];
                 }
             }

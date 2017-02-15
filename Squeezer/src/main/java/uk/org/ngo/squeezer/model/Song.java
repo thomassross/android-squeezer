@@ -266,19 +266,19 @@ public class Song extends ArtworkItem {
         // super.equals() has already checked that o is not null and is of the same class.
         Song s = (Song)o;
 
-        if (! s.getName().equals(mName)) {
+        if (! s.mName.equals(mName)) {
             return false;
         }
 
-        if (! s.getAlbumName().equals(mAlbumName)) {
+        if (! s.mAlbumName.equals(mAlbumName)) {
             return false;
         }
 
-        if (! s.getArtist().equals(mArtist)) {
+        if (! s.mArtist.equals(mArtist)) {
             return false;
         }
 
-        if (! s.getArtworkUrl().equals(mArtworkUrl)) {
+        if (! s.mArtworkUrl.equals(mArtworkUrl)) {
             return false;
         }
 
