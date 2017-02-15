@@ -38,22 +38,22 @@ public class Genre extends PlaylistItem {
         return "genre_id";
     }
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
     public Genre setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
     public Genre(@NonNull Map<String, String> record) {
         setId(record.containsKey("genre_id") ? record.get("genre_id") : record.get("id"));
-        name = record.get("genre");
+        mName = record.get("genre");
     }
 
     public static final Creator<Genre> CREATOR = new Creator<Genre>() {
@@ -72,13 +72,13 @@ public class Genre extends PlaylistItem {
 
     private Genre(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
+        mName = source.readString();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
+        dest.writeString(mName);
     }
 
 }

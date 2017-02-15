@@ -31,81 +31,81 @@ public class Plugin extends Item {
     public static final Plugin FAVORITE = new Plugin("favorites", R.drawable.ic_favorites);
     public static final Plugin MY_APPS = new Plugin("myapps", R.drawable.ic_my_apps);
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
     public Plugin setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
-    private String icon;
+    private String mIcon;
 
     /**
-     * @return Relative URL path to an icon for this radio or music service, for example
-     * "plugins/Picks/html/images/icon.png"
+     * @return Relative URL path to an mIcon for this radio or music service, for example
+     * "plugins/Picks/html/images/mIcon.png"
      */
     public String getIcon() {
-        return icon;
+        return mIcon;
     }
 
     public void setIcon(String icon) {
-        this.icon = icon;
+        mIcon = icon;
     }
 
-    private int iconResource;
+    private int mIconResource;
 
     /**
      * @return Icon resource for this plugin if it is embedded in the Squeezer app, or null.
      */
     public int getIconResource() {
-        return iconResource;
+        return mIconResource;
     }
 
     public void setIconResource(int iconResource) {
-        this.iconResource = iconResource;
+        mIconResource = iconResource;
     }
 
-    private int weight;
+    private int mWeight;
 
     public int getWeight() {
-        return weight;
+        return mWeight;
     }
 
     public void setWeight(int weight) {
-        this.weight = weight;
+        mWeight = weight;
     }
 
-    private String type;
+    private String mType;
 
     public String getType() {
-        return type;
+        return mType;
     }
 
     public void setType(String type) {
-        this.type = type;
+        mType = type;
     }
 
     public boolean isSearchable() {
-        return "xmlbrowser_search".equals(type);
+        return "xmlbrowser_search".equals(mType);
     }
 
     private Plugin(String cmd, int iconResource) {
         setId(cmd);
-        this.iconResource = iconResource;
+        mIconResource = iconResource;
     }
 
     public Plugin(@NonNull Map<String, String> record) {
         setId(record.get("cmd"));
-        name = record.get("name");
-        type = record.get("type");
-        icon = record.get("icon");
-        weight = Util.parseDecimalIntOrZero(record.get("weight"));
+        mName = record.get("mName");
+        mType = record.get("mType");
+        mIcon = record.get("mIcon");
+        mWeight = Util.parseDecimalIntOrZero(record.get("mWeight"));
     }
 
     public static final Creator<Plugin> CREATOR = new Creator<Plugin>() {
@@ -124,27 +124,27 @@ public class Plugin extends Item {
 
     private Plugin(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
-        type = source.readString();
-        icon = source.readString();
-        iconResource = source.readInt();
-        weight = source.readInt();
+        mName = source.readString();
+        mType = source.readString();
+        mIcon = source.readString();
+        mIconResource = source.readInt();
+        mWeight = source.readInt();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(type);
-        dest.writeString(icon);
-        dest.writeInt(iconResource);
-        dest.writeInt(weight);
+        dest.writeString(mName);
+        dest.writeString(mType);
+        dest.writeString(mIcon);
+        dest.writeInt(mIconResource);
+        dest.writeInt(mWeight);
     }
 
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + "type: " + type + ", weight: " + weight;
+        return super.toStringOpen() + "mType: " + mType + ", mWeight: " + mWeight;
     }
 
 }

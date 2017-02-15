@@ -62,7 +62,7 @@ public class Player extends Item implements Comparable {
 
     @Override
     public int compareTo(@NonNull Object otherPlayer) {
-        return this.mName.compareToIgnoreCase(((Player)otherPlayer).mName);
+        return mName.compareToIgnoreCase(((Player)otherPlayer).mName);
     }
 
     public static class Pref {
@@ -123,7 +123,7 @@ public class Player extends Item implements Comparable {
 
     @NonNull
     public Player setName(String name) {
-        this.mName = name;
+        mName = name;
         return this;
     }
 

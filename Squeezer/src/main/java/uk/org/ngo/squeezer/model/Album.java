@@ -41,11 +41,11 @@ public class Album extends ArtworkItem {
         return "album_id";
     }
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
@@ -62,28 +62,28 @@ public class Album extends ArtworkItem {
 
     @NonNull
     public Album setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
-    private String artist;
+    private String mArtist;
 
     public String getArtist() {
-        return artist;
+        return mArtist;
     }
 
     public void setArtist(String model) {
-        this.artist = model;
+        mArtist = model;
     }
 
-    private int year;
+    private int mYear;
 
     public int getYear() {
-        return year;
+        return mYear;
     }
 
     public void setYear(int year) {
-        this.year = year;
+        mYear = year;
     }
 
     public Album(String albumId, String album) {
@@ -94,8 +94,8 @@ public class Album extends ArtworkItem {
     public Album(@NonNull Map<String, String> record) {
         setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
         setName(record.get("album"));
-        this.artist = record.get("artist");
-        this.year = Util.parseDecimalIntOrZero(record.get("year"));
+        mArtist = record.get("mArtist");
+        mYear = Util.parseDecimalIntOrZero(record.get("year"));
         setArtwork_track_id(record.get("artwork_track_id"));
         mArtworkUrl = Uri.parse(Strings.nullToEmpty(record.get("artwork_url")));
     }
@@ -120,9 +120,9 @@ public class Album extends ArtworkItem {
 
     private Album(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
-        artist = source.readString();
-        year = source.readInt();
+        mName = source.readString();
+        mArtist = source.readString();
+        mYear = source.readInt();
         setArtwork_track_id(source.readString());
         mArtworkUrl = Uri.parse(Strings.nullToEmpty(source.readString()));
     }
@@ -130,9 +130,9 @@ public class Album extends ArtworkItem {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(artist);
-        dest.writeInt(year);
+        dest.writeString(mName);
+        dest.writeString(mArtist);
+        dest.writeInt(mYear);
         dest.writeString(getArtwork_track_id());
         dest.writeString(mArtworkUrl.toString());
     }
@@ -140,7 +140,7 @@ public class Album extends ArtworkItem {
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + ", artist: " + artist + ", year: " + year;
+        return super.toStringOpen() + ", mArtist: " + mArtist + ", mYear: " + mYear;
     }
 
 }

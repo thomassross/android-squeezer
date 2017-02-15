@@ -29,83 +29,83 @@ import uk.org.ngo.squeezer.framework.Item;
  */
 public class PluginItem extends Item {
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
     public PluginItem setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
-    private String description;
+    private String mDescription;
 
     public String getDescription() {
-        return description;
+        return mDescription;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        mDescription = description;
     }
 
     /**
      * Relative URL to the icon to use for this item.
      */
-    private String image;
+    private String mImage;
 
     /**
      * @return the absolute URL to the icon to use for this item
      */
     public String getImage() {
-        return image;
+        return mImage;
     }
 
     public void setImage(String image) {
-        this.image = image;
+        mImage = image;
     }
 
-    private boolean hasitems;
+    private boolean mHasitems;
 
     public boolean isHasitems() {
-        return hasitems;
+        return mHasitems;
     }
 
     public void setHasitems(boolean hasitems) {
-        this.hasitems = hasitems;
+        mHasitems = hasitems;
     }
 
-    private String type;
+    private String mType;
 
     public String getType() {
-        return type;
+        return mType;
     }
 
     public void setType(String type) {
-        this.type = type;
+        mType = type;
     }
 
-    private boolean audio;
+    private boolean mAudio;
 
     public boolean isAudio() {
-        return audio;
+        return mAudio;
     }
 
     public void setAudio(boolean audio) {
-        this.audio = audio;
+        mAudio = audio;
     }
 
     public PluginItem(@NonNull Map<String, String> record) {
         setId(record.get("id"));
-        name = record.containsKey("name") ? record.get("name") : record.get("title");
-        description = record.get("description");
-        type = record.get("type");
-        image = record.get("image");
-        hasitems = (Util.parseDecimalIntOrZero(record.get("hasitems")) != 0);
-        audio = (Util.parseDecimalIntOrZero(record.get("isaudio")) != 0);
+        mName = record.containsKey("mName") ? record.get("mName") : record.get("title");
+        mDescription = record.get("description");
+        mType = record.get("mType");
+        mImage = record.get("image");
+        mHasitems = (Util.parseDecimalIntOrZero(record.get("mHasitems")) != 0);
+        mAudio = (Util.parseDecimalIntOrZero(record.get("isaudio")) != 0);
     }
 
     public static final Creator<PluginItem> CREATOR = new Creator<PluginItem>() {
@@ -124,29 +124,29 @@ public class PluginItem extends Item {
 
     private PluginItem(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
-        description = source.readString();
-        type = source.readString();
-        image = source.readString();
-        hasitems = (source.readInt() != 0);
-        audio = (source.readInt() != 0);
+        mName = source.readString();
+        mDescription = source.readString();
+        mType = source.readString();
+        mImage = source.readString();
+        mHasitems = (source.readInt() != 0);
+        mAudio = (source.readInt() != 0);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(description);
-        dest.writeString(type);
-        dest.writeString(image);
-        dest.writeInt(hasitems ? 1 : 0);
-        dest.writeInt(audio ? 1 : 0);
+        dest.writeString(mName);
+        dest.writeString(mDescription);
+        dest.writeString(mType);
+        dest.writeString(mImage);
+        dest.writeInt(mHasitems ? 1 : 0);
+        dest.writeInt(mAudio ? 1 : 0);
     }
 
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + ", type: " + type + ", hasItems: " + hasitems +
-                ", audio: " + audio + ", description: " + description;
+        return super.toStringOpen() + ", mType: " + mType + ", hasItems: " + mHasitems +
+                ", mAudio: " + mAudio + ", mDescription: " + mDescription;
     }
 }

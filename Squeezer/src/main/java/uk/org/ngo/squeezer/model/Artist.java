@@ -38,16 +38,16 @@ public class Artist extends PlaylistItem {
         return "artist_id";
     }
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
     public Artist setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
@@ -59,7 +59,7 @@ public class Artist extends PlaylistItem {
     public Artist(@NonNull Map<String, String> record) {
         setId(record.containsKey("contributor_id") ? record.get("contributor_id")
                 : record.get("id"));
-        name = record.containsKey("contributor") ? record.get("contributor") : record.get("artist");
+        mName = record.containsKey("contributor") ? record.get("contributor") : record.get("artist");
     }
 
     public static final Creator<Artist> CREATOR = new Creator<Artist>() {
@@ -78,13 +78,13 @@ public class Artist extends PlaylistItem {
 
     private Artist(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
+        mName = source.readString();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
+        dest.writeString(mName);
     }
 
 }

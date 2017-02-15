@@ -29,7 +29,7 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
 /**
  * Encapsulate a music folder item on the Squeezeserver.
  * <p>
- * An item has a name and a type. The name is free text, the type may be one of "track", "folder",
+ * An item has a mName and a mType. The mName is free text, the mType may be one of "track", "folder",
  * "playlist", or "unknown".
  *
  * @author nik
@@ -39,15 +39,15 @@ public class MusicFolderItem extends PlaylistItem {
     @NonNull
     @Override
     public String getPlaylistTag() {
-        if ("track".equals(type)) {
+        if ("track".equals(mType)) {
             return "track_id";
         }
 
-        if ("playlist".equals(type)) {
+        if ("playlist".equals(mType)) {
             return "playlist_id";
         }
 
-        if ("folder".equals(type)) {
+        if ("folder".equals(mType)) {
             return "folder_id";
         }
 
@@ -60,45 +60,45 @@ public class MusicFolderItem extends PlaylistItem {
         return "folder_id";
     }
 
-    private String name;
+    private String mName;
 
     @Override
     public String getName() {
-        return name;
+        return mName;
     }
 
     @NonNull
     public MusicFolderItem setName(String name) {
-        this.name = name;
+        mName = name;
         return this;
     }
 
     /**
-     * The folder item's type, "track", "folder", "playlist", "unknown".
+     * The folder item's mType, "track", "folder", "playlist", "unknown".
      */
     // XXX: Should be an enum.
-    private String type;
+    private String mType;
 
     public String getType() {
-        return type;
+        return mType;
     }
 
     @NonNull
     public MusicFolderItem setType(String type) {
-        this.type = type;
+        mType = type;
         return this;
     }
 
     @NonNull
-    private Uri url = Uri.EMPTY;
+    private Uri mUrl = Uri.EMPTY;
 
     @NonNull
     public Uri getUrl() {
-        return url;
+        return mUrl;
     }
 
     public void setUrl(@NonNull Uri url) {
-        this.url = url;
+        mUrl = url;
     }
 
     /** The URL to use to download the song. */
@@ -112,9 +112,9 @@ public class MusicFolderItem extends PlaylistItem {
 
     public MusicFolderItem(@NonNull Map<String, String> record) {
         setId(record.get("id"));
-        name = record.get("filename");
-        type = record.get("type");
-        url = Uri.parse(Strings.nullToEmpty(record.get("url")));
+        mName = record.get("filename");
+        mType = record.get("mType");
+        mUrl = Uri.parse(Strings.nullToEmpty(record.get("url")));
         mDownloadUrl = Uri.parse(Strings.nullToEmpty(record.get("download_url")));
     }
 
@@ -134,24 +134,24 @@ public class MusicFolderItem extends PlaylistItem {
 
     private MusicFolderItem(@NonNull Parcel source) {
         setId(source.readString());
-        name = source.readString();
-        type = source.readString();
-        url = Uri.parse(source.readString());
+        mName = source.readString();
+        mType = source.readString();
+        mUrl = Uri.parse(source.readString());
         mDownloadUrl = Uri.parse(source.readString());
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(type);
-        dest.writeString(url.toString());
+        dest.writeString(mName);
+        dest.writeString(mType);
+        dest.writeString(mUrl.toString());
         dest.writeString(mDownloadUrl.toString());
     }
 
     @NonNull
     @Override
     public String toStringOpen() {
-        return super.toStringOpen() + ", type: " + type;
+        return super.toStringOpen() + ", mType: " + mType;
     }
 }
