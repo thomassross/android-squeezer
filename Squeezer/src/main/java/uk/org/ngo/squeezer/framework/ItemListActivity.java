@@ -265,7 +265,7 @@ public abstract class ItemListActivity extends BaseActivity {
                 return;
             }
 
-            if (mAttachedTouchListener == false) {
+            if (!mAttachedTouchListener) {
                 if (mTouchListener != null) {
                     listView.setOnTouchListener(mTouchListener);
                 }
