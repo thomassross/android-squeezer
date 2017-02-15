@@ -1,6 +1,7 @@
 package uk.org.ngo.squeezer.menu;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -35,7 +36,7 @@ public class BaseMenuFragment extends Fragment {
      * @param activity The activity to add the new fragment to
      * @param clazz Type of the fragment to add to the activity
      */
-    public static void add(FragmentActivity activity, Class<? extends Fragment> clazz) {
+    public static void add(@NonNull FragmentActivity activity, @NonNull Class<? extends Fragment> clazz) {
         FragmentManager fragmentManager = activity.getSupportFragmentManager();
         if (fragmentManager.findFragmentByTag(clazz.getName()) == null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

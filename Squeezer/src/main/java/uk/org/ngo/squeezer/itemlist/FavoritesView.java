@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
+
 import uk.org.ngo.squeezer.R;
 
 /**
@@ -28,6 +30,7 @@ public class FavoritesView extends PluginItemView {
         super(activity);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.favorites, quantity);

@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -60,17 +61,18 @@ public class FloatLabelLayout extends FrameLayout {
     private EditText mEditText;
     private TextView mLabel;
     private Trigger mTrigger;
+    @Nullable
     private CharSequence mHint;
 
-    public FloatLabelLayout(Context context) {
+    public FloatLabelLayout(@NonNull Context context) {
         this(context, null);
     }
 
-    public FloatLabelLayout(Context context, AttributeSet attrs) {
+    public FloatLabelLayout(@NonNull Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FloatLabelLayout(Context context, AttributeSet attrs, int defStyle) {
+    public FloatLabelLayout(@NonNull Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         final TypedArray a = context
@@ -96,6 +98,7 @@ public class FloatLabelLayout extends FrameLayout {
         a.recycle();
     }
 
+    @NonNull
     @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
@@ -139,7 +142,7 @@ public class FloatLabelLayout extends FrameLayout {
     }
 
     @Override
-    public void addView(@NonNull View child, int index, ViewGroup.LayoutParams params) {
+    public void addView(@NonNull View child, int index, @NonNull ViewGroup.LayoutParams params) {
         if (child instanceof EditText) {
             // Update the layout params so that the EditText is at the bottom, with enough top
             // margin to show the label
@@ -259,6 +262,7 @@ public class FloatLabelLayout extends FrameLayout {
                 getResources().getDisplayMetrics());
     }
 
+    @NonNull
     private OnFocusChangeListener mOnFocusChangeListener = new OnFocusChangeListener() {
 
         @Override
@@ -279,6 +283,7 @@ public class FloatLabelLayout extends FrameLayout {
          }
     };
 
+    @NonNull
     private TextWatcher mTextWatcher = new TextWatcher() {
 
         @Override

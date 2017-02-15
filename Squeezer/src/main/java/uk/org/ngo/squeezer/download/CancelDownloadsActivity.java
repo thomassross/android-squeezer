@@ -22,6 +22,8 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
@@ -61,19 +63,22 @@ public class CancelDownloadsActivity extends Activity {
 
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     static class CancelDownloadsTask extends AsyncTask<Void, Void, Void> {
+        @NonNull
         final DownloadDatabase downloadDatabase;
+        @NonNull
         final DownloadManager downloadManager;
 
-        public CancelDownloadsTask(Context context) {
+        public CancelDownloadsTask(@NonNull Context context) {
             downloadDatabase = new DownloadDatabase(context);
             downloadManager =(DownloadManager)context.getSystemService(Context.DOWNLOAD_SERVICE);
         }
 
+        @Nullable
         @Override
         protected Void doInBackground(Void... params) {
             downloadDatabase.iterateDownloadEntries(new DownloadDatabase.DownloadHandler() {
                 @Override
-                public void handle(DownloadDatabase.DownloadEntry entry) {
+                public void handle(@NonNull DownloadDatabase.DownloadEntry entry) {
                     downloadManager.remove(entry.downloadId);
                     downloadDatabase.remove(entry.downloadId);
                 }

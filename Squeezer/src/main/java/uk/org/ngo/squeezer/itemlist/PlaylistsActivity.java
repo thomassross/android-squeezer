@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,16 +49,18 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
 
     private int currentIndex = -1;
 
+    @Nullable
     private Playlist currentPlaylist;
 
     private String oldName;
 
+    @Nullable
     public Playlist getCurrentPlaylist() {
         return currentPlaylist;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             currentIndex = savedInstanceState.getInt(CURRENT_INDEX);
@@ -66,7 +69,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(CURRENT_INDEX, currentIndex);
         outState.putParcelable(CURRENT_PLAYLIST, currentPlaylist);
         super.onSaveInstanceState(outState);
@@ -95,6 +98,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
         getItemAdapter().notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
     public ItemView<Playlist> createItemView() {
         return new PlaylistView(this);
@@ -106,7 +110,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
         Log.d(getTag(), "onActivityResult(" + requestCode + "," + resultCode + ",'" + data + "')");
         if (requestCode == PLAYLIST_SONGS_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data.getBooleanExtra(PLAYLIST_RENAMED, false)) {
@@ -121,7 +125,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.playlistsmenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -130,7 +134,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
      * Sets the enabled state of the R.menu.playlistsmenu items.
      */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         final MenuItem item = menu.findItem(R.id.menu_item_playlists_new);
         final boolean boundToService = getService() != null;
 
@@ -140,7 +144,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_playlists_new:
                 new PlaylistsNewDialog().show(getSupportFragmentManager(),
@@ -150,7 +154,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
         return super.onOptionsItemSelected(item);
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, PlaylistsActivity.class);
         context.startActivity(intent);
     }
@@ -165,11 +169,11 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
         });
     }
 
-    public void onEvent(PlaylistCreateFailed event) {
+    public void onEvent(@NonNull PlaylistCreateFailed event) {
         showServiceMessage(event.failureMessage);
     }
 
-    public void onEvent(PlaylistRenameFailed event) {
+    public void onEvent(@NonNull PlaylistRenameFailed event) {
         if (currentIndex != -1) {
             currentPlaylist.setName(oldName);
         }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -53,9 +54,10 @@ import static uk.org.ngo.squeezer.framework.BaseItemView.ViewHolder;
  */
 public class CurrentPlaylistActivity extends BaseListActivity<Song> {
 
+    @Nullable
     private Player player;
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, CurrentPlaylistActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
@@ -67,6 +69,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
      * some OEM Android versions, whereas a dedicated Handler always works. See
      * https://github.com/nikclayton/android-squeezer/pull/164 for more.
      */
+    @NonNull
     private Handler playlistIndexUpdateHandler = new Handler();
 
     private int currentPlaylistIndex;
@@ -113,12 +116,14 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
         }
     }
 
+    @NonNull
     @Override
     protected ItemAdapter<Song> createItemListAdapter(
-            ItemView<Song> itemView) {
+            @NonNull ItemView<Song> itemView) {
         return new HighlightingListAdapter(itemView);
     }
 
+    @Nullable
     @Override
     public ItemView<Song> createItemView() {
         SongViewWithArt view = new SongViewWithArt(this) {
@@ -136,7 +141,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
             }
 
             @Override
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+            public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
                 super.onCreateContextMenu(menu, v, menuInfo);
 
                 menu.setGroupVisible(R.id.group_playlist, true);
@@ -160,7 +165,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
             }
 
             @Override
-            public boolean doItemContext(MenuItem menuItem, int index, Song selectedItem) {
+            public boolean doItemContext(@NonNull MenuItem menuItem, int index, @NonNull Song selectedItem) {
                 ISqueezeService service = getService();
                 if (service == null) {
                     return true;
@@ -207,7 +212,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.currentplaylistmenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -216,7 +221,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
      * Sets the enabled state of the R.menu.currentplaylistmenu items.
      */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         final int[] ids = {R.id.menu_item_playlist_clear, R.id.menu_item_playlist_save,
                 R.id.menu_item_playlist_show_current_song};
 
@@ -231,7 +236,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_playlist_clear:
                 if (getService() != null) {
@@ -263,7 +268,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
         player = getService().getActivePlayer();
     }
 
-    public void onEventMainThread(MusicChanged event) {
+    public void onEventMainThread(@NonNull MusicChanged event) {
         if (event.player.equals(getService().getActivePlayer())) {
             Log.d(getTag(), "onMusicChanged " + event.playerState.getCurrentSong());
             currentPlaylistIndex = event.playerState.getCurrentPlaylistIndex();
@@ -300,7 +305,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    public void onItemsReceived(int count, int start, Map<String, String> parameters, List<Song> items, Class<Song> dataType) {
+    public void onItemsReceived(int count, int start, Map<String, String> parameters, @NonNull List<Song> items, Class<Song> dataType) {
         super.onItemsReceived(count, start, parameters, items, dataType);
         ISqueezeService service = getService();
         if (service == null) {

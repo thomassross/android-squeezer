@@ -29,11 +29,13 @@ import uk.org.ngo.squeezer.framework.ArtworkItem;
 
 public class Album extends ArtworkItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "album_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "album_id";
@@ -58,6 +60,7 @@ public class Album extends ArtworkItem {
         mArtworkUrl = artworkUrl;
     }
 
+    @NonNull
     public Album setName(String name) {
         this.name = name;
         return this;
@@ -88,7 +91,7 @@ public class Album extends ArtworkItem {
         setName(album);
     }
 
-    public Album(Map<String, String> record) {
+    public Album(@NonNull Map<String, String> record) {
         setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
         setName(record.get("album"));
         setArtist(record.get("artist"));
@@ -98,13 +101,15 @@ public class Album extends ArtworkItem {
     }
 
     public static final Creator<Album> CREATOR = new Creator<Album>() {
+        @NonNull
         @Override
         public Album[] newArray(int size) {
             return new Album[size];
         }
 
+        @NonNull
         @Override
-        public Album createFromParcel(Parcel source) {
+        public Album createFromParcel(@NonNull Parcel source) {
             return new Album(source);
         }
     };
@@ -113,7 +118,7 @@ public class Album extends ArtworkItem {
 
     }
 
-    private Album(Parcel source) {
+    private Album(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
         artist = source.readString();
@@ -123,7 +128,7 @@ public class Album extends ArtworkItem {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
         dest.writeString(artist);
@@ -132,6 +137,7 @@ public class Album extends ArtworkItem {
         dest.writeString(mArtworkUrl.toString());
     }
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + ", artist: " + artist + ", year: " + year;

@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -25,11 +26,13 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 public class Genre extends PlaylistItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "genre_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "genre_id";
@@ -42,35 +45,38 @@ public class Genre extends PlaylistItem {
         return name;
     }
 
+    @NonNull
     public Genre setName(String name) {
         this.name = name;
         return this;
     }
 
-    public Genre(Map<String, String> record) {
+    public Genre(@NonNull Map<String, String> record) {
         setId(record.containsKey("genre_id") ? record.get("genre_id") : record.get("id"));
         name = record.get("genre");
     }
 
     public static final Creator<Genre> CREATOR = new Creator<Genre>() {
+        @NonNull
         @Override
         public Genre[] newArray(int size) {
             return new Genre[size];
         }
 
+        @NonNull
         @Override
-        public Genre createFromParcel(Parcel source) {
+        public Genre createFromParcel(@NonNull Parcel source) {
             return new Genre(source);
         }
     };
 
-    private Genre(Parcel source) {
+    private Genre(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
     }

@@ -1,6 +1,7 @@
 
 package uk.org.ngo.squeezer.test.mock;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import junit.framework.AssertionFailedError;
@@ -37,6 +38,7 @@ public class SqueezeboxServerMock extends Thread {
 
     public static class Starter {
 
+        @NonNull
         public SqueezeboxServerMock start() {
             SqueezeboxServerMock server = new SqueezeboxServerMock(this);
             server.start();
@@ -55,26 +57,31 @@ public class SqueezeboxServerMock extends Thread {
             return server;
         }
 
+        @NonNull
         public Starter username(String username) {
             this.username = username;
             return this;
         }
 
+        @NonNull
         public Starter password(String password) {
             this.password = password;
             return this;
         }
 
+        @NonNull
         public Starter canRandomplay(boolean canRandomplay) {
             this.canRandomplay = canRandomplay;
             return this;
         }
 
+        @NonNull
         public Starter canMusicFolder(boolean canMusicFolder) {
             this.canMusicFolder = canMusicFolder;
             return this;
         }
 
+        @NonNull
         public Starter albumsSortOrder(AlbumsSortOrder albumsSortOrder) {
             this.albumsSortOrder = albumsSortOrder;
             return this;
@@ -91,11 +98,12 @@ public class SqueezeboxServerMock extends Thread {
         private AlbumsSortOrder albumsSortOrder = AlbumsSortOrder.album;
     }
 
+    @NonNull
     public static Starter starter() {
         return new Starter();
     }
 
-    private SqueezeboxServerMock(Starter starter) {
+    private SqueezeboxServerMock(@NonNull Starter starter) {
         username = starter.username;
         password = starter.password;
         canRandomplay = starter.canRandomplay;

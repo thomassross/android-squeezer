@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.view.KeyEvent;
 import android.view.View;
@@ -49,8 +50,10 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 public class PluginListActivity extends BaseListActivity<Plugin>
         implements NetworkErrorDialogFragment.NetworkErrorDialogListener {
 
+    @Nullable
     private Plugin plugin;
 
+    @Nullable
     private String search;
 
     @Override
@@ -73,7 +76,7 @@ public class PluginListActivity extends BaseListActivity<Plugin>
 
             searchCriteriaText.setOnKeyListener(new OnKeyListener() {
                 @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                public boolean onKey(View v, int keyCode, @NonNull KeyEvent event) {
                     if ((event.getAction() == KeyEvent.ACTION_DOWN)
                             && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                         clearAndReOrderItems(searchCriteriaText.getText().toString());
@@ -100,11 +103,12 @@ public class PluginListActivity extends BaseListActivity<Plugin>
         header.setVisibility(View.VISIBLE);
     }
 
+    @Nullable
     public Plugin getPlugin() {
         return plugin;
     }
 
-    private void clearAndReOrderItems(String searchString) {
+    private void clearAndReOrderItems(@Nullable String searchString) {
         if (getService() != null && !(plugin.isSearchable() && (searchString == null
                 || searchString.length() == 0))) {
             search = searchString;
@@ -119,7 +123,7 @@ public class PluginListActivity extends BaseListActivity<Plugin>
 
 
     @Override
-    public void onItemsReceived(int count, int start, final Map<String, String> parameters, List<Plugin> items, Class<Plugin> dataType) {
+    public void onItemsReceived(int count, int start, @NonNull final Map<String, String> parameters, @NonNull List<Plugin> items, Class<Plugin> dataType) {
         if (parameters.containsKey("title")) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -169,7 +173,7 @@ public class PluginListActivity extends BaseListActivity<Plugin>
         });
     }
 
-    private boolean pluginPlaylistControl(@PluginPlaylistControlCmd String cmd, PluginItem item) {
+    private boolean pluginPlaylistControl(@PluginPlaylistControlCmd String cmd, @NonNull PluginItem item) {
         if (getService() == null) {
             return false;
         }

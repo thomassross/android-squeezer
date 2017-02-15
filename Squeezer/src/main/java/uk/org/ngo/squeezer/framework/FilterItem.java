@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
+
 /**
  * Items which can be used as a filter in lists of another item
  *
@@ -27,6 +29,7 @@ public interface FilterItem {
     String getId();
 
     /** @return The tag to filters by this item in a CLI query. */
+    @NonNull
     String getFilterTag();
 
     /** @return Tagged parameter to filter by this item. */

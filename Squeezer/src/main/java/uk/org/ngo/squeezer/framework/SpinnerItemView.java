@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -28,11 +29,11 @@ import uk.org.ngo.squeezer.Util;
  */
 public abstract class SpinnerItemView<T extends Item> extends BaseItemView<T> {
 
-    public SpinnerItemView(ItemListActivity activity) {
+    public SpinnerItemView(@NonNull ItemListActivity activity) {
         super(activity);
     }
 
-    public View getDropDownAdapterView(View convertView, ViewGroup parent, int position, T item) {
+    public View getDropDownAdapterView(View convertView, ViewGroup parent, int position, @NonNull T item) {
         return Util.getSpinnerDropDownView(getActivity(), convertView, parent, item.getName());
     }
 

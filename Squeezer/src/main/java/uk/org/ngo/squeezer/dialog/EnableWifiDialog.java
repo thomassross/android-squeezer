@@ -44,7 +44,8 @@ public class EnableWifiDialog extends DialogFragment {
         return builder.create();
     }
 
-    public static EnableWifiDialog show(FragmentManager fragmentManager) {
+    @NonNull
+    public static EnableWifiDialog show(@NonNull FragmentManager fragmentManager) {
         // Remove any currently showing dialog
         Fragment prev = fragmentManager.findFragmentByTag(TAG);
         if (prev != null) {

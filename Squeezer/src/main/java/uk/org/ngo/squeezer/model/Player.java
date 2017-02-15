@@ -54,13 +54,14 @@ public class Player extends Item implements Comparable {
     /**  A hash of the player's ID. */
     private final HashCode mHashCode;
 
+    @NonNull
     private PlayerState mPlayerState = new PlayerState();
 
     /** Is the player connected? */
     private boolean mConnected;
 
     @Override
-    public int compareTo(Object otherPlayer) {
+    public int compareTo(@NonNull Object otherPlayer) {
         return this.mName.compareToIgnoreCase(((Player)otherPlayer).mName);
     }
 
@@ -80,7 +81,7 @@ public class Player extends Item implements Comparable {
                 ALARMS_ENABLED);
     }
 
-    public Player(Map<String, String> record) {
+    public Player(@NonNull Map<String, String> record) {
         setId(record.get("playerid"));
         mIp = record.get("ip");
         mName = record.get("name");
@@ -105,7 +106,7 @@ public class Player extends Item implements Comparable {
         }
     }
 
-    private Player(Parcel source) {
+    private Player(@NonNull Parcel source) {
         setId(source.readString());
         mIp = source.readString();
         mName = source.readString();
@@ -120,6 +121,7 @@ public class Player extends Item implements Comparable {
         return mName;
     }
 
+    @NonNull
     public Player setName(String name) {
         this.mName = name;
         return this;
@@ -155,19 +157,21 @@ public class Player extends Item implements Comparable {
     }
 
     public static final Creator<Player> CREATOR = new Creator<Player>() {
+        @NonNull
         @Override
         public Player[] newArray(int size) {
             return new Player[size];
         }
 
+        @NonNull
         @Override
-        public Player createFromParcel(Parcel source) {
+        public Player createFromParcel(@NonNull Parcel source) {
             return new Player(source);
         }
     };
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(mIp);
         dest.writeString(mName);
@@ -194,11 +198,12 @@ public class Player extends Item implements Comparable {
      */
     public static final Comparator<Player> compareById = new Comparator<Player>() {
         @Override
-        public int compare(Player lhs, Player rhs) {
+        public int compare(@NonNull Player lhs, @NonNull Player rhs) {
             return lhs.getId().compareTo(rhs.getId());
         }
     };
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + ", model: " + mModel + ", canpoweroff: " + mCanPowerOff

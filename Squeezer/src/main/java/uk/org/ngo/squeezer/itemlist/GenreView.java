@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.View;
@@ -31,6 +32,7 @@ public class GenreView extends SpinnerItemView<Genre> {
         super(activity);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.genre, quantity);
@@ -43,7 +45,7 @@ public class GenreView extends SpinnerItemView<Genre> {
 
     // XXX: Make this a menu resource.
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         menu.add(Menu.NONE, R.id.browse_songs, 0, R.string.BROWSE_SONGS);

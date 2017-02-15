@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -25,38 +26,42 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 public class Year extends PlaylistItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "year_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "year";
     }
 
-    public Year(Map<String, String> record) {
+    public Year(@NonNull Map<String, String> record) {
         setId(record.get("year"));
     }
 
     public static final Creator<Year> CREATOR = new Creator<Year>() {
+        @NonNull
         @Override
         public Year[] newArray(int size) {
             return new Year[size];
         }
 
+        @NonNull
         @Override
-        public Year createFromParcel(Parcel source) {
+        public Year createFromParcel(@NonNull Parcel source) {
             return new Year(source);
         }
     };
 
-    private Year(Parcel source) {
+    private Year(@NonNull Parcel source) {
         setId(source.readString());
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
     }
 
@@ -65,6 +70,7 @@ public class Year extends PlaylistItem {
         return getId();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "year=" + getId();

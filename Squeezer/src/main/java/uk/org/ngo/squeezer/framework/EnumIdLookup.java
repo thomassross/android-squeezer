@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 /**
@@ -27,7 +28,7 @@ public class EnumIdLookup<E extends Enum<E> & EnumWithId> {
 
     private final SparseArray<E> map = new SparseArray<E>();
 
-    public EnumIdLookup(Class<E> enumType) {
+    public EnumIdLookup(@NonNull Class<E> enumType) {
         for (E v : enumType.getEnumConstants()) {
             map.put(v.getId(), v);
         }

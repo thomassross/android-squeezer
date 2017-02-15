@@ -18,6 +18,8 @@ package uk.org.ngo.squeezer.framework;
 
 import android.os.Parcelable.Creator;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -73,10 +75,13 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
 
     protected static final int BROWSE_ALBUMS = 1;
 
+    @NonNull
     private final ItemListActivity mActivity;
 
+    @NonNull
     private final LayoutInflater mLayoutInflater;
 
+    @Nullable
     private Class<T> mItemClass;
 
     private Creator<T> mCreator;
@@ -131,18 +136,20 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      */
     protected static final Joiner mJoiner = Joiner.on(" - ").skipNulls();
 
-    public BaseItemView(ItemListActivity activity) {
+    public BaseItemView(@NonNull ItemListActivity activity) {
         mActivity = activity;
         mLayoutInflater = activity.getLayoutInflater();
         mIconWidth = mActivity.getResources().getDimensionPixelSize(R.dimen.album_art_icon_width);
         mIconHeight = mActivity.getResources().getDimensionPixelSize(R.dimen.album_art_icon_height);
     }
 
+    @NonNull
     @Override
     public ItemListActivity getActivity() {
         return mActivity;
     }
 
+    @NonNull
     public LayoutInflater getLayoutInflater() {
         return mLayoutInflater;
     }
@@ -161,6 +168,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
         mLoadingViewParams = viewParams;
     }
 
+    @Nullable
     @Override
     @SuppressWarnings("unchecked")
     public Class<T> getItemClass() {
@@ -203,8 +211,9 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      * Override this method and {@link #getAdapterView(View, ViewGroup, String)} if your subclass
      * uses a different layout.
      */
+    @Nullable
     @Override
-    public View getAdapterView(View convertView, ViewGroup parent, int position, T item) {
+    public View getAdapterView(View convertView, ViewGroup parent, int position, @NonNull T item) {
         View view = getAdapterView(convertView, parent, mViewParams);
         bindView(view, item);
         return view;
@@ -219,7 +228,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      * @param view The view that contains the {@link ViewHolder}
      * @param item The item to be bound
      */
-    public void bindView(View view, T item) {
+    public void bindView(@NonNull View view, @NonNull T item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
@@ -231,6 +240,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      * Override this method and {@link #getAdapterView(View, ViewGroup, Item)} if your
      * extension uses a different layout.
      */
+    @Nullable
     @Override
     public View getAdapterView(View convertView, ViewGroup parent, String text) {
         View view = getAdapterView(convertView, parent, mLoadingViewParams);
@@ -247,7 +257,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      * @param view The view that contains the {@link ViewHolder}
      * @param text The text to set in the view.
      */
-    public void bindView(View view, String text) {
+    public void bindView(@NonNull View view, String text) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(text);
@@ -263,6 +273,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      *
      * @return convertView if it can be reused, or a new view
      */
+    @Nullable
     public View getAdapterView(View convertView, ViewGroup parent, @ViewParam int viewParams) {
         return getAdapterView(convertView, parent, viewParams, R.layout.list_item);
     }
@@ -277,8 +288,9 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      *
      * @return convertView if it can be reused, or a new view
      */
-    public View getAdapterView(View convertView, ViewGroup parent, @ViewParam int viewParams,
-            int layoutResource) {
+    @Nullable
+    public View getAdapterView(@Nullable View convertView, ViewGroup parent, @ViewParam int viewParams,
+                               int layoutResource) {
         ViewHolder viewHolder =
                 (convertView != null && convertView.getTag() instanceof ViewHolder)
                         ? (ViewHolder) convertView.getTag()
@@ -306,7 +318,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
                 viewHolder.btnContextMenu.setVisibility(View.VISIBLE);
                 viewHolder.btnContextMenu.setOnClickListener(new OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(@NonNull View v) {
                         v.showContextMenu();
                     }
                 });
@@ -320,6 +332,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
         return convertView;
     }
 
+    @NonNull
     public ViewHolder createViewHolder() {
         return new ViewHolder();
     }
@@ -330,8 +343,8 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ItemView.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v,
+                                    @NonNull ItemView.ContextMenuInfo menuInfo) {
         menu.setHeaderTitle(menuInfo.item.getName());
     }
 
@@ -339,7 +352,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
      * The default context menu handler handles some common actions.
      */
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, T selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, T selectedItem) {
         switch (menuItem.getItemId()) {
             case R.id.browse_songs:
                 SongListActivity.show(mActivity, selectedItem);

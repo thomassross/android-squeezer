@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.service.event;
 
+import android.support.annotation.NonNull;
+
 import uk.org.ngo.squeezer.service.ConnectionState;
 
 /**
@@ -30,6 +32,7 @@ public class ConnectionChanged {
         this.connectionState = connectionState;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ConnectionChanged{" + connectionState + '}';

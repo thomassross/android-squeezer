@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import uk.org.ngo.squeezer.framework.BaseListActivity;
@@ -38,38 +39,45 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 public class ArtistListActivity extends BaseListActivity<Artist> implements
         GenreSpinnerCallback, FilterableListActivity {
 
+    @Nullable
     private String searchString = null;
 
+    @Nullable
     public String getSearchString() {
         return searchString;
     }
 
-    public void setSearchString(String searchString) {
+    public void setSearchString(@Nullable String searchString) {
         this.searchString = searchString;
     }
 
+    @Nullable
     private Album album;
 
+    @Nullable
     public Album getAlbum() {
         return album;
     }
 
-    public void setAlbum(Album album) {
+    public void setAlbum(@Nullable Album album) {
         this.album = album;
     }
 
+    @Nullable
     private Genre genre;
 
+    @Nullable
     @Override
     public Genre getGenre() {
         return genre;
     }
 
     @Override
-    public void setGenre(Genre genre) {
+    public void setGenre(@Nullable Genre genre) {
         this.genre = genre;
     }
 
+    @NonNull
     @Override
     public ItemView<Artist> createItemView() {
         return new ArtistView(this);
@@ -112,7 +120,7 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
         new ArtistFilterDialog().show(getSupportFragmentManager(), "ArtistFilterDialog");
     }
 
-    public static void show(Context context, Item... items) {
+    public static void show(@NonNull Context context, @NonNull Item... items) {
         final Intent intent = new Intent(context, ArtistListActivity.class);
         for (Item item : items) {
             intent.putExtra(item.getClass().getName(), item);

@@ -40,7 +40,7 @@ public class ImageFetcher extends ImageWorker {
 
     private volatile static ImageFetcher sImageFetcher;
 
-    private ImageFetcher(Context context) {
+    private ImageFetcher(@NonNull Context context) {
         super(context);
     }
 
@@ -51,7 +51,7 @@ public class ImageFetcher extends ImageWorker {
      * @param context Anything that provides a context.
      */
     @NonNull
-    public static ImageFetcher getInstance(Context context) {
+    public static ImageFetcher getInstance(@NonNull Context context) {
         ImageFetcher result = sImageFetcher;
         if (result == null) {
             synchronized (ImageFetcher.class) {
@@ -89,7 +89,7 @@ public class ImageFetcher extends ImageWorker {
      */
     @Override
     @Nullable
-    protected byte[] processBitmap(BitmapWorkerTaskParams params) {
+    protected byte[] processBitmap(@NonNull BitmapWorkerTaskParams params) {
         String data = params.data.toString();
         Log.d(TAG, "processBitmap: " + data);
 
@@ -104,7 +104,7 @@ public class ImageFetcher extends ImageWorker {
             urlConnection = (HttpURLConnection) url.openConnection();
             in = urlConnection.getInputStream();
             bytes = ByteStreams.toByteArray(in);
-        } catch (final IOException e) {
+        } catch (@NonNull final IOException e) {
             Log.e(TAG, "Error in downloadUrlToStream - " + data + e);
         } finally {
             if (urlConnection != null) {
@@ -114,7 +114,7 @@ public class ImageFetcher extends ImageWorker {
                 if (in != null) {
                     in.close();
                 }
-            } catch (final IOException e) {
+            } catch (@NonNull final IOException e) {
                 Log.e(TAG, "Closing input stream failed");
             }
         }

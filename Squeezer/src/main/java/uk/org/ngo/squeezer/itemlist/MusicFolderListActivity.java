@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,16 +51,19 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
     /**
      * The folder to view. The root folder if null.
      */
+    @Nullable
     private MusicFolderItem mFolder;
 
+    @NonNull
     @Override
     public ItemView<MusicFolderItem> createItemView() {
         return new MusicFolderView(this);
     }
 
+    @NonNull
     @Override
     protected ItemAdapter<MusicFolderItem> createItemListAdapter(
-            ItemView<MusicFolderItem> itemView) {
+            @NonNull ItemView<MusicFolderItem> itemView) {
         return new ItemAdapter<MusicFolderItem>(itemView);
     }
 
@@ -80,7 +84,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         if (mFolder != null) {
             getMenuInflater().inflate(R.menu.playmenu, menu);
         }
@@ -91,7 +95,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
      * Sets the enabled state of the R.menu.playmenu items.
      */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         if (mFolder != null) {
             final int[] ids = {R.id.play_now, R.id.add_to_playlist};
             final boolean boundToService = getService() != null;
@@ -106,7 +110,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.play_now:
                 play(mFolder);
@@ -134,7 +138,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
      *
      * @param activity
      */
-    public static void show(Activity activity) {
+    public static void show(@NonNull Activity activity) {
         final Intent intent = new Intent(activity, MusicFolderListActivity.class);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -146,7 +150,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
      * @param activity
      * @param folder The folder whose contents will be shown.
      */
-    public static void show(Activity activity, MusicFolderItem folder) {
+    public static void show(@NonNull Activity activity, @NonNull MusicFolderItem folder) {
         final Intent intent = new Intent(activity, MusicFolderListActivity.class);
         intent.putExtra(folder.getClass().getName(), folder);
         activity.startActivity(intent);

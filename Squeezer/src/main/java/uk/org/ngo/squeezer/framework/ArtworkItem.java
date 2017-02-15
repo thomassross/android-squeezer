@@ -17,6 +17,8 @@
 package uk.org.ngo.squeezer.framework;
 
 
+import android.support.annotation.NonNull;
+
 /**
  * A PlaylistItem that has associated artwork.
  */
@@ -32,6 +34,7 @@ public abstract class ArtworkItem extends PlaylistItem {
         this.artwork_track_id = artwork_track_id;
     }
 
+    @NonNull
     @Override
     protected String toStringOpen() {
         return super.toStringOpen() + ", artwork_track_id: " + artwork_track_id;

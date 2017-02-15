@@ -157,6 +157,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     private MediaSession mMediaSession;
 
     /** The player state that the most recent notifcation was for. */
+    @Nullable
     private PlayerState mNotifiedPlayerState;
 
     /**
@@ -187,6 +188,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     private boolean scrobblingPreviouslyEnabled;
 
     /** User's preferred notification type. */
+    @Nullable
     @Preferences.NotificationType
     private String mNotificationType = Preferences.NOTIFICATION_TYPE_NONE;
 
@@ -272,7 +274,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         try{
             if(intent != null && intent.getAction()!= null ) {
                 if (intent.getAction().equals(ACTION_NEXT_TRACK)) {
@@ -388,7 +390,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * player didn't have a sleep duration set, and now does).
      * @param event
      */
-    public void onEvent(PlayerStateChanged event) {
+    public void onEvent(@NonNull PlayerStateChanged event) {
         updatePlayerSubscription(event.player, calculateSubscriptionTypeFor(event.player));
     }
 
@@ -397,7 +399,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * <p>
      * Updates the Wi-Fi lock and ongoing status notification as necessary.
      */
-    public void onEvent(PlayStatusChanged event) {
+    public void onEvent(@NonNull PlayStatusChanged event) {
         if (event.player.equals(mActivePlayer.get())) {
             updateWifiLock(event.player.getPlayerState().isPlaying());
             updateOngoingNotification();
@@ -468,7 +470,8 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * Determine the correct status subscription type for the given player, based on
      * how frequently we need to know its status.
      */
-    private @PlayerState.PlayerSubscriptionType String calculateSubscriptionTypeFor(Player player) {
+    @NonNull
+    private @PlayerState.PlayerSubscriptionType String calculateSubscriptionTypeFor(@NonNull Player player) {
         Player activePlayer = this.mActivePlayer.get();
 
         if (mEventBus.hasSubscriberForEvent(PlayerStateChanged.class) ||
@@ -500,7 +503,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * @param playerSubscriptionType the new subscription type
      */
     private void updatePlayerSubscription(
-            Player player,
+            @NonNull Player player,
             @NonNull @PlayerState.PlayerSubscriptionType String playerSubscriptionType) {
         PlayerState playerState = player.getPlayerState();
 
@@ -726,7 +729,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         mNotifiedPlayerState = null;
     }
 
-    public void onEvent(ConnectionChanged event) {
+    public void onEvent(@NonNull ConnectionChanged event) {
         if (event.connectionState == ConnectionState.DISCONNECTED) {
             mPlayers.clear();
             mEventBus.removeAllStickyEvents();
@@ -741,13 +744,13 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         strings();
     }
 
-    public void onEvent(MusicChanged event) {
+    public void onEvent(@NonNull MusicChanged event) {
         if (event.player.equals(mActivePlayer.get())) {
             updateOngoingNotification();
         }
     }
 
-    public void onEvent(PlayersChanged event) {
+    public void onEvent(@NonNull PlayersChanged event) {
         mPlayers.clear();
         mPlayers.putAll(event.players);
 
@@ -785,12 +788,13 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     /** A download request will be passed to the download manager for each song called back to this */
     private final IServiceItemListCallback<Song> songDownloadCallback = new IServiceItemListCallback<Song>() {
         @Override
-        public void onItemsReceived(int count, int start, Map<String, String> parameters, List<Song> items, Class<Song> dataType) {
+        public void onItemsReceived(int count, int start, Map<String, String> parameters, @NonNull List<Song> items, Class<Song> dataType) {
             for (Song item : items) {
                 downloadSong(item);
             }
         }
 
+        @NonNull
         @Override
         public Object getClient() {
             return this;
@@ -804,12 +808,13 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      */
     private final IServiceItemListCallback<MusicFolderItem> musicFolderDownloadCallback = new IServiceItemListCallback<MusicFolderItem>() {
         @Override
-        public void onItemsReceived(int count, int start, Map<String, String> parameters, List<MusicFolderItem> items, Class<MusicFolderItem> dataType) {
+        public void onItemsReceived(int count, int start, Map<String, String> parameters, @NonNull List<MusicFolderItem> items, Class<MusicFolderItem> dataType) {
             for (MusicFolderItem item : items) {
                 squeezeService.downloadItem(item);
             }
         }
 
+        @NonNull
         @Override
         public Object getClient() {
             return this;
@@ -1037,7 +1042,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public void adjustVolumeTo(Player player, int newVolume) {
+        public void adjustVolumeTo(@NonNull Player player, int newVolume) {
             cli.sendPlayerCommand(player, "mixer volume " + Math.min(100, Math.max(0, newVolume)));
         }
 
@@ -1091,17 +1096,17 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public void togglePower(Player player) {
+        public void togglePower(@NonNull Player player) {
             cli.sendPlayerCommand(player, "power");
         }
 
         @Override
-        public void playerRename(Player player, String newName) {
+        public void playerRename(@NonNull Player player, String newName) {
             cli.sendPlayerCommand(player, "name " + Util.encode(newName));
         }
 
         @Override
-        public void sleep(Player player, int duration) {
+        public void sleep(@NonNull Player player, int duration) {
             cli.sendPlayerCommand(player, "sleep " + duration);
         }
 
@@ -1211,6 +1216,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
             }
         }
 
+        @NonNull
         private String fadeInSecs() {
             return mFadeInSecs > 0 ? " " + mFadeInSecs : "";
         }
@@ -1323,7 +1329,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public boolean playlistControl(@BaseActivity.PlaylistControlCmd String cmd, PlaylistItem playlistItem, int index) {
+        public boolean playlistControl(@BaseActivity.PlaylistControlCmd String cmd, @NonNull PlaylistItem playlistItem, int index) {
             if (!isConnected()) {
                 return false;
             }
@@ -1394,7 +1400,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         @Override
         public boolean pluginPlaylistControl(
-                Plugin plugin, @PluginItemListActivity.PluginPlaylistControlCmd String cmd,
+                @NonNull Plugin plugin, @PluginItemListActivity.PluginPlaylistControlCmd String cmd,
                 String itemId) {
             if (!isConnected()) {
                 return false;
@@ -1425,17 +1431,20 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
             return mActivePlayer.get();
         }
 
+        @NonNull
         @Override
         public List<Player> getPlayers() {
             // TODO: Return a Collection, instead of casting? Or return an ImmutableList?
             return (List<Player>) new ArrayList<Player>(mPlayers.values());
         }
 
+        @NonNull
         @Override
         public java.util.Collection<Player> getConnectedPlayers() {
             return mPlayers.values();
         }
 
+        @Nullable
         @Override
         public PlayerState getPlayerState() {
             return getActivePlayerState();
@@ -1471,7 +1480,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public void preferenceChanged(String key) {
+        public void preferenceChanged(@NonNull String key) {
             Log.i(TAG, "Preference changed: " + key);
             cachePreferences();
 
@@ -1583,14 +1592,14 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public void alarmSetPlaylist(String id, AlarmPlaylist playlist) {
+        public void alarmSetPlaylist(String id, @NonNull AlarmPlaylist playlist) {
             String url = "".equals(playlist.getId()) ? "0" : playlist.getId();
             sendActivePlayerCommand("alarm update id:" + Util.encode(id) + " url:" + Util.encode(url));
         }
 
         /* Start an async fetch of the SqueezeboxServer's albums, which are matching the given parameters */
         @Override
-        public void albums(IServiceItemListCallback<Album> callback, int start, String sortOrder, String searchString, FilterItem... filters) throws HandshakeNotCompleteException {
+        public void albums(IServiceItemListCallback<Album> callback, int start, String sortOrder, @Nullable String searchString, @NonNull FilterItem... filters) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1609,7 +1618,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         /* Start an async fetch of the SqueezeboxServer's artists */
         @Override
-        public void artists(IServiceItemListCallback<Artist> callback, int start, String searchString, FilterItem... filters) throws HandshakeNotCompleteException {
+        public void artists(IServiceItemListCallback<Artist> callback, int start, @Nullable String searchString, @NonNull FilterItem... filters) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1634,7 +1643,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         /* Start an async fetch of the SqueezeboxServer's genres */
         @Override
-        public void genres(int start, String searchString, IServiceItemListCallback<Genre> callback) throws HandshakeNotCompleteException {
+        public void genres(int start, @Nullable String searchString, IServiceItemListCallback<Genre> callback) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1659,7 +1668,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
          * @param callback Results will be returned through this
          */
         @Override
-        public void musicFolders(int start, MusicFolderItem musicFolderItem, IServiceItemListCallback<MusicFolderItem> callback) throws HandshakeNotCompleteException {
+        public void musicFolders(int start, @Nullable MusicFolderItem musicFolderItem, IServiceItemListCallback<MusicFolderItem> callback) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1676,7 +1685,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         /* Start an async fetch of the SqueezeboxServer's songs */
         @Override
-        public void songs(IServiceItemListCallback<Song> callback, int start, String sortOrder, String searchString, FilterItem... filters) throws HandshakeNotCompleteException {
+        public void songs(IServiceItemListCallback<Song> callback, int start, String sortOrder, @Nullable String searchString, @NonNull FilterItem... filters) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1703,7 +1712,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         /* Start an async fetch of the songs of the supplied playlist */
         @Override
-        public void playlistSongs(int start, Playlist playlist, IServiceItemListCallback<Song> callback) throws HandshakeNotCompleteException {
+        public void playlistSongs(int start, @NonNull Playlist playlist, IServiceItemListCallback<Song> callback) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1721,7 +1730,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public boolean playlistsDelete(Playlist playlist) {
+        public boolean playlistsDelete(@NonNull Playlist playlist) {
             if (!isConnected()) {
                 return false;
             }
@@ -1730,7 +1739,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public boolean playlistsMove(Playlist playlist, int index, int toindex) {
+        public boolean playlistsMove(@NonNull Playlist playlist, int index, int toindex) {
             if (!isConnected()) {
                 return false;
             }
@@ -1749,7 +1758,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public boolean playlistsRemove(Playlist playlist, int index) {
+        public boolean playlistsRemove(@NonNull Playlist playlist, int index) {
             if (!isConnected()) {
                 return false;
             }
@@ -1759,7 +1768,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         }
 
         @Override
-        public boolean playlistsRename(Playlist playlist, String newname) {
+        public boolean playlistsRename(@NonNull Playlist playlist, String newname) {
             if (!isConnected()) {
                 return false;
             }
@@ -1807,7 +1816,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         /* Start an asynchronous fetch of the squeezeservers items of the given type */
         @Override
-        public void pluginItems(int start, Plugin plugin, PluginItem parent, String search, IServiceItemListCallback<PluginItem> callback) throws HandshakeNotCompleteException {
+        public void pluginItems(int start, @NonNull Plugin plugin, @Nullable PluginItem parent, @Nullable String search, IServiceItemListCallback<PluginItem> callback) throws HandshakeNotCompleteException {
             if (!mHandshakeComplete) {
                 throw new HandshakeNotCompleteException("Handshake with server has not completed.");
             }
@@ -1856,37 +1865,37 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     class EventBus extends de.greenrobot.event.EventBus {
 
         @Override
-        public void register(Object subscriber) {
+        public void register(@NonNull Object subscriber) {
             super.register(subscriber);
             updateAllPlayerSubscriptionStates();
         }
 
         @Override
-        public void register(Object subscriber, int priority) {
+        public void register(@NonNull Object subscriber, int priority) {
             super.register(subscriber, priority);
             updateAllPlayerSubscriptionStates();
         }
 
         @Override
-        public void post(Object event) {
+        public void post(@NonNull Object event) {
             Log.v("EventBus", "post() " + event.getClass().getSimpleName() + ": " + event);
             super.post(event);
         }
 
         @Override
-        public void postSticky(Object event) {
+        public void postSticky(@NonNull Object event) {
             Log.v("EventBus", "postSticky() " + event.getClass().getSimpleName() + ": " + event);
             super.postSticky(event);
         }
 
         @Override
-        public void registerSticky(Object subscriber) {
+        public void registerSticky(@NonNull Object subscriber) {
             super.registerSticky(subscriber);
             updateAllPlayerSubscriptionStates();
         }
 
         @Override
-        public void registerSticky(Object subscriber, int priority) {
+        public void registerSticky(@NonNull Object subscriber, int priority) {
             super.registerSticky(subscriber, priority);
             updateAllPlayerSubscriptionStates();
         }

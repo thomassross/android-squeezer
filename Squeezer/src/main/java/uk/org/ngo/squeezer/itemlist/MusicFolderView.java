@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,7 +48,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     }
 
     @Override
-    public void bindView(View view, MusicFolderItem item) {
+    public void bindView(@NonNull View view, @NonNull MusicFolderItem item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
@@ -69,7 +70,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     }
 
     @Override
-    public boolean isSelectable(MusicFolderItem item) {
+    public boolean isSelectable(@NonNull MusicFolderItem item) {
         if ("track".equals(item.getType())) {
             return super.isSelectable(item);
         }
@@ -80,7 +81,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     }
 
     @Override
-    public void onItemSelected(int index, MusicFolderItem item) {
+    public void onItemSelected(int index, @NonNull MusicFolderItem item) {
         if ("track".equals(item.getType())) {
             super.onItemSelected(index, item);
         } else
@@ -91,7 +92,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
 
     // XXX: Make this a menu resource.
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         MusicFolderItem item = (MusicFolderItem) menuInfo.item;
@@ -113,7 +114,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, MusicFolderItem selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, @NonNull MusicFolderItem selectedItem) {
         switch (menuItem.getItemId()) {
             case R.id.browse_songs:
                 MusicFolderListActivity.show(getActivity(), selectedItem);
@@ -127,6 +128,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
         return super.doItemContext(menuItem, index, selectedItem);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.musicfolder, quantity);

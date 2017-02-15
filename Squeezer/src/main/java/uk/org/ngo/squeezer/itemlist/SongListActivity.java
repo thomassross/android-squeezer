@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -74,47 +75,55 @@ public class SongListActivity extends BaseListActivity<Song>
         this.searchString = searchString;
     }
 
+    @Nullable
     private Album album;
 
+    @Nullable
     public Album getAlbum() {
         return album;
     }
 
-    public void setAlbum(Album album) {
+    public void setAlbum(@Nullable Album album) {
         this.album = album;
     }
 
+    @Nullable
     private Artist artist;
 
+    @Nullable
     public Artist getArtist() {
         return artist;
     }
 
-    public void setArtist(Artist artist) {
+    public void setArtist(@Nullable Artist artist) {
         this.artist = artist;
     }
 
+    @Nullable
     private Year year;
 
+    @Nullable
     @Override
     public Year getYear() {
         return year;
     }
 
     @Override
-    public void setYear(Year year) {
+    public void setYear(@Nullable Year year) {
         this.year = year;
     }
 
+    @Nullable
     private Genre genre;
 
+    @Nullable
     @Override
     public Genre getGenre() {
         return genre;
     }
 
     @Override
-    public void setGenre(Genre genre) {
+    public void setGenre(@Nullable Genre genre) {
         this.genre = genre;
     }
 
@@ -155,7 +164,7 @@ public class SongListActivity extends BaseListActivity<Song>
 
             btnContextMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(@NonNull View v) {
                     v.showContextMenu();
                 }
             });
@@ -228,7 +237,7 @@ public class SongListActivity extends BaseListActivity<Song>
      * Ensures that the artwork in the UI is updated after the server handshake completes.
      */
     @Override
-    public void onEventMainThread(HandshakeComplete event) {
+    public void onEventMainThread(@NonNull HandshakeComplete event) {
         if (!sortOrder.can(event.version)) {
             sortOrder = SongViewDialog.SongsSortOrder.title;
         }
@@ -236,7 +245,7 @@ public class SongListActivity extends BaseListActivity<Song>
         updateArtwork();
     }
 
-    public static void show(Context context, Item... items) {
+    public static void show(@NonNull Context context, @NonNull Item... items) {
         final Intent intent = new Intent(context, SongListActivity.class);
         for (Item item : items) {
             intent.putExtra(item.getClass().getName(), item);
@@ -266,6 +275,7 @@ public class SongListActivity extends BaseListActivity<Song>
         return songViewLogic;
     }
 
+    @NonNull
     private SongViewWithArt songViewLogicFromListLayout() {
         return (listLayout == SongViewDialog.SongListLayout.grid) ? new SongGridView(this) : new SongViewWithArt(this);
     }
@@ -327,8 +337,8 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         if (album != null) {
@@ -344,7 +354,7 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
 
@@ -376,7 +386,7 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         // Play all requires that we're showing all titles of an item which can be played.
         // If we're showing tracks of an album, the context menu already shows them, so don't show
         // the menu items.
@@ -408,7 +418,7 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.play_now:
                 play(getPlaylistItem());
@@ -428,7 +438,9 @@ public class SongListActivity extends BaseListActivity<Song>
         return false;
     }
 
-    /* package */ PlaylistItem getPlaylistItem() {
+    /* package */
+    @Nullable
+    PlaylistItem getPlaylistItem() {
         if (hasPlaylistItem()) {
             if (album != null) {
                 return album;

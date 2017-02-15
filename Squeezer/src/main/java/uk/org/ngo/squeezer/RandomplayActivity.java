@@ -96,7 +96,7 @@ public class RandomplayActivity extends BaseActivity {
         }
     }
 
-    static void show(Context context) {
+    static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, RandomplayActivity.class);
         context.startActivity(intent);
     }

@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
+
 /**
  * Items that can be added to Squeezeserver playlists (anything that can be passed to the
  * {@code playlistcontrol} command) should derive from this class and implement {@link
@@ -32,15 +34,18 @@ public abstract class PlaylistItem extends Item implements FilterItem {
      *
      * @return the tag, e.g., "album_id".
      */
+    @NonNull
     abstract public String getPlaylistTag();
 
 
     /** @return The parameter to use in the {@code playlistcontrol} command for this item.
      */
+    @NonNull
     public String getPlaylistParameter() {
         return getPlaylistTag() + ":" + getId();
     }
 
+    @NonNull
     @Override
     public String getFilterParameter() {
         return getFilterTag() + ":" + getId();

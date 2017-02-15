@@ -36,6 +36,7 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
  */
 public class MusicFolderItem extends PlaylistItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         if ("track".equals(type)) {
@@ -53,6 +54,7 @@ public class MusicFolderItem extends PlaylistItem {
         return "Unknown_type_in_getTag()";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "folder_id";
@@ -65,6 +67,7 @@ public class MusicFolderItem extends PlaylistItem {
         return name;
     }
 
+    @NonNull
     public MusicFolderItem setName(String name) {
         this.name = name;
         return this;
@@ -80,6 +83,7 @@ public class MusicFolderItem extends PlaylistItem {
         return type;
     }
 
+    @NonNull
     public MusicFolderItem setType(String type) {
         this.type = type;
         return this;
@@ -106,7 +110,7 @@ public class MusicFolderItem extends PlaylistItem {
         return mDownloadUrl;
     }
 
-    public MusicFolderItem(Map<String, String> record) {
+    public MusicFolderItem(@NonNull Map<String, String> record) {
         setId(record.get("id"));
         name = record.get("filename");
         type = record.get("type");
@@ -115,18 +119,20 @@ public class MusicFolderItem extends PlaylistItem {
     }
 
     public static final Creator<MusicFolderItem> CREATOR = new Creator<MusicFolderItem>() {
+        @NonNull
         @Override
         public MusicFolderItem[] newArray(int size) {
             return new MusicFolderItem[size];
         }
 
+        @NonNull
         @Override
-        public MusicFolderItem createFromParcel(Parcel source) {
+        public MusicFolderItem createFromParcel(@NonNull Parcel source) {
             return new MusicFolderItem(source);
         }
     };
 
-    private MusicFolderItem(Parcel source) {
+    private MusicFolderItem(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
         type = source.readString();
@@ -135,7 +141,7 @@ public class MusicFolderItem extends PlaylistItem {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
         dest.writeString(type);
@@ -143,6 +149,7 @@ public class MusicFolderItem extends PlaylistItem {
         dest.writeString(mDownloadUrl.toString());
     }
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + ", type: " + type;

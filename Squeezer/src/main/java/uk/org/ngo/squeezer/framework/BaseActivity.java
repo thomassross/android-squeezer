@@ -77,6 +77,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     private final Handler uiThreadHandler = new Handler() {
     };
 
+    @Nullable
     private SqueezePlayer squeezePlayer;
 
     /** Option menu volume control entry. */
@@ -109,11 +110,13 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     /**
      * Use this to post Runnables to work off thread
      */
+    @NonNull
     @Override
     public Handler getUIThreadHandler() {
         return uiThreadHandler;
     }
 
+    @Nullable
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -227,7 +230,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     private boolean mIsRestoredToTop;
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         if ((intent.getFlags() | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT) > 0) {
             mIsRestoredToTop = true;
@@ -283,7 +286,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
 
     @Override
     @CallSuper
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.base_activity, menu);
 
@@ -306,7 +309,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
 
     @Override
     @CallSuper
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 Intent upIntent = NavUtils.getParentActivityIntent(this);
@@ -396,7 +399,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
         return true;
     }
 
-    public void onEvent(PlayerVolume event) {
+    public void onEvent(@NonNull PlayerVolume event) {
         if (!mIgnoreVolumeChange && mVolumePanel != null && event.player == mService.getActivePlayer()) {
             mVolumePanel.postVolumeChanged(event.volume, event.player.getName());
         }
@@ -416,29 +419,29 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
         return mService != null && mService.isConnected();
     }
 
-    public String getServerString(ServerString stringToken) {
+    public String getServerString(@NonNull ServerString stringToken) {
         return ServerString.values()[stringToken.ordinal()].getLocalizedString();
     }
 
     // This section is just an easier way to call squeeze service
 
-    public void play(PlaylistItem item, int index) {
+    public void play(@NonNull PlaylistItem item, int index) {
         playlistControl(PLAYLIST_PLAY_NOW, item, index, R.string.ITEM_PLAYING);
     }
 
-    public void play(PlaylistItem item) {
+    public void play(@NonNull PlaylistItem item) {
         playlistControl(PLAYLIST_PLAY_NOW, item, 0, R.string.ITEM_PLAYING);
     }
 
-    public void add(PlaylistItem item) {
+    public void add(@NonNull PlaylistItem item) {
         playlistControl(PLAYLIST_ADD_TO_END, item, 0, R.string.ITEM_ADDED);
     }
 
-    public void insert(PlaylistItem item) {
+    public void insert(@NonNull PlaylistItem item) {
         playlistControl(PLAYLIST_PLAY_AFTER_CURRENT, item, 0, R.string.ITEM_INSERTED);
     }
 
-    private void playlistControl(@PlaylistControlCmd String cmd, PlaylistItem item, int index, int resId)
+    private void playlistControl(@PlaylistControlCmd String cmd, @NonNull PlaylistItem item, int index, int resId)
             {
         if (mService == null) {
             return;

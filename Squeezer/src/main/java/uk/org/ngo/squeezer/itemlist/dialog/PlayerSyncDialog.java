@@ -45,6 +45,7 @@ public class PlayerSyncDialog extends DialogFragment {
      * Activities that host this dialog must implement this interface.
      */
     public interface PlayerSyncDialogHost {
+        @NonNull
         Multimap<String, Player> getPlayerSyncGroups();
         Player getCurrentPlayer();
         void syncPlayerToPlayer(@NonNull Player slave, @NonNull String masterId);
@@ -58,7 +59,7 @@ public class PlayerSyncDialog extends DialogFragment {
 
     // Override the Fragment.onAttach() method to instantiate the PlayerSyncDialogHost.
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         // Verify that the host activity implements the callback interface
         try {

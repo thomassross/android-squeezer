@@ -1,5 +1,7 @@
 package uk.org.ngo.squeezer.util;
 
+import android.support.annotation.NonNull;
+
 import junit.framework.TestCase;
 
 import java.lang.reflect.Type;
@@ -239,11 +241,11 @@ public class ReflectionTest extends TestCase {
                 }.getClass(), AII.class));
     }
 
-    private void assertTypesEquals(Type[] expected, Type[] actual) {
+    private void assertTypesEquals(@NonNull Type[] expected, @NonNull Type[] actual) {
         assertEquals(typeArray(expected), typeArray(actual));
     }
 
-    private String typeArray(Type[] types) {
+    private String typeArray(@NonNull Type[] types) {
         StringBuilder sb = new StringBuilder();
         for (Type type : types) {
             sb.append(sb.length() > 0 ? "," : "[");

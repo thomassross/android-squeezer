@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class PluginItem extends Item {
         return name;
     }
 
+    @NonNull
     public PluginItem setName(String name) {
         this.name = name;
         return this;
@@ -96,7 +98,7 @@ public class PluginItem extends Item {
         this.audio = audio;
     }
 
-    public PluginItem(Map<String, String> record) {
+    public PluginItem(@NonNull Map<String, String> record) {
         setId(record.get("id"));
         name = record.containsKey("name") ? record.get("name") : record.get("title");
         description = record.get("description");
@@ -107,18 +109,20 @@ public class PluginItem extends Item {
     }
 
     public static final Creator<PluginItem> CREATOR = new Creator<PluginItem>() {
+        @NonNull
         @Override
         public PluginItem[] newArray(int size) {
             return new PluginItem[size];
         }
 
+        @NonNull
         @Override
-        public PluginItem createFromParcel(Parcel source) {
+        public PluginItem createFromParcel(@NonNull Parcel source) {
             return new PluginItem(source);
         }
     };
 
-    private PluginItem(Parcel source) {
+    private PluginItem(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
         description = source.readString();
@@ -129,7 +133,7 @@ public class PluginItem extends Item {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
         dest.writeString(description);
@@ -139,6 +143,7 @@ public class PluginItem extends Item {
         dest.writeInt(audio ? 1 : 0);
     }
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + ", type: " + getType() + ", hasItems: " + isHasitems() +

@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
+
 import uk.org.ngo.squeezer.R;
 
 public class ApplicationView extends PluginItemView {
@@ -24,6 +26,7 @@ public class ApplicationView extends PluginItemView {
         super(activity);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.application, quantity);

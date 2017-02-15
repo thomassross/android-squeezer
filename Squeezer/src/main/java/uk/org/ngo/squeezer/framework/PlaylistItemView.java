@@ -33,12 +33,13 @@ import uk.org.ngo.squeezer.itemlist.action.PlayableItemAction;
 public abstract class PlaylistItemView<T extends PlaylistItem> extends
         BaseItemView<T> implements OnSharedPreferenceChangeListener {
 
+    @NonNull
     private final Preferences preferences;
 
     @NonNull
     protected PlayableItemAction onSelectAction;
 
-    public PlaylistItemView(ItemListActivity activity) {
+    public PlaylistItemView(@NonNull ItemListActivity activity) {
         super(activity);
         preferences = new Preferences(activity);
         preferences.registerOnSharedPreferenceChangeListener(this);

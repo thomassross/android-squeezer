@@ -34,11 +34,13 @@ import uk.org.ngo.squeezer.framework.ArtworkItem;
 public class Song extends ArtworkItem {
     private static final String TAG = "Song";
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "track_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "track_id";
@@ -155,7 +157,7 @@ public class Song extends ArtworkItem {
         return mArtworkUrl;
     }
 
-    public Song(Map<String, String> record) {
+    public Song(@NonNull Map<String, String> record) {
         if (getId() == null) {
             setId(record.get("track_id"));
         }
@@ -192,18 +194,20 @@ public class Song extends ArtworkItem {
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @NonNull
         @Override
         public Song[] newArray(int size) {
             return new Song[size];
         }
 
+        @NonNull
         @Override
-        public Song createFromParcel(Parcel source) {
+        public Song createFromParcel(@NonNull Parcel source) {
             return new Song(source);
         }
     };
 
-    private Song(Parcel source) {
+    private Song(@NonNull Parcel source) {
         setId(source.readString());
         mName = source.readString();
         mArtist = source.readString();
@@ -221,7 +225,7 @@ public class Song extends ArtworkItem {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(mName);
         dest.writeString(mArtist);
@@ -238,6 +242,7 @@ public class Song extends ArtworkItem {
         dest.writeString(mDownloadUrl.toString());
     }
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + ", mArtist: " + mArtist + ", year: " + mYear;

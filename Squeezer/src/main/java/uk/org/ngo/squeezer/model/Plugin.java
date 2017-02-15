@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public class Plugin extends Item {
         return name;
     }
 
+    @NonNull
     public Plugin setName(String name) {
         this.name = name;
         return this;
@@ -98,7 +100,7 @@ public class Plugin extends Item {
         setIconResource(iconResource);
     }
 
-    public Plugin(Map<String, String> record) {
+    public Plugin(@NonNull Map<String, String> record) {
         setId(record.get("cmd"));
         name = record.get("name");
         type = record.get("type");
@@ -107,18 +109,20 @@ public class Plugin extends Item {
     }
 
     public static final Creator<Plugin> CREATOR = new Creator<Plugin>() {
+        @NonNull
         @Override
         public Plugin[] newArray(int size) {
             return new Plugin[size];
         }
 
+        @NonNull
         @Override
-        public Plugin createFromParcel(Parcel source) {
+        public Plugin createFromParcel(@NonNull Parcel source) {
             return new Plugin(source);
         }
     };
 
-    private Plugin(Parcel source) {
+    private Plugin(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
         type = source.readString();
@@ -128,7 +132,7 @@ public class Plugin extends Item {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
         dest.writeString(type);
@@ -137,6 +141,7 @@ public class Plugin extends Item {
         dest.writeInt(weight);
     }
 
+    @NonNull
     @Override
     public String toStringOpen() {
         return super.toStringOpen() + "type: " + getType() + ", weight: " + getWeight();

@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.MainThread;
 import android.support.v7.app.ActionBar;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -137,7 +138,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     @MainThread
-    public void onEventMainThread(HandshakeComplete event) {
+    public void onEventMainThread(@NonNull HandshakeComplete event) {
         int[] icons = new int[]{
                 R.drawable.ic_artists,
                 R.drawable.ic_albums, R.drawable.ic_songs,
@@ -261,7 +262,7 @@ public class HomeActivity extends BaseActivity {
         }
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, HomeActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

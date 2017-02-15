@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.net.Uri;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,7 +72,7 @@ public class AlbumView extends AlbumArtView<Album> {
     }
 
     @Override
-    public void bindView(View view, Album item) {
+    public void bindView(@NonNull View view, @NonNull Album item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
@@ -98,7 +99,7 @@ public class AlbumView extends AlbumArtView<Album> {
      * Creates the context menu for an album by inflating R.menu.albumcontextmenu.
      */
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         menuInfo.menuInflater.inflate(R.menu.albumcontextmenu, menu);
@@ -110,7 +111,7 @@ public class AlbumView extends AlbumArtView<Album> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, Album selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, Album selectedItem) {
         switch (menuItem.getItemId()) {
             case R.id.browse_songs_by_artist:
                 SongListActivity.show(getActivity(), selectedItem, mArtist);
@@ -119,6 +120,7 @@ public class AlbumView extends AlbumArtView<Album> {
         return super.doItemContext(menuItem, index, selectedItem);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.album, quantity);

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,16 +54,18 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
         }
     }
 
-    public static void show(Activity context, Playlist playlist) {
+    public static void show(@NonNull Activity context, Playlist playlist) {
         final Intent intent = new Intent(context, PlaylistSongsActivity.class);
         intent.putExtra("playlist", playlist);
         context.startActivityForResult(intent, PlaylistsActivity.PLAYLIST_SONGS_REQUEST_CODE);
     }
 
+    @Nullable
     private Playlist playlist;
 
     private String oldName;
 
+    @Nullable
     public Playlist getPlaylist() {
         return playlist;
     }
@@ -91,13 +94,14 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
         finish();
     }
 
+    @Nullable
     @Override
     public ItemView<Song> createItemView() {
         // XXX: Note, very similar to code in CurrentPlaylistActivity#createItemView,
         // investigate opportunities to refactor.
         SongViewWithArt view = new SongViewWithArt(this) {
             @Override
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+            public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
                 super.onCreateContextMenu(menu, v, menuInfo);
 
                 menu.findItem(R.id.play_from_here).setVisible(true);
@@ -117,7 +121,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
             }
 
             @Override
-            public boolean doItemContext(MenuItem menuItem, int index, Song selectedItem) {
+            public boolean doItemContext(@NonNull MenuItem menuItem, int index, @NonNull Song selectedItem) {
                 ISqueezeService service = getService();
                 if (service == null) {
                     return super.doItemContext(menuItem, index, selectedItem);
@@ -176,7 +180,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.playlistmenu, menu);
         getMenuInflater().inflate(R.menu.playmenu, menu);
         return super.onCreateOptionsMenu(menu);
@@ -186,7 +190,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
      * Sets the enabled state of the R.menu.playlistmenu and R.menu.playmenu items.
      */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         final int[] ids = {
                 R.id.menu_item_playlists_delete,
                 R.id.menu_item_playlists_rename,
@@ -204,7 +208,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_playlists_delete:
                 new PlaylistDeleteDialog().show(getSupportFragmentManager(),
@@ -240,11 +244,11 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
         setResult(RESULT_OK, intent);
     }
 
-    public void onEvent(PlaylistCreateFailed event) {
+    public void onEvent(@NonNull PlaylistCreateFailed event) {
         showServiceMessage(event.failureMessage);
     }
 
-    public void onEvent(PlaylistRenameFailed event) {
+    public void onEvent(@NonNull PlaylistRenameFailed event) {
         playlist.setName(oldName);
         getIntent().putExtra("playlist", playlist);
         showServiceMessage(event.failureMessage);

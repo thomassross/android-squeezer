@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +42,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
     }
 
     @Override
-    public void bindView(View view, PluginItem item) {
+    public void bindView(@NonNull View view, @NonNull PluginItem item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
@@ -72,13 +74,14 @@ public class PluginItemView extends BaseItemView<PluginItem> {
         }
     }
 
+    @Nullable
     @Override
     public String getQuantityString(int quantity) {
         return null;
     }
 
     @Override
-    public boolean isSelectable(PluginItem item) {
+    public boolean isSelectable(@NonNull PluginItem item) {
         return item.isHasitems();
     }
 
@@ -89,7 +92,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
 
     // XXX: Make this a menu resource.
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         if (((PluginItem) menuInfo.item).isAudio()) {
             super.onCreateContextMenu(menu, v, menuInfo);
 
@@ -100,7 +103,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, PluginItem selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, @NonNull PluginItem selectedItem) {
         switch (menuItem.getItemId()) {
             case R.id.play_now:
                 if (mActivity.play(selectedItem)) {

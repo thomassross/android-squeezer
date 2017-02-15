@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.support.annotation.NonNull;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class Intents {
      * @return True if an Intent with the specified action can be sent and responded to, false
      * otherwise.
      */
-    public static boolean isIntentAvailable(Context context, String action) {
+    public static boolean isIntentAvailable(@NonNull Context context, String action) {
         final PackageManager packageManager = context.getPackageManager();
         final Intent intent = new Intent(action);
         List<ResolveInfo> list =
@@ -40,7 +41,7 @@ public class Intents {
      * @return True if an Intent with the specified action can be sent and responded to, false
      * otherwise.
      */
-    public static boolean isBroadcastReceiverAvailable(Context context, String action) {
+    public static boolean isBroadcastReceiverAvailable(@NonNull Context context, String action) {
         final PackageManager packageManager = context.getPackageManager();
         final Intent intent = new Intent(action);
         List<ResolveInfo> list =

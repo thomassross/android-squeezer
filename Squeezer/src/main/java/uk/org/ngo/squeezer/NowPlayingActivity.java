@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.framework.BaseActivity;
 
@@ -35,7 +36,7 @@ public class NowPlayingActivity extends BaseActivity {
         setContentView(R.layout.now_playing);
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, NowPlayingActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);

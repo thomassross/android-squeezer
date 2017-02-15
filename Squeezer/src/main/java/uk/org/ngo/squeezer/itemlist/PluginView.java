@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import uk.org.ngo.squeezer.framework.BaseItemView;
@@ -32,7 +33,7 @@ public abstract class PluginView extends BaseItemView<Plugin> {
     }
 
     @Override
-    public void bindView(View view, Plugin item) {
+    public void bindView(@NonNull View view, @NonNull Plugin item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());

@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -25,11 +26,13 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 public class Playlist extends PlaylistItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "playlist_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "playlist_id";
@@ -42,35 +45,38 @@ public class Playlist extends PlaylistItem {
         return name;
     }
 
+    @NonNull
     public Playlist setName(String name) {
         this.name = name;
         return this;
     }
 
-    public Playlist(Map<String, String> record) {
+    public Playlist(@NonNull Map<String, String> record) {
         setId(record.containsKey("playlist_id") ? record.get("playlist_id") : record.get("id"));
         name = record.get("playlist");
     }
 
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
+        @NonNull
         @Override
         public Playlist[] newArray(int size) {
             return new Playlist[size];
         }
 
+        @NonNull
         @Override
-        public Playlist createFromParcel(Parcel source) {
+        public Playlist createFromParcel(@NonNull Parcel source) {
             return new Playlist(source);
         }
     };
 
-    private Playlist(Parcel source) {
+    private Playlist(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
     }

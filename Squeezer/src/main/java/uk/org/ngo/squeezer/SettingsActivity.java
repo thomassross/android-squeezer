@@ -36,6 +36,8 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.text.Html;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -62,6 +64,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
     private static final int DIALOG_SCROBBLE_APPS = 0;
 
+    @Nullable
     private ISqueezeService service = null;
 
     private Preference addressPref;
@@ -70,6 +73,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
     private final ThemeManager mThemeManager = new ThemeManager();
 
+    @Nullable
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -124,7 +128,7 @@ public class SettingsActivity extends PreferenceActivity implements
         startSqueezePlayerPref.setChecked(sharedPreferences.getBoolean(Preferences.KEY_SQUEEZEPLAYER_ENABLED, true));
     }
 
-    private void fillScrobblePreferences(SharedPreferences preferences) {
+    private void fillScrobblePreferences(@NonNull SharedPreferences preferences) {
         CheckBoxPreference scrobblePref = (CheckBoxPreference) findPreference(
                 Preferences.KEY_SCROBBLE_ENABLED);
         scrobblePref.setOnPreferenceChangeListener(this);
@@ -152,8 +156,8 @@ public class SettingsActivity extends PreferenceActivity implements
         }
     }
 
-    private void fillNotificationPreferences(SharedPreferences preferences,
-                                             ListPreference notificationTypePref) {
+    private void fillNotificationPreferences(@NonNull SharedPreferences preferences,
+                                             @NonNull ListPreference notificationTypePref) {
         // If an old KEY_NOTIFY_OF_CONNECTION preference exists, use it, delete it, and
         // upgrade it to the new KEY_NOTIFICATION_TYPE preference.
         if (preferences.contains(Preferences.KEY_NOTIFY_OF_CONNECTION)) {
@@ -201,10 +205,11 @@ public class SettingsActivity extends PreferenceActivity implements
         if (useSdCardScreen != null) {
             final boolean useSdCard = preferences.isDownloadUseSdCard();
             useSdCardScreen.setSummary(useSdCard ? R.string.on : R.string.off);
-            ((BaseAdapter)useSdCardScreen.getRootAdapter()).notifyDataSetChanged();
+            ((BaseAdapter) useSdCardScreen.getRootAdapter()).notifyDataSetChanged();
         }
 
-        final CheckBoxPreference useServerPathPreference = (CheckBoxPreference) findPreference(Preferences.KEY_DOWNLOAD_USE_SERVER_PATH);        final ListPreference pathStructurePreference = (ListPreference) findPreference(Preferences.KEY_DOWNLOAD_PATH_STRUCTURE);
+        final CheckBoxPreference useServerPathPreference = (CheckBoxPreference) findPreference(Preferences.KEY_DOWNLOAD_USE_SERVER_PATH);
+        final ListPreference pathStructurePreference = (ListPreference) findPreference(Preferences.KEY_DOWNLOAD_PATH_STRUCTURE);
         final ListPreference filenameStructurePreference = (ListPreference) findPreference(Preferences.KEY_DOWNLOAD_FILENAME_STRUCTURE);
         final boolean useServerPath = preferences.isDownloadUseServerPath();
         useServerPathPreference.setChecked(useServerPath);
@@ -237,7 +242,6 @@ public class SettingsActivity extends PreferenceActivity implements
         onSelectThemePref.setOnPreferenceChangeListener(this);
         updateListPreferenceSummary(onSelectThemePref, onSelectThemePref.getValue());
     }
-
 
     private <E extends Enum<E> & EnumWithText> void fillEnumPreference(ListPreference listPreference, Class<E> actionTypes) {
         fillEnumPreference(listPreference, actionTypes.getEnumConstants());
@@ -309,7 +313,7 @@ public class SettingsActivity extends PreferenceActivity implements
      * @param pref the preference to set
      * @param value the preference's value (might not be set yet)
      */
-    private void updateListPreferenceSummary(ListPreference pref, String value) {
+    private void updateListPreferenceSummary(@NonNull ListPreference pref, String value) {
         CharSequence[] entries = pref.getEntries();
         int index = pref.findIndexOfValue(value);
         if (index != -1) pref.setSummary(entries[index]);
@@ -319,7 +323,7 @@ public class SettingsActivity extends PreferenceActivity implements
      * A preference has been changed by the user, but has not yet been persisted.
      */
     @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
+    public boolean onPreferenceChange(@NonNull Preference preference, @NonNull Object newValue) {
         final String key = preference.getKey();
         Log.v(TAG, "preference change for: " + key);
 
@@ -357,7 +361,7 @@ public class SettingsActivity extends PreferenceActivity implements
      * A preference has been changed by the user and is going to be persisted.
      */
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @NonNull String key) {
         Log.v(TAG, "Preference changed: " + key);
 
         if (key.startsWith(Preferences.KEY_SERVER_ADDRESS)) {
@@ -376,6 +380,7 @@ public class SettingsActivity extends PreferenceActivity implements
         }
     }
 
+    @Nullable
     @Override
     @Deprecated
     protected Dialog onCreateDialog(int id) {
@@ -423,7 +428,7 @@ public class SettingsActivity extends PreferenceActivity implements
         return dialog;
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, SettingsActivity.class);
         context.startActivity(intent);
     }

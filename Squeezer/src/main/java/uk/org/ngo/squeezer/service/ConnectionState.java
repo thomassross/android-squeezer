@@ -108,7 +108,7 @@ public class ConnectionState {
 
     private final AtomicReference<String[]> mediaDirs = new AtomicReference<String[]>();
 
-    void disconnect(EventBus eventBus, boolean loginFailed) {
+    void disconnect(@NonNull EventBus eventBus, boolean loginFailed) {
         Log.v(TAG, "disconnect" + (loginFailed ? ": authentication failure" : ""));
         currentConnectionGeneration.incrementAndGet();
         Socket socket = socketRef.get();
@@ -153,6 +153,7 @@ public class ConnectionState {
         Log.v(TAG, "HTTP port is now: " + port);
     }
 
+    @NonNull
     public String[] getMediaDirs() {
         String[] dirs = mediaDirs.get();
         return dirs == null ? new String[0] : dirs;
@@ -311,10 +312,10 @@ public class ConnectionState {
         }
     }
 
-    void startConnect(final SqueezeService service, @NonNull final EventBus eventBus,
+    void startConnect(@NonNull final SqueezeService service, @NonNull final EventBus eventBus,
                       @NonNull final Executor executor,
-                      final CliClient cli, String hostPort, final String userName,
-                      final String password) {
+                      @NonNull final CliClient cli, @NonNull String hostPort, final String userName,
+                      @NonNull final String password) {
         Log.v(TAG, "startConnect");
         // Common mistakes, based on crash reports...
         if (hostPort.startsWith("Http://") || hostPort.startsWith("http://")) {
@@ -355,6 +356,7 @@ public class ConnectionState {
                     startListeningThread(eventBus, executor, cli);
                     onCliPortConnectionEstablished(eventBus, cli, userName, password);
                     Authenticator.setDefault(new Authenticator() {
+                        @NonNull
                         @Override
                         public PasswordAuthentication getPasswordAuthentication() {
                             return new PasswordAuthentication(userName, password.toCharArray());
@@ -389,7 +391,7 @@ public class ConnectionState {
      * therefore a disconnect when handshake (the next step after authentication) is not completed,
      * is considered an authentication failure.
      */
-    void onCliPortConnectionEstablished(final EventBus eventBus, final CliClient cli, final String userName, final String password) {
+    void onCliPortConnectionEstablished(@NonNull final EventBus eventBus, @NonNull final CliClient cli, final String userName, final String password) {
         setConnectionState(eventBus, ConnectionState.LOGIN_STARTED);
         cli.sendCommandImmediately("login " + Util.encode(userName) + " " + Util.encode(password));
     }

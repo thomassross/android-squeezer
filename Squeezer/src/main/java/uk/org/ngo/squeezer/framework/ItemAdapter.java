@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -67,6 +69,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     /**
      * Text to display before the items are received from SqueezeServer
      */
+    @NonNull
     protected final String loadingText;
 
     /**
@@ -86,7 +89,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
      * @param itemView The {@link ItemView} to use with this adapter
      * @param emptyItem If set the list of items shall start with an empty item
      */
-    public ItemAdapter(ItemView<T> itemView, boolean emptyItem) {
+    public ItemAdapter(@NonNull ItemView<T> itemView, boolean emptyItem) {
         mItemView = itemView;
         mEmptyItem = emptyItem;
         loadingText = itemView.getActivity().getString(R.string.loading_text);
@@ -97,7 +100,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     /**
      * Calls {@link #ItemAdapter(ItemView, boolean)}, with emptyItem = false
      */
-    public ItemAdapter(ItemView<T> itemView) {
+    public ItemAdapter(@NonNull ItemView<T> itemView) {
         this(itemView, false);
     }
 
@@ -113,6 +116,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         pages.clear();
     }
 
+    @Nullable
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         T item = getItem(position);
@@ -124,6 +128,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
                 (position == 0 && mEmptyItem ? "" : loadingText));
     }
 
+    @Nullable
     public String getQuantityString(int size) {
         return mItemView.getQuantityString(size);
     }
@@ -193,7 +198,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         return page;
     }
 
-    private void setItems(int start, List<T> items) {
+    private void setItems(int start, @NonNull List<T> items) {
         T[] page = getPage(start);
         int offset = start % pageSize;
         for (T item : items) {
@@ -238,6 +243,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
      *
      * @return the title.
      */
+    @NonNull
     public String getHeader() {
         String item_text = getQuantityString(getCount());
         return getActivity().getString(R.string.browse_items_text, item_text, getCount());
@@ -259,7 +265,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
      * @param start The start position of items in this update.
      * @param items New items to insert in the main list
      */
-    public void update(int count, int start, List<T> items) {
+    public void update(int count, int start, @NonNull List<T> items) {
         int offset = (mEmptyItem ? 1 : 0);
         count += offset;
         start += offset;
@@ -275,7 +281,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     /**
      * @return The position of the given item in this adapter or 0 if not found
      */
-    public int findItem(T item) {
+    public int findItem(@Nullable T item) {
         for (int pos = 0; pos < getCount(); pos++) {
             if (getItem(pos) == null) {
                 if (item == null) {

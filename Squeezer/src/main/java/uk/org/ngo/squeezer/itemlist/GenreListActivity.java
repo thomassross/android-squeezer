@@ -27,6 +27,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class GenreListActivity extends BaseListActivity<Genre> {
 
+    @NonNull
     @Override
     public ItemView<Genre> createItemView() {
         return new GenreView(this);
@@ -38,7 +39,7 @@ public class GenreListActivity extends BaseListActivity<Genre> {
     }
 
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, GenreListActivity.class);
         context.startActivity(intent);
     }

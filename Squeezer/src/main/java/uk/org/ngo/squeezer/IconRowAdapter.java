@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -75,7 +76,7 @@ public class IconRowAdapter extends BaseAdapter {
      * @param items Item text.
      * @param images Image resources.
      */
-    public IconRowAdapter(Activity context, CharSequence[] items, int[] icons) {
+    public IconRowAdapter(Activity context, @NonNull CharSequence[] items, int[] icons) {
         this.activity = context;
 
         // Convert to a list of IconRow.

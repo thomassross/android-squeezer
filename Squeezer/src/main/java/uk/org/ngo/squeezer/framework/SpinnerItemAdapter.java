@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
@@ -33,7 +34,7 @@ import uk.org.ngo.squeezer.util.ImageFetcher;
 public class SpinnerItemAdapter<T extends Item> extends ItemAdapter<T> implements SpinnerAdapter {
     private SpinnerItemView<T> mItemView;
 
-    public SpinnerItemAdapter(SpinnerItemView itemView, boolean emptyItem) {
+    public SpinnerItemAdapter(@NonNull SpinnerItemView itemView, boolean emptyItem) {
         super(itemView, emptyItem);
         mItemView = itemView;
     }

@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -54,6 +55,7 @@ import uk.org.ngo.squeezer.widget.UndoBarController;
 
 public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSettingsDialog.HostActivity {
     /** The most recent active player. */
+    @Nullable
     private Player mActivePlayer;
 
     private AlarmView mAlarmView;
@@ -135,7 +137,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         }
     }
 
-    private void maybeOrderPrefs(ISqueezeService service) {
+    private void maybeOrderPrefs(@NonNull ISqueezeService service) {
         if (!mPrefsOrdered) {
             mPrefsOrdered = true;
 
@@ -152,7 +154,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         UndoBarController.hide(this);
     }
 
-    public static void show(Activity context) {
+    public static void show(@NonNull Activity context) {
         final Intent intent = new Intent(context, AlarmsActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
@@ -185,7 +187,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         private final List<AlarmPlaylist> mAlarmPlaylists = new ArrayList<>();
 
         @Override
-        public void onItemsReceived(final int count, final int start, Map<String, String> parameters, final List<AlarmPlaylist> items, Class<AlarmPlaylist> dataType) {
+        public void onItemsReceived(final int count, final int start, Map<String, String> parameters, @NonNull final List<AlarmPlaylist> items, Class<AlarmPlaylist> dataType) {
             if (start == 0) {
                 mAlarmPlaylists.clear();
             }
@@ -198,13 +200,14 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
             }
         }
 
+        @NonNull
         @Override
         public Object getClient() {
             return AlarmsActivity.this;
         }
     };
 
-    public void onEventMainThread(PlayerPrefReceived event) {
+    public void onEventMainThread(@NonNull PlayerPrefReceived event) {
         if (!event.player.equals(getService().getActivePlayer())) {
             return;
         }
@@ -230,7 +233,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         }
     }
 
-    public void onEventMainThread(PlayersChanged event) {
+    public void onEventMainThread(@NonNull PlayersChanged event) {
         // Only include players that are connected to the server.
         ArrayList<Player> connectedPlayers = new ArrayList<>();
         for (Player player : event.players.values()) {
@@ -296,7 +299,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
             return super.onCreateDialog(savedInstanceState);
         }
 
-        public static void show(FragmentManager manager, boolean is24HourMode, boolean dark) {
+        public static void show(@NonNull FragmentManager manager, boolean is24HourMode, boolean dark) {
             // Use the current time as the default values for the picker
             final Calendar c = Calendar.getInstance();
             int hour = c.get(Calendar.HOUR_OF_DAY);

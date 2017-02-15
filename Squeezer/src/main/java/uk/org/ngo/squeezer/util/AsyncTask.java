@@ -161,6 +161,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
+        @NonNull
         @Override
         public Thread newThread(@NonNull Runnable r) {
             return new Thread(r, "AsyncTask #" + mCount.getAndIncrement());
@@ -196,8 +197,10 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
 
+    @NonNull
     private final WorkerRunnable<Params, Result> mWorker;
 
+    @NonNull
     private final FutureTask<Result> mFuture;
 
     @AsyncTaskStatus private volatile int mStatus = PENDING;
@@ -478,7 +481,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @throws InterruptedException  If the current thread was interrupted while waiting.
      * @throws TimeoutException      If the wait timed out.
      */
-    public final Result get(long timeout, TimeUnit unit) throws InterruptedException,
+    public final Result get(long timeout, @NonNull TimeUnit unit) throws InterruptedException,
             ExecutionException, TimeoutException {
         return mFuture.get(timeout, unit);
     }
@@ -508,6 +511,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #executeOnExecutor(java.util.concurrent.Executor, Object[])
      * @see #execute(Runnable)
      */
+    @NonNull
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
         return executeOnExecutor(sDefaultExecutor, params);
     }
@@ -542,8 +546,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *                               {@link AsyncTask.AsyncTaskStatus#FINISHED}.
      * @see #execute(Object[])
      */
-    public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
-            Params... params) {
+    @NonNull
+    public final AsyncTask<Params, Progress, Result> executeOnExecutor(@NonNull Executor exec,
+                                                                       Params... params) {
         if (mStatus != PENDING) {
             switch (mStatus) {
                 case RUNNING:
@@ -573,7 +578,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #execute(Object[])
      * @see #executeOnExecutor(java.util.concurrent.Executor, Object[])
      */
-    public static void execute(Runnable runnable) {
+    public static void execute(@NonNull Runnable runnable) {
         sDefaultExecutor.execute(runnable);
     }
 
@@ -609,7 +614,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
         @SuppressWarnings({"unchecked", "RawUseOfParameterizedType"})
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             AsyncTaskResult result = (AsyncTaskResult) msg.obj;
             switch (msg.what) {
                 case MESSAGE_POST_RESULT:

@@ -154,9 +154,10 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     // Updating the seekbar
     private boolean updateSeekBar = true;
 
+    @Nullable
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(@NonNull Context context, Intent intent) {
             ConnectivityManager connMgr = (ConnectivityManager) context
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -175,6 +176,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     };
 
     /** Dialog displayed while connecting to the server. */
+    @Nullable
     private ProgressDialog connectingDialog = null;
 
     /**
@@ -205,6 +207,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
 
+    @Nullable
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -224,7 +227,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
      * Called before onAttach. Pull out the layout spec to figure out which layout to use later.
      */
     @Override
-    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+    public void onInflate(Activity activity, @NonNull AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
 
         int layout_height = attrs.getAttributeUnsignedIntValue(
@@ -251,8 +254,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View v;
 
         if (mFullHeightLayout) {
@@ -270,7 +273,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             btnContextMenu.setOnCreateContextMenuListener(this);
             btnContextMenu.setOnClickListener(new OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(@NonNull View v) {
                     v.showContextMenu();
                 }
             });
@@ -362,6 +365,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             });
 
             seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+                @Nullable
                 Song seekingSong;
 
                 // Update the time indicator to reflect the dragged thumb
@@ -384,7 +388,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 // we started seeking then jump to the new point in the track,
                 // otherwise ignore the seek.
                 @Override
-                public void onStopTrackingTouch(SeekBar s) {
+                public void onStopTrackingTouch(@NonNull SeekBar s) {
                     Song thisSong = getCurrentSong();
 
                     updateSeekBar = true;
@@ -416,7 +420,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @UiThread
-    private void updateShuffleStatus(ShuffleStatus shuffleStatus) {
+    private void updateShuffleStatus(@Nullable ShuffleStatus shuffleStatus) {
         if (mFullHeightLayout && shuffleStatus != null) {
             shuffleButton.setImageResource(
                     mActivity.getAttributeValue(shuffleStatus.getIcon()));
@@ -424,7 +428,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @UiThread
-    private void updateRepeatStatus(RepeatStatus repeatStatus) {
+    private void updateRepeatStatus(@Nullable RepeatStatus repeatStatus) {
         if (mFullHeightLayout && repeatStatus != null) {
             repeatButton.setImageResource(
                     mActivity.getAttributeValue(repeatStatus.getIcon()));
@@ -497,14 +501,16 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             final ArrayAdapter<Player> playerAdapter = new ArrayAdapter<Player>(
                     actionBarContext, android.R.layout.simple_spinner_dropdown_item,
                     connectedPlayers) {
+                @Nullable
                 @Override
-                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                     return Util.getActionBarSpinnerItemView(actionBarContext, convertView, parent,
                             getItem(position).getName());
                 }
 
+                @NonNull
                 @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
+                public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                     return Util.getActionBarSpinnerItemView(actionBarContext, convertView, parent,
                             getItem(position).getName());
                 }
@@ -816,8 +822,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
      * @param menuInfo
      */
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.songcontextmenu, menu);
@@ -841,7 +847,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
      * @return
      */
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
         Song song = getCurrentSong();
         if (song == null || song.isRemote()) {
             return false;
@@ -877,7 +883,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
      * android.view.MenuInflater)
      */
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
         // I confess that I don't understand why using the inflater passed as
         // an argument here doesn't work -- but if you do it crashes without
         // a stracktrace on API 7.
@@ -938,7 +944,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_settings:
                 SettingsActivity.show(mActivity);
@@ -1036,7 +1042,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @MainThread
-    public void onEventMainThread(ConnectionChanged event) {
+    public void onEventMainThread(@NonNull ConnectionChanged event) {
         Log.d(TAG, "ConnectionChanged: " + event);
 
         // The fragment may no longer be attached to the parent activity.  If so, do nothing.
@@ -1131,32 +1137,32 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @MainThread
-    public void onEventMainThread(MusicChanged event) {
+    public void onEventMainThread(@NonNull MusicChanged event) {
         if (event.player.equals(mService.getActivePlayer())) {
             updateSongInfo(event.playerState);
         }
     }
 
     @MainThread
-    public void onEventMainThread(PlayersChanged event) {
+    public void onEventMainThread(@NonNull PlayersChanged event) {
         updatePlayerDropDown(event.players.values(), mService.getActivePlayer());
         updateUiFromPlayerState(mService.getActivePlayerState());
     }
 
     @MainThread
-    public void onEventMainThread(PlayStatusChanged event) {
+    public void onEventMainThread(@NonNull PlayStatusChanged event) {
         updatePlayPauseIcon(event.playStatus);
     }
 
     @MainThread
-    public void onEventMainThread(PowerStatusChanged event) {
+    public void onEventMainThread(@NonNull PowerStatusChanged event) {
         if (event.player.equals(mService.getActivePlayer())) {
             updatePowerMenuItems(event.canPowerOn, event.canPowerOff);
         }
     }
 
     @MainThread
-    public void onEventMainThread(RepeatStatusChanged event) {
+    public void onEventMainThread(@NonNull RepeatStatusChanged event) {
         if (event.player.equals(mService.getActivePlayer())) {
             updateRepeatStatus(event.repeatStatus);
             if (!event.initial) {
@@ -1167,7 +1173,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @MainThread
-    public void onEventMainThread(ShuffleStatusChanged event) {
+    public void onEventMainThread(@NonNull ShuffleStatusChanged event) {
         if (event.player.equals(mService.getActivePlayer())) {
             updateShuffleStatus(event.shuffleStatus);
             if (!event.initial) {
@@ -1179,7 +1185,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
     }
 
     @MainThread
-    public void onEventMainThread(SongTimeChanged event) {
+    public void onEventMainThread(@NonNull SongTimeChanged event) {
         if (event.player.equals(mService.getActivePlayer())) {
             updateTimeDisplayTo(event.currentPosition, event.duration);
         }

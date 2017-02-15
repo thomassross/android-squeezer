@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.TypedValue;
 import android.view.View;
@@ -59,6 +60,7 @@ public abstract class BaseViewDialog<
                                    return listLayoutClass.getEnumConstants().length + 1 + sortOrders.size();
                                }
 
+                               @Nullable
                                @Override
                                public Object getItem(int i) {
                                    return null;
@@ -70,6 +72,7 @@ public abstract class BaseViewDialog<
                                }
 
 
+                               @Nullable
                                @Override
                                public View getView(int position, View convertView,
                                                    ViewGroup parent) {
@@ -105,7 +108,7 @@ public abstract class BaseViewDialog<
                                }
                            }, new DialogInterface.OnClickListener() {
                                @Override
-                               public void onClick(DialogInterface dialog, int position) {
+                               public void onClick(@NonNull DialogInterface dialog, int position) {
                                    if (position < positionSortLabel) {
                                        activity.setListLayout(listLayoutClass.getEnumConstants()[position]);
                                        dialog.dismiss();
@@ -120,14 +123,15 @@ public abstract class BaseViewDialog<
         return builder.create();
     }
 
-    private List<SortOrder> getAvailableSortOrders(SortOrder[] sortOrders, String version) {
+    @NonNull
+    private List<SortOrder> getAvailableSortOrders(@NonNull SortOrder[] sortOrders, String version) {
         List<SortOrder> availableSortOrders = new ArrayList<SortOrder>();
         for (SortOrder sortOrder : sortOrders)
             if (sortOrder.can(version)) availableSortOrders.add(sortOrder);
         return availableSortOrders;
     }
 
-    protected int getIcon(ListLayout listLayout) {
+    protected int getIcon(@NonNull ListLayout listLayout) {
         TypedValue v = new TypedValue();
         getActivity().getTheme().resolveAttribute(listLayout.getIconAttribute(), v, true);
         return v.resourceId;

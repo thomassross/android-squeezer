@@ -2,6 +2,7 @@ package uk.org.ngo.squeezer.util;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -59,6 +60,7 @@ public class ScanNetworkTask extends android.os.AsyncTask<Void, Void, Void> {
      * <p>
      * See the Slim::Networking::Discovery module in Squeeze server for more details.
      */
+    @Nullable
     @Override
     protected Void doInBackground(Void... unused) {
         WifiManager.WifiLock wifiLock;
@@ -165,7 +167,7 @@ public class ScanNetworkTask extends android.os.AsyncTask<Void, Void, Void> {
      */
     @VisibleForTesting
     @Nullable
-    public static String extractNameFromBuffer(byte[] buffer) {
+    public static String extractNameFromBuffer(@NonNull byte[] buffer) {
         int i = 1;  // Skip over the initial 'E'.
 
         // Find the 'NAME' tuple. It's the only one that starts with an 'N'.

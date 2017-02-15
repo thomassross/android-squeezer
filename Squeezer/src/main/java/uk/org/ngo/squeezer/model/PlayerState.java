@@ -50,18 +50,20 @@ public class PlayerState implements Parcelable {
     }
 
     public static final Creator<PlayerState> CREATOR = new Creator<PlayerState>() {
+        @NonNull
         @Override
         public PlayerState[] newArray(int size) {
             return new PlayerState[size];
         }
 
+        @NonNull
         @Override
-        public PlayerState createFromParcel(Parcel source) {
+        public PlayerState createFromParcel(@NonNull Parcel source) {
             return new PlayerState(source);
         }
     };
 
-    private PlayerState(Parcel source) {
+    private PlayerState(@NonNull Parcel source) {
         playerId = source.readString();
         playStatus = source.readString();
         poweredOn = (source.readByte() == 1);
@@ -81,7 +83,7 @@ public class PlayerState implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(playerId);
         dest.writeString(playStatus);
         dest.writeByte(poweredOn ? (byte) 1 : (byte) 0);
@@ -119,7 +121,7 @@ public class PlayerState implements Parcelable {
 
     /** The name of the current playlist, which may be the empty string. */
     @NonNull
-    private String currentPlaylist;
+    private String currentPlaylist = "";
 
     private int currentPlaylistTracksNum;
 
@@ -207,7 +209,7 @@ public class PlayerState implements Parcelable {
         return true;
     }
 
-    public boolean setShuffleStatus(String s) {
+    public boolean setShuffleStatus(@Nullable String s) {
         return setShuffleStatus(s != null ? ShuffleStatus.valueOf(Util.parseDecimalIntOrZero(s)) : null);
     }
 
@@ -223,7 +225,7 @@ public class PlayerState implements Parcelable {
         return true;
     }
 
-    public boolean setRepeatStatus(String s) {
+    public boolean setRepeatStatus(@Nullable String s) {
         return setRepeatStatus(s != null ? RepeatStatus.valueOf(Util.parseDecimalIntOrZero(s)) : null);
     }
 
@@ -236,7 +238,7 @@ public class PlayerState implements Parcelable {
         return (currentSong != null) ? currentSong.getName() : "";
     }
 
-    public boolean setCurrentSong(Song song) {
+    public boolean setCurrentSong(@NonNull Song song) {
         if (song.equals(currentSong))
             return false;
 
@@ -383,6 +385,7 @@ public class PlayerState implements Parcelable {
         return mSyncSlaves;
     }
 
+    @NonNull
     @PlayerSubscriptionType public String getSubscriptionType() {
         return mPlayerSubscriptionType;
     }

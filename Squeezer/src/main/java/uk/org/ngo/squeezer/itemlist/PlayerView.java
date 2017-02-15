@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,13 +56,14 @@ public class PlayerView extends BaseItemView<Player> {
         return getAdapterView(convertView, parent, viewParams, R.layout.list_item_player);
     }
 
+    @NonNull
     @Override
     public ViewHolder createViewHolder() {
         return new PlayerViewHolder();
     }
 
     @Override
-    public void bindView(View view, Player item) {
+    public void bindView(@NonNull View view, @NonNull Player item) {
         final PlayerListActivity activity = (PlayerListActivity) getActivity();
         PlayerState playerState = activity.getPlayerState(item.getId());
         PlayerViewHolder viewHolder = (PlayerViewHolder) view.getTag();
@@ -96,7 +98,7 @@ public class PlayerView extends BaseItemView<Player> {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menuInfo.menuInflater.inflate(R.menu.playercontextmenu, menu);
 
@@ -133,7 +135,7 @@ public class PlayerView extends BaseItemView<Player> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, Player selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, Player selectedItem) {
         activity.setCurrentPlayer(selectedItem);
         ISqueezeService service = activity.getService();
         if (service == null) {
@@ -164,7 +166,7 @@ public class PlayerView extends BaseItemView<Player> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem) {
         ISqueezeService service = activity.getService();
         if (service == null) {
             return super.doItemContext(menuItem);
@@ -204,11 +206,13 @@ public class PlayerView extends BaseItemView<Player> {
         return super.doItemContext(menuItem);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.player, quantity);
     }
 
+    @NonNull
     private static Map<String, Integer> initializeModelIcons() {
         Map<String, Integer> modelIcons = new HashMap<String, Integer>();
         modelIcons.put("baby", R.drawable.ic_baby);

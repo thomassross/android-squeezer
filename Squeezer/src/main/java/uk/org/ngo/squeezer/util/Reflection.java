@@ -16,6 +16,9 @@
 
 package uk.org.ngo.squeezer.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -42,8 +45,8 @@ public class Reflection {
      *
      * @see #genericTypeResolver(Class, Class)
      */
-    public static Class<?> getGenericClass(Class<?> currentClass,
-            Class<?> base, int genericArgumentNumber) {
+    public static Class<?> getGenericClass(@NonNull Class<?> currentClass,
+                                           @NonNull Class<?> base, int genericArgumentNumber) {
         Type[] genericTypes = genericTypeResolver(currentClass, base);
         Type type = genericArgumentNumber < genericTypes.length
                 ? genericTypes[genericArgumentNumber] : null;
@@ -72,8 +75,9 @@ public class Reflection {
      *
      * @see #getGenericClass(Class, Class, int)
      */
-    public static Type[] genericTypeResolver(Class<?> currentClass,
-            Class<?> base) {
+    @Nullable
+    public static Type[] genericTypeResolver(@NonNull Class<?> currentClass,
+                                             @NonNull Class<?> base) {
         Type[] actualTypeArguments = null;
 
         while (currentClass != Object.class) {
@@ -112,8 +116,8 @@ public class Reflection {
      *
      * @see #getGenericClass(Class, Class, int)
      */
-    private static Type[] genericInterfaceResolver(Class<?> currentClass,
-            Class<?> baseInterface, Type[] pActualTypeArguments) {
+    private static Type[] genericInterfaceResolver(@NonNull Class<?> currentClass,
+                                                   @NonNull Class<?> baseInterface, Type[] pActualTypeArguments) {
         Class<?>[] interfaces = currentClass.getInterfaces();
         Type[] genericInterfaces = currentClass.getGenericInterfaces();
         for (int ifno = 0; ifno < genericInterfaces.length; ifno++) {
@@ -147,8 +151,9 @@ public class Reflection {
      *
      * @return The resolved type arguments mapped to the given superclass or direct interface
      */
-    private static Type[] mapTypeArguments(Class<?> currentClass, Type type,
-            Type[] actualTypeArguments) {
+    @Nullable
+    private static Type[] mapTypeArguments(@NonNull Class<?> currentClass, Type type,
+                                           @Nullable Type[] actualTypeArguments) {
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
 

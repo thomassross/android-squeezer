@@ -1,5 +1,6 @@
 package uk.org.ngo.squeezer.test.framework;
 
+import android.support.annotation.NonNull;
 import android.test.ActivityInstrumentationTestCase2;
 
 import java.util.Arrays;
@@ -179,6 +180,7 @@ public class ItemAdapterTest extends ActivityInstrumentationTestCase2<ArtistList
         }
     }
 
+    @NonNull
     private Artist[] getArtists() {
         int N = 109;
         Artist[] result = new Artist[N];

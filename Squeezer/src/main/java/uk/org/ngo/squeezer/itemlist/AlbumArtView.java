@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.itemlist;
 
 
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import uk.org.ngo.squeezer.R;
@@ -48,7 +49,7 @@ public abstract class AlbumArtView<T extends ArtworkItem> extends
      * @param text The text to bind to {@link ViewHolder#text1}
      */
     @Override
-    public void bindView(View view, String text) {
+    public void bindView(@NonNull View view, String text) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.icon.setImageResource(R.drawable.icon_pending_artwork);

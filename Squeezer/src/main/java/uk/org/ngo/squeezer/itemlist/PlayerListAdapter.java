@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,13 +59,13 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
         }
 
         @Override
-        public int compareTo(Object otherSyncGroup) {
+        public int compareTo(@NonNull Object otherSyncGroup) {
             // compare this syncgroup name with the other one, alphabetically
             return this.syncGroupName.compareToIgnoreCase(((SyncGroup)otherSyncGroup).syncGroupName);
         }
 
         @Override
-        public void update(int count, int start, List<Player> syncedPlayersList) {
+        public void update(int count, int start, @NonNull List<Player> syncedPlayersList) {
             Collections.sort(syncedPlayersList); // first order players in syncgroup alphabetically
 
             // add the list
@@ -118,7 +119,7 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
      *     {@link PlayerListActivity#updateSyncGroups(List, Player)} for how this map is
      *     generated.
      */
-    public void setSyncGroups(Multimap<String, Player> playerSyncGroups) {
+    public void setSyncGroups(@NonNull Multimap<String, Player> playerSyncGroups) {
         // The players might not have changed (so there's no need to reset the contents of the
         // adapter) but information about an individual player might have done.
         if (prevPlayerSyncGroups != null && prevPlayerSyncGroups.equals(playerSyncGroups)) {
@@ -144,7 +145,7 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         mPlayersChanged = false;
         ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
         long packedPosition = contextMenuInfo.packedPosition;

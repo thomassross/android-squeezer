@@ -18,6 +18,8 @@ package uk.org.ngo.squeezer.framework;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -110,7 +112,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
 
         mListView.setRecyclerListener(new RecyclerListener() {
             @Override
-            public void onMovedToScrapHeap(View view) {
+            public void onMovedToScrapHeap(@NonNull View view) {
                 // Release strong reference when a view is recycled
                 final ImageView imageView = (ImageView) view.findViewById(R.id.icon);
                 if (imageView != null) {
@@ -143,10 +145,11 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     /**
      * @return A new view logic to be used by this activity
      */
+    @Nullable
     abstract protected ItemView<T> createItemView();
 
     @Override
-    public boolean onContextItemSelected(MenuItem menuItem) {
+    public boolean onContextItemSelected(@NonNull MenuItem menuItem) {
         AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) menuItem.getMenuInfo();
 
         // If menuInfo is null we have a sub menu, we expect the adapter to have stored the position
@@ -248,11 +251,12 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
         return mListView;
     }
 
-    protected ItemAdapter<T> createItemListAdapter(ItemView<T> itemView) {
+    @NonNull
+    protected ItemAdapter<T> createItemListAdapter(@NonNull ItemView<T> itemView) {
         return new ItemAdapter<T>(itemView);
     }
 
-    public void onItemsReceived(final int count, final int start, final List<T> items) {
+    public void onItemsReceived(final int count, final int start, @NonNull final List<T> items) {
         super.onItemsReceived(count, start, items.size());
 
         getUIThreadHandler().post(new Runnable() {
@@ -266,10 +270,11 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
     }
 
     @Override
-    public void onItemsReceived(int count, int start, Map<String, String> parameters, List<T> items, Class<T> dataType) {
+    public void onItemsReceived(int count, int start, Map<String, String> parameters, @NonNull List<T> items, Class<T> dataType) {
         onItemsReceived(count, start, items);
     }
 
+    @NonNull
     @Override
     public Object getClient() {
         return this;
@@ -286,7 +291,7 @@ public abstract class BaseListActivity<T extends Item> extends ItemListActivity 
          * on the screen.
          */
         @Override
-        public void onScrollStateChanged(AbsListView listView, int scrollState) {
+        public void onScrollStateChanged(@NonNull AbsListView listView, int scrollState) {
             super.onScrollStateChanged(listView, scrollState);
 
             if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING ||

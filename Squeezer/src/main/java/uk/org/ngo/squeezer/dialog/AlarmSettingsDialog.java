@@ -71,7 +71,7 @@ public class AlarmSettingsDialog extends DialogFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
 
         // Verify that the host activity implements the callback interface

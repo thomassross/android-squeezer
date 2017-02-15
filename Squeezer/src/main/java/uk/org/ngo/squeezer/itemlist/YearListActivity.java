@@ -27,6 +27,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 
 public class YearListActivity extends BaseListActivity<Year> {
 
+    @NonNull
     @Override
     public ItemView<Year> createItemView() {
         return new YearView(this);
@@ -37,7 +38,7 @@ public class YearListActivity extends BaseListActivity<Year> {
         service.years(start, this);
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, YearListActivity.class);
         context.startActivity(intent);
     }

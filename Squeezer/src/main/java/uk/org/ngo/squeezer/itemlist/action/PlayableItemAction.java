@@ -53,7 +53,7 @@ public abstract class PlayableItemAction {
         }
 
         @Override
-        public String getText(Context context) {
+        public String getText(@NonNull Context context) {
             return context.getString(labelId);
         }
     }
@@ -72,7 +72,7 @@ public abstract class PlayableItemAction {
     public abstract void execute(PlaylistItem item);
 
     @NonNull
-    public static PlayableItemAction createAction( ItemListActivity activity, Type type) {
+    public static PlayableItemAction createAction(ItemListActivity activity, @NonNull Type type) {
         switch (type) {
             case BROWSE:
                 return new BrowseSongsAction(activity);

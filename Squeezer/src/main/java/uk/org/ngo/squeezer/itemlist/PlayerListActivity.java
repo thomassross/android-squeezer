@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
@@ -50,6 +51,7 @@ public class PlayerListActivity extends ItemListActivity implements
 
     private PlayerListAdapter mResultsAdapter;
 
+    @Nullable
     private Player currentPlayer;
     private boolean mTrackingTouch;
 
@@ -78,7 +80,7 @@ public class PlayerListActivity extends ItemListActivity implements
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.item_list_players);
@@ -113,13 +115,13 @@ public class PlayerListActivity extends ItemListActivity implements
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putParcelable(CURRENT_PLAYER, currentPlayer);
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public final boolean onContextItemSelected(MenuItem item) {
+    public final boolean onContextItemSelected(@NonNull MenuItem item) {
         if (getService() != null) {
             ExpandableListView.ExpandableListContextMenuInfo contextMenuInfo = (ExpandableListView.ExpandableListContextMenuInfo) item
                     .getMenuInfo();
@@ -173,7 +175,7 @@ public class PlayerListActivity extends ItemListActivity implements
      * @param players List of players.
      * @param activePlayer The currently active player.
      */
-    public void updateSyncGroups(List<Player> players, Player activePlayer) {
+    public void updateSyncGroups(@NonNull List<Player> players, Player activePlayer) {
         Map<String, Player> connectedPlayers = new HashMap<String, Player>();
 
         // Make a copy of the players we know about, ignoring unconnected ones.
@@ -217,15 +219,17 @@ public class PlayerListActivity extends ItemListActivity implements
         return mPlayerSyncGroups;
     }
 
+    @Nullable
     public PlayerState getPlayerState(String id) {
         return getService().getPlayerState(id);
     }
 
+    @Nullable
     @Override
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
-    public void setCurrentPlayer(Player currentPlayer) {
+    public void setCurrentPlayer(@Nullable Player currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
 
@@ -276,7 +280,7 @@ public class PlayerListActivity extends ItemListActivity implements
         getService().unsyncPlayer(player);
     }
 
-    public static void show(Context context) {
+    public static void show(@NonNull Context context) {
         final Intent intent = new Intent(context, PlayerListActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);

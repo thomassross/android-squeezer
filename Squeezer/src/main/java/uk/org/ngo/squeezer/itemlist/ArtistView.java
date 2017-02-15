@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.View;
@@ -40,7 +41,7 @@ public class ArtistView extends BaseItemView<Artist> {
 
     // XXX: Make this a menu resource.
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         menu.add(Menu.NONE, BROWSE_ALBUMS, 0, R.string.BROWSE_ALBUMS);
@@ -50,6 +51,7 @@ public class ArtistView extends BaseItemView<Artist> {
         menu.add(Menu.NONE, R.id.download, 4, R.string.DOWNLOAD);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.artist, quantity);

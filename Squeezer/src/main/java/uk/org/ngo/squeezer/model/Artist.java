@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -25,11 +26,13 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 public class Artist extends PlaylistItem {
 
+    @NonNull
     @Override
     public String getPlaylistTag() {
         return "artist_id";
     }
 
+    @NonNull
     @Override
     public String getFilterTag() {
         return "artist_id";
@@ -42,6 +45,7 @@ public class Artist extends PlaylistItem {
         return name;
     }
 
+    @NonNull
     public Artist setName(String name) {
         this.name = name;
         return this;
@@ -52,31 +56,33 @@ public class Artist extends PlaylistItem {
         setName(artist);
     }
 
-    public Artist(Map<String, String> record) {
+    public Artist(@NonNull Map<String, String> record) {
         setId(record.containsKey("contributor_id") ? record.get("contributor_id")
                 : record.get("id"));
         name = record.containsKey("contributor") ? record.get("contributor") : record.get("artist");
     }
 
     public static final Creator<Artist> CREATOR = new Creator<Artist>() {
+        @NonNull
         @Override
         public Artist[] newArray(int size) {
             return new Artist[size];
         }
 
+        @NonNull
         @Override
-        public Artist createFromParcel(Parcel source) {
+        public Artist createFromParcel(@NonNull Parcel source) {
             return new Artist(source);
         }
     };
 
-    private Artist(Parcel source) {
+    private Artist(@NonNull Parcel source) {
         setId(source.readString());
         name = source.readString();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getId());
         dest.writeString(name);
     }

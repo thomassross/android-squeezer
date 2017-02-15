@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer;
 
 import android.content.Context;
 import android.preference.EditTextPreference;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 
 public class IntEditTextPreference extends EditTextPreference {
@@ -34,6 +35,7 @@ public class IntEditTextPreference extends EditTextPreference {
         super(context, attrs, defStyle);
     }
 
+    @NonNull
     @Override
     protected String getPersistedString(String defaultReturnValue) {
         return String.valueOf(getPersistedInt(0));

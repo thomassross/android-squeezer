@@ -21,6 +21,8 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
@@ -122,10 +124,11 @@ public final class Preferences {
     static final String KEY_DOWNLOAD_USE_SD_CARD_SCREEN = "squeezer.download.use_sd_card.screen";
     static final String KEY_DOWNLOAD_USE_SD_CARD = "squeezer.download.use_sd_card";
 
+    @NonNull
     private final Context context;
     private final SharedPreferences sharedPreferences;
 
-    public Preferences(Context context) {
+    public Preferences(@NonNull Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences(Preferences.NAME, Context.MODE_PRIVATE);
     }
@@ -135,6 +138,7 @@ public final class Preferences {
         this.sharedPreferences = sharedPreferences;
     }
 
+    @Nullable
     private String getStringPreference(String preference, String defaultValue) {
         final String pref = sharedPreferences.getString(preference, null);
         if (pref == null || pref.length() == 0) {
@@ -147,6 +151,7 @@ public final class Preferences {
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
 
+    @NonNull
     public ServerAddress getServerAddress() {
         ServerAddress serverAddress = new ServerAddress();
 
@@ -163,15 +168,19 @@ public final class Preferences {
     }
 
     public static class ServerAddress {
+        @Nullable
         public String bssId;
+        @Nullable
         public String address; // <host name or ip>:<port>
 
+        @NonNull
         @Override
         public String toString() {
             return (bssId != null ? bssId + "_ " : "") + address + "_";
         }
     }
 
+    @NonNull
     public ServerAddress saveServerAddress(String address) {
         WifiManager mWifiManager = (WifiManager) context
                 .getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -189,11 +198,13 @@ public final class Preferences {
         return serverAddress;
     }
 
+    @Nullable
     public String getServerName() {
         return getServerName(getServerAddress());
     }
 
-    public String getServerName(ServerAddress serverAddress) {
+    @Nullable
+    public String getServerName(@NonNull ServerAddress serverAddress) {
         String serverName = getStringPreference(serverAddress + KEY_SERVER_NAME, null);
         return serverName != null ? serverName : serverAddress.address;
     }
@@ -204,18 +215,22 @@ public final class Preferences {
         editor.commit();
     }
 
+    @Nullable
     public String getUserName(ServerAddress serverAddress) {
         return getUserName(serverAddress, null);
     }
 
+    @Nullable
     public String getUserName(ServerAddress serverAddress, String defaultValue) {
         return getStringPreference(serverAddress + KEY_USERNAME, defaultValue);
     }
 
+    @Nullable
     public String getPassword(ServerAddress serverAddress) {
         return getPassword(serverAddress, null);
     }
 
+    @Nullable
     public String getPassword(ServerAddress serverAddress, String defaultValue) {
         return getStringPreference(serverAddress + KEY_PASSWORD, defaultValue);
     }
@@ -227,6 +242,7 @@ public final class Preferences {
         editor.commit();
     }
 
+    @Nullable
     public String getTheme() {
         return getStringPreference(KEY_ON_THEME_SELECT_ACTION, null);
     }
@@ -248,7 +264,7 @@ public final class Preferences {
         }
     }
 
-    public void setOnSelectItemAction(Class<? extends PlaylistItem> clazz, PlayableItemAction.Type action) {
+    public void setOnSelectItemAction(Class<? extends PlaylistItem> clazz, @Nullable PlayableItemAction.Type action) {
         String key = getOnSelectItemActionKey(clazz);
 
         if (action != null) {
@@ -258,6 +274,7 @@ public final class Preferences {
         }
     }
 
+    @Nullable
     private String getOnSelectItemActionKey(Class<? extends PlaylistItem> clazz) {
         String key = null;
         if (clazz == Song.class) key = KEY_ON_SELECT_SONG_ACTION; else
@@ -281,7 +298,7 @@ public final class Preferences {
         }
     }
 
-    public void setAlbumListLayout(AlbumViewDialog.AlbumListLayout albumListLayout) {
+    public void setAlbumListLayout(@NonNull AlbumViewDialog.AlbumListLayout albumListLayout) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Preferences.KEY_ALBUM_LIST_LAYOUT, albumListLayout.name());
         editor.commit();
@@ -295,7 +312,7 @@ public final class Preferences {
         return SongViewDialog.SongListLayout.list;
     }
 
-    public void setSongListLayout(SongViewDialog.SongListLayout songListLayout) {
+    public void setSongListLayout(@NonNull SongViewDialog.SongListLayout songListLayout) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Preferences.KEY_SONG_LIST_LAYOUT, songListLayout.name());
         editor.commit();

@@ -20,6 +20,7 @@ package uk.org.ngo.squeezer.framework;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -172,7 +173,7 @@ public abstract class ItemListActivity extends BaseActivity {
      *
      * @param listView The listview with visible rows.
      */
-    public void maybeOrderVisiblePages(AbsListView listView) {
+    public void maybeOrderVisiblePages(@NonNull AbsListView listView) {
         int pos = (listView.getFirstVisiblePosition() / mPageSize) * mPageSize;
         int end = listView.getFirstVisiblePosition() + listView.getChildCount();
 
@@ -241,6 +242,7 @@ public abstract class ItemListActivity extends BaseActivity {
      */
     protected class ScrollListener implements AbsListView.OnScrollListener {
 
+        @Nullable
         private TouchListener mTouchListener = null;
 
         private boolean mAttachedTouchListener = false;
@@ -260,7 +262,7 @@ public abstract class ItemListActivity extends BaseActivity {
         }
 
         @Override
-        public void onScrollStateChanged(AbsListView listView, int scrollState) {
+        public void onScrollStateChanged(@NonNull AbsListView listView, int scrollState) {
             if (scrollState == mPrevScrollState) {
                 return;
             }
@@ -319,7 +321,7 @@ public abstract class ItemListActivity extends BaseActivity {
             }
 
             @Override
-            public boolean onTouch(View view, MotionEvent event) {
+            public boolean onTouch(View view, @NonNull MotionEvent event) {
                 final int action = event.getAction();
                 boolean mFingerUp = action == MotionEvent.ACTION_UP
                         || action == MotionEvent.ACTION_CANCEL;

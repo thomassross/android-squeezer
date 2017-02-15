@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import uk.org.ngo.squeezer.R;
@@ -41,7 +42,7 @@ public class SongViewWithArt extends SongView {
     }
 
     @Override
-    public void bindView(View view, Song item) {
+    public void bindView(@NonNull View view, @NonNull Song item) {
         super.bindView(view, item);
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
@@ -63,7 +64,7 @@ public class SongViewWithArt extends SongView {
      * @param label The text to bind to {@link ViewHolder#text1}
      */
     @Override
-    public void bindView(View view, String label) {
+    public void bindView(@NonNull View view, String label) {
         super.bindView(view, label);
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();

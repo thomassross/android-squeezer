@@ -63,7 +63,7 @@ public class AskAction extends PlayableItemAction {
             builder.setTitle(titleId);
             builder.setSingleChoiceItems(typeStrings, -1, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(@NonNull DialogInterface dialog, int which) {
                     selection = which;
                     ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE).setEnabled(true);
                     ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
@@ -88,7 +88,7 @@ public class AskAction extends PlayableItemAction {
 
             dialog.setOnShowListener(new DialogInterface.OnShowListener() {
                 @Override
-                public void onShow(DialogInterface dialog) {
+                public void onShow(@NonNull DialogInterface dialog) {
                     ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE).setEnabled(false);
                     ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
                 }
@@ -109,7 +109,7 @@ public class AskAction extends PlayableItemAction {
             }
         }
 
-        public static void showDialog(ItemListActivity activity, PlaylistItem item, int titleId, Type[] types) {
+        public static void showDialog(@NonNull ItemListActivity activity, PlaylistItem item, int titleId, @NonNull Type[] types) {
             final List<String> typeNames = new ArrayList<>();
             for (Type type : types) {
                 if (type != Type.NONE) typeNames.add(type.name());

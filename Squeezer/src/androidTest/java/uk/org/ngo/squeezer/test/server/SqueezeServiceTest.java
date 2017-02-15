@@ -2,6 +2,7 @@
 package uk.org.ngo.squeezer.test.server;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.test.ServiceTestCase;
 
 import java.util.ArrayList;
@@ -202,7 +203,7 @@ public class SqueezeServiceTest extends ServiceTestCase<SqueezeService> {
                 ConnectionState.LOGIN_FAILED), mActualConnectionStates);
     }
 
-    public void onEvent(ConnectionChanged event) {
+    public void onEvent(@NonNull ConnectionChanged event) {
         mActualConnectionStates.add(event.connectionState);
 
         // If the desired state is DISCONNECTED then ignore it the very first time it

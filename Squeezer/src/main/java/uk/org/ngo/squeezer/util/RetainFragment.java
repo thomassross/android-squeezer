@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.util;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -43,7 +44,8 @@ public class RetainFragment extends Fragment {
     public RetainFragment() {
     }
 
-    public static RetainFragment getInstance(String tag, FragmentManager fm) {
+    @NonNull
+    public static RetainFragment getInstance(String tag, @NonNull FragmentManager fm) {
         Log.d(TAG, "getInstance() for " + tag);
         RetainFragment fragment = (RetainFragment) fm.findFragmentByTag(tag);
         if (fragment == null) {

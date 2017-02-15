@@ -35,6 +35,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
  */
 public class RadioListActivity extends BaseListActivity<Plugin> {
 
+    @NonNull
     @Override
     public ItemView<Plugin> createItemView() {
         return new RadioView(this);
@@ -45,7 +46,7 @@ public class RadioListActivity extends BaseListActivity<Plugin> {
         service.radios(start, this);
     }
 
-    public static void show(Activity activity) {
+    public static void show(@NonNull Activity activity) {
         final Intent intent = new Intent(activity, RadioListActivity.class);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

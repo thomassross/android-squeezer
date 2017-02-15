@@ -18,6 +18,7 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
@@ -31,16 +32,17 @@ import uk.org.ngo.squeezer.model.PluginItem;
  */
 public class FavoriteListActivity extends PluginItemListActivity {
 
+    @NonNull
     @Override
     public ItemView<PluginItem> createItemView() {
         return new FavoritesView(this);
     }
 
-    public static void show(Activity activity) {
+    public static void show(@NonNull Activity activity) {
         show(activity, Plugin.FAVORITE);
     }
 
-    public static void show(Activity activity, Plugin plugin) {
+    public static void show(@NonNull Activity activity, @NonNull Plugin plugin) {
         final Intent intent = new Intent(activity, FavoriteListActivity.class);
         intent.putExtra(plugin.getClass().getName(), plugin);
         activity.startActivity(intent);

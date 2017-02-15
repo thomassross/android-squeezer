@@ -1,5 +1,6 @@
 package uk.org.ngo.squeezer.service;
 
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment.InstantiationException;
 
 import java.lang.reflect.Constructor;
@@ -21,12 +22,14 @@ abstract class BaseListHandler<T extends Item> implements ListHandler<T> {
 
     protected List<T> items;
 
+    @Nullable
     @SuppressWarnings("unchecked")
     private final Class<T> dataType = (Class<T>) Reflection
             .getGenericClass(this.getClass(), ListHandler.class, 0);
 
     private Constructor<T> constructor;
 
+    @Nullable
     @Override
     public Class<T> getDataType() {
         return dataType;

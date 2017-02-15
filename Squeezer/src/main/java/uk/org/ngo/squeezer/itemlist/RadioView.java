@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.View;
 
@@ -30,6 +31,7 @@ public class RadioView extends PluginView {
         super(activity);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.radio, quantity);
@@ -41,7 +43,7 @@ public class RadioView extends PluginView {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ItemView.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v,
+                                    @NonNull ItemView.ContextMenuInfo menuInfo) {
     }
 }

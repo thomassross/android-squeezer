@@ -60,6 +60,7 @@ public abstract class ImageWorker {
 
     private static final int FADE_IN_TIME = 200;
 
+    @android.support.annotation.Nullable
     private ImageCache mImageCache;
 
     private Bitmap mLoadingBitmap;
@@ -99,7 +100,7 @@ public abstract class ImageWorker {
     /** Colour of debug swatch for images loaded from network (no caching). */
     private static final int mCacheDebugColorNetwork = Color.RED;
 
-    protected ImageWorker(Context context) {
+    protected ImageWorker(@NonNull Context context) {
         mResources = context.getResources();
     }
 
@@ -114,7 +115,7 @@ public abstract class ImageWorker {
      * @param data The URL of the image to download
      * @param imageView The ImageView to bind the downloaded image to
      */
-    public void loadImage(final Object data, final ImageView imageView) {
+    public void loadImage(@android.support.annotation.Nullable final Object data, @NonNull final ImageView imageView) {
         if (data == null) {
             return;
         }
@@ -158,7 +159,7 @@ public abstract class ImageWorker {
      * @param width Resize the image to this width (and save it in the memory cache as such)
      * @param height Resize the image to this height (and save it in the memory cache as such)
      */
-    public void loadImage(final Object data, final ImageView imageView, int width, int height) {
+    public void loadImage(@NonNull final Object data, @NonNull final ImageView imageView, int width, int height) {
         Bitmap bitmap = null;
         String memCacheKey = hashKeyForMemory(String.valueOf(data), width, height);
 
@@ -209,7 +210,7 @@ public abstract class ImageWorker {
      * @param height Resize the image to this height (and save it in the memory cache as such)
      * @param callback The callback
      */
-    public void loadImage(final Object data, int width, int height, ImageWorkerCallback callback) {
+    public void loadImage(@NonNull final Object data, int width, int height, @NonNull ImageWorkerCallback callback) {
         Bitmap bitmap = null;
         String memCacheKey = hashKeyForMemory(String.valueOf(data), width, height);
         if (mImageCache != null) {
@@ -244,9 +245,9 @@ public abstract class ImageWorker {
      * @param notificationId Identifier of the notification to update
      * @param notification The notification to post
      */
-    public void loadImage(Context context, final Object data, final RemoteViews remoteViews,
+    public void loadImage(Context context, @NonNull final Object data, @NonNull final RemoteViews remoteViews,
                           @IdRes int viewId, int width, int height,
-                          NotificationManagerCompat nm, int notificationId, Notification notification) {
+                          @NonNull NotificationManagerCompat nm, int notificationId, Notification notification) {
         Bitmap bitmap = null;
         String memCacheKey = hashKeyForMemory(String.valueOf(data), width, height);
         if (mImageCache != null) {
@@ -313,7 +314,7 @@ public abstract class ImageWorker {
      * @param canvas The canvas to draw on.
      * @param color The colour to use for the swatch.
      */
-    public static void addDebugSwatch(Canvas canvas, int color) {
+    public static void addDebugSwatch(@NonNull Canvas canvas, int color) {
         float width = canvas.getWidth();
         float height = canvas.getHeight();
 
@@ -340,7 +341,7 @@ public abstract class ImageWorker {
      *
      * @param imageCacheParams A description of the cache.
      */
-    public void addImageCache(ImageCache.ImageCacheParams imageCacheParams) {
+    public void addImageCache(@NonNull ImageCache.ImageCacheParams imageCacheParams) {
         setImageCache(new ImageCache(imageCacheParams));
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
@@ -384,6 +385,7 @@ public abstract class ImageWorker {
      *
      * @return The processed bitmap, or null if processing failed.
      */
+    @android.support.annotation.Nullable
     protected abstract byte[] processBitmap(BitmapWorkerTaskParams params);
 
     /**
@@ -431,7 +433,8 @@ public abstract class ImageWorker {
      * @return Retrieve the currently active work task (if any) associated with this imageView. null
      * if there is no such task.
      */
-    private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
+    @android.support.annotation.Nullable
+    private static BitmapWorkerTask getBitmapWorkerTask(@android.support.annotation.Nullable ImageView imageView) {
         if (imageView != null) {
             final Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AsyncDrawable) {
@@ -493,6 +496,7 @@ public abstract class ImageWorker {
         /**
          * Background processing.
          */
+        @android.support.annotation.Nullable
         @TargetApi(11)
         @Override
         protected Bitmap doInBackground(BitmapWorkerTaskParams... params) {
@@ -604,8 +608,8 @@ public abstract class ImageWorker {
          *
          * @return The value to be used for inSampleSize
          */
-        public int calculateInSampleSize(BitmapFactory.Options options,
-                                                int reqWidth, int reqHeight) {
+        public int calculateInSampleSize(@NonNull BitmapFactory.Options options,
+                                         int reqWidth, int reqHeight) {
             // Raw height and width of image
             final int height = options.outHeight;
             final int width = options.outWidth;
@@ -661,6 +665,7 @@ public abstract class ImageWorker {
      * {@link ImageView}.
      */
     private class ImageViewBitmapWorkerTask extends BitmapWorkerTask {
+        @NonNull
         protected final WeakReference<ImageView> imageViewReference;
 
         public ImageViewBitmapWorkerTask(ImageView imageView) {
@@ -696,6 +701,7 @@ public abstract class ImageWorker {
          * Returns the ImageView associated with this task as long as the ImageView's task still
          * points to this task as well. Returns null otherwise.
          */
+        @android.support.annotation.Nullable
         protected ImageView getAttachedImageView() {
             final ImageView imageView = imageViewReference.get();
             final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
@@ -765,7 +771,7 @@ public abstract class ImageWorker {
         }
 
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
+        protected void onPostExecute(@android.support.annotation.Nullable Bitmap bitmap) {
             if (bitmap != null) {
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "onPostExecute - setting bitmap");
@@ -795,6 +801,7 @@ public abstract class ImageWorker {
      */
     private static class AsyncDrawable extends BitmapDrawable {
 
+        @NonNull
         private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
 
         public AsyncDrawable(Resources res, Bitmap bitmap, BitmapWorkerTask bitmapWorkerTask) {
@@ -814,7 +821,7 @@ public abstract class ImageWorker {
      * @param imageView
      * @param bitmap
      */
-    private void setImageBitmap(ImageView imageView, Bitmap bitmap) {
+    private void setImageBitmap(@NonNull ImageView imageView, Bitmap bitmap) {
         if (mFadeInBitmap) {
             // Transition drawable between the pending image and the final bitmap.
             final TransitionDrawable td =
@@ -841,6 +848,7 @@ public abstract class ImageWorker {
 
     protected class CacheAsyncTask extends AsyncTask<Object, Void, Void> {
 
+        @android.support.annotation.Nullable
         @Override
         protected Void doInBackground(Object... params) {
             @CacheMessages int message = (Integer) params[0];

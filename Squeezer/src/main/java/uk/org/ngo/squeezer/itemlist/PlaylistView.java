@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.itemlist;
 
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ public class PlaylistView extends BaseItemView<Playlist> {
         this.activity = activity;
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.playlist, quantity);
@@ -54,7 +56,7 @@ public class PlaylistView extends BaseItemView<Playlist> {
 
     // XXX: Make this a menu resource.
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         menu.add(Menu.NONE, PLAYLISTS_CONTEXTMENU_DELETE_ITEM, 0, R.string.menu_item_delete);
@@ -67,7 +69,7 @@ public class PlaylistView extends BaseItemView<Playlist> {
     }
 
     @Override
-    public boolean doItemContext(MenuItem menuItem, int index, Playlist selectedItem) {
+    public boolean doItemContext(@NonNull MenuItem menuItem, int index, Playlist selectedItem) {
         activity.setCurrentPlaylist(index, selectedItem);
         switch (menuItem.getItemId()) {
             case PLAYLISTS_CONTEXTMENU_DELETE_ITEM:

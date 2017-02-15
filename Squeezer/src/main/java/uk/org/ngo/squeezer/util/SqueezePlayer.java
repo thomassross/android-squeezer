@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import uk.org.ngo.squeezer.Preferences;
@@ -46,7 +47,7 @@ public class SqueezePlayer extends Handler {
         startControllingSqueezePlayer();
     }
 
-    public static boolean hasSqueezePlayer(Context context) {
+    public static boolean hasSqueezePlayer(@NonNull Context context) {
         final PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(SQUEEZEPLAYER_PACKAGE);
         return (intent != null);
@@ -78,7 +79,7 @@ public class SqueezePlayer extends Handler {
     }
 
     @Override
-    public void handleMessage(Message msg) {
+    public void handleMessage(@NonNull Message msg) {
         switch (msg.what) {
             case MSG_STOP :
                 removeMessages(MSG_TIMEOUT);

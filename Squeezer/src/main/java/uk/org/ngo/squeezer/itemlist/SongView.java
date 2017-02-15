@@ -20,6 +20,7 @@ package uk.org.ngo.squeezer.itemlist;
 import com.google.common.base.Strings;
 
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.View;
 
@@ -88,7 +89,7 @@ public class SongView extends PlaylistItemView<Song> {
     }
 
     @Override
-    public void bindView(View view, Song item) {
+    public void bindView(@NonNull View view, @NonNull Song item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(item.getName());
@@ -112,7 +113,7 @@ public class SongView extends PlaylistItemView<Song> {
      * @param label The text to bind to {@link ViewHolder#text1}
      */
     @Override
-    public void bindView(View view, String label) {
+    public void bindView(@NonNull View view, String label) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         viewHolder.text1.setText(label);
@@ -126,7 +127,7 @@ public class SongView extends PlaylistItemView<Song> {
      * visibility of R.id.group_playlist.
      */
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         menuInfo.menuInflater.inflate(R.menu.songcontextmenu, menu);
@@ -151,7 +152,7 @@ public class SongView extends PlaylistItemView<Song> {
     }
 
     @Override
-    public boolean doItemContext(android.view.MenuItem menuItem, int index, Song selectedItem) {
+    public boolean doItemContext(@NonNull android.view.MenuItem menuItem, int index, @NonNull Song selectedItem) {
         switch (menuItem.getItemId()) {
             case R.id.play_from_here:
                 getActivity().play(getPlayListItem(), index);
@@ -176,6 +177,7 @@ public class SongView extends PlaylistItemView<Song> {
         return super.doItemContext(menuItem, index, selectedItem);
     }
 
+    @NonNull
     @Override
     public String getQuantityString(int quantity) {
         return getActivity().getResources().getQuantityString(R.plurals.song, quantity);

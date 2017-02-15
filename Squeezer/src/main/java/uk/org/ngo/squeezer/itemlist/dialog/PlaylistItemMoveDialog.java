@@ -3,6 +3,7 @@ package uk.org.ngo.squeezer.itemlist.dialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.InputType;
 
 import uk.org.ngo.squeezer.R;
@@ -17,6 +18,7 @@ public class PlaylistItemMoveDialog extends BaseEditTextDialog {
 
     private int fromIndex;
 
+    @Nullable
     private Playlist playlist;
 
     @NonNull
@@ -55,7 +57,7 @@ public class PlaylistItemMoveDialog extends BaseEditTextDialog {
         return false;
     }
 
-    public static void addTo(BaseListActivity<?> activity, int fromIndex) {
+    public static void addTo(@NonNull BaseListActivity<?> activity, int fromIndex) {
         PlaylistItemMoveDialog dialog = new PlaylistItemMoveDialog();
         Bundle args = new Bundle();
         args.putInt("fromIndex", fromIndex + 1);
@@ -63,7 +65,7 @@ public class PlaylistItemMoveDialog extends BaseEditTextDialog {
         dialog.show(activity.getSupportFragmentManager(), "MoveDialog");
     }
 
-    public static void addTo(BaseListActivity<?> activity, Playlist playlist, int fromIndex) {
+    public static void addTo(@NonNull BaseListActivity<?> activity, Playlist playlist, int fromIndex) {
         PlaylistItemMoveDialog dialog = new PlaylistItemMoveDialog();
         Bundle args = new Bundle();
         args.putInt("fromIndex", fromIndex + 1);

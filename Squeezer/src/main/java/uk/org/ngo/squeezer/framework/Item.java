@@ -17,6 +17,8 @@
 package uk.org.ngo.squeezer.framework;
 
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Base class for SqueezeServer data. Specializations must implement all the necessary boilerplate
@@ -53,7 +55,7 @@ public abstract class Item implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
@@ -80,6 +82,7 @@ public abstract class Item implements Parcelable {
         return getClass().getSimpleName() + " { id: " + getId() + ", name: " + getName();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return toStringOpen() + " }";

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -53,9 +54,12 @@ public class UndoBarController extends LinearLayout {
     public static final int FADE_DURATION = 300;
     public static final int UNDO_DURATION = 5000;
 
+    @NonNull
     private final View mUndoBar;
+    @NonNull
     private final TextView mMessageView;
     private final Handler mHideHandler = new Handler();
+    @Nullable
     private UndoListener mUndoListener;
 
     private final Runnable mHideRunnable = new Runnable() {
@@ -114,7 +118,7 @@ public class UndoBarController extends LinearLayout {
      * @param message The message will be shown in left side in toast
      * @param listener Callback
      */
-    private static void showUndoBar(final Activity activity, final CharSequence message,
+    private static void showUndoBar(@NonNull final Activity activity, final CharSequence message,
                                     final UndoListener listener) {
         UndoBarController undo = UndoBarController.getView(activity);
         if (undo == null) {
@@ -132,7 +136,8 @@ public class UndoBarController extends LinearLayout {
         undo.startAnimation(undo.inAnimation());
     }
 
-    private static UndoBarController getView(final Activity activity) {
+    @Nullable
+    private static UndoBarController getView(@NonNull final Activity activity) {
         final View view = activity.findViewById(R.id.undobar);
         UndoBarController undo = null;
         if (view != null) {
@@ -141,6 +146,7 @@ public class UndoBarController extends LinearLayout {
         return undo;
     }
 
+    @NonNull
     private Animation outAnimation(boolean immediate) {
         final Animation animation = new AlphaAnimation(1F, 0F);
         animation.setDuration(immediate ? 0 : FADE_DURATION);
@@ -153,6 +159,7 @@ public class UndoBarController extends LinearLayout {
         return animation;
     }
 
+    @NonNull
     private Animation inAnimation() {
         final Animation animation = new AlphaAnimation(0F, 1F);
         animation.setDuration(FADE_DURATION);
@@ -173,7 +180,7 @@ public class UndoBarController extends LinearLayout {
      * @param message The message will be shown in left side in toast
      * @param listener Callback
      */
-    public static void show(final Activity activity, final CharSequence message,
+    public static void show(@NonNull final Activity activity, final CharSequence message,
                             final UndoListener listener) {
         showUndoBar(activity, message, listener);
     }
@@ -183,7 +190,7 @@ public class UndoBarController extends LinearLayout {
      *
      * @param activity Activity which hosts the {@link UndoBarController}
      */
-    public static void hide(final Activity activity) {
+    public static void hide(@NonNull final Activity activity) {
         final UndoBarController v = UndoBarController.getView(activity);
         if (v != null && v.getVisibility() == View.VISIBLE) v.hideUndoBar(false, false);
     }

@@ -1,5 +1,7 @@
 package uk.org.ngo.squeezer.service;
 
+import android.support.annotation.NonNull;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,18 +21,21 @@ public class ServiceCallbackList<T extends ServiceCallback> implements Iterable<
         return items.size();
     }
 
+    @NonNull
     public ServiceCallbackList<T> register(T item) {
         publisher.addClient(this, item);
         items.put(item, Boolean.TRUE);
         return this;
     }
 
+    @NonNull
     public ServiceCallbackList<T> unregister(T item) {
         publisher.removeClient(item);
         items.remove(item);
         return this;
     }
 
+    @NonNull
     @Override
     public Iterator<T> iterator() {
         return items.keySet().iterator();

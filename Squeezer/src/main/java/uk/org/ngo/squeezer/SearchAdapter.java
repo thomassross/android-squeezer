@@ -18,6 +18,8 @@ package uk.org.ngo.squeezer;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -52,17 +54,21 @@ import uk.org.ngo.squeezer.model.Song;
 public class SearchAdapter extends BaseExpandableListAdapter implements
         OnCreateContextMenuListener {
 
+    @NonNull
     private final SearchActivity activity;
+    @NonNull
     private final Group[] groups;
     private final Map<Class<? extends Item>, Group> groupMap
             = new HashMap<Class<? extends Item>, Group>();
+    @NonNull
     private final View.OnClickListener onItemClickListener;
+    @NonNull
     private final View.OnLongClickListener onItemLongClickListener;
 
     private int currentGroup;
     private int currentChild;
 
-    public SearchAdapter(SearchActivity activity) {
+    public SearchAdapter(@NonNull SearchActivity activity) {
         this.activity = activity;
         final Preferences preferences = new Preferences(activity);
         final boolean songGrid= preferences.getSongListLayout() == SongViewDialog.SongListLayout.grid;
@@ -87,7 +93,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
 
         onItemClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(@NonNull View v) {
                 int groupPosition = (int) v.getTag(R.id.group_position_tag);
                 int childPosition = (int) v.getTag(R.id.child_position_tag);
                 onChildClick(groupPosition, childPosition);
@@ -96,7 +102,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
 
         onItemLongClickListener = new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View v) {
+            public boolean onLongClick(@NonNull View v) {
                 v.showContextMenu();
                 return true;
             }
@@ -109,7 +115,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         }
     }
 
-    public <T extends Item> void updateItems(int count, int start, List<T> items, Class<T> dataType) {
+    public <T extends Item> void updateItems(int count, int start, @NonNull List<T> items, Class<T> dataType) {
         @SuppressWarnings("unchecked")
         ItemAdapter<T> adapter = (ItemAdapter<T>) groupMap.get(dataType).adapter;
         adapter.update(count, start, items);
@@ -117,7 +123,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, @NonNull View v, ContextMenuInfo menuInfo) {
         currentGroup = (int) v.getTag(R.id.group_position_tag);
         currentChild = (int) v.getTag(R.id.child_position_tag);
         groups[currentGroup].adapter.createContextMenu(menu, v, currentChild);
@@ -135,6 +141,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         return groups[groupPosition].adapter.doItemContext(menuItem, childPosition);
     }
 
+    @NonNull
     @Override
     public PlaylistItem getChild(int groupPosition, int childPosition) {
         return (PlaylistItem) groups[groupPosition].adapter.getItem(childPosition);
@@ -145,8 +152,9 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         return childPosition;
     }
 
+    @Nullable
     @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, @NonNull ViewGroup parent) {
         if (groups[groupPosition].isGrid) {
             return getViewGroupChild(convertView, groupPosition, childPosition, parent);
         } else {
@@ -154,7 +162,8 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         }
     }
 
-    private View getChildView(int groupPosition, int childPosition, View convertView, ViewGroup parent) {
+    @Nullable
+    private View getChildView(int groupPosition, int childPosition, @Nullable View convertView, ViewGroup parent) {
         if (convertView != null && (int)convertView.getTag(R.id.group_position_tag) != groupPosition)
             convertView = null;
         final View view = groups[groupPosition].adapter.getView(childPosition, convertView, parent);
@@ -163,7 +172,8 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         return view;
     }
 
-    private View getViewGroupChild(View convertView, int groupPosition, int childPosition, ViewGroup parent) {
+    @Nullable
+    private View getViewGroupChild(@Nullable View convertView, int groupPosition, int childPosition, @NonNull ViewGroup parent) {
         final Group group = groups[groupPosition];
         ViewGroup row;
 
@@ -203,7 +213,7 @@ public class SearchAdapter extends BaseExpandableListAdapter implements
         return row;
     }
 
-    private void prepareItemView(View view, int groupPosition, int childPosition) {
+    private void prepareItemView(@NonNull View view, int groupPosition, int childPosition) {
         view.setTag(R.id.group_position_tag, groupPosition);
         view.setTag(R.id.child_position_tag, childPosition);
         view.setOnClickListener(onItemClickListener);

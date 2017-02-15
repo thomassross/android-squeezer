@@ -18,22 +18,24 @@ package uk.org.ngo.squeezer.itemlist;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
 
 public class ApplicationListActivity extends PluginListActivity {
 
+    @NonNull
     @Override
     public ItemView<Plugin> createItemView() {
         return new RadioView(this);
     }
 
-    public static void show(Activity activity) {
+    public static void show(@NonNull Activity activity) {
         show(activity, Plugin.MY_APPS);
     }
 
-    public static void show(Activity activity, Plugin plugin) {
+    public static void show(@NonNull Activity activity, @NonNull Plugin plugin) {
         final Intent intent = new Intent(activity, ApplicationListActivity.class);
         intent.putExtra(plugin.getClass().getName(), plugin);
         activity.startActivity(intent);

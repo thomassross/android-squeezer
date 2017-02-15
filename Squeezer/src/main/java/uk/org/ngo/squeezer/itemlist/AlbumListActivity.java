@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -52,65 +53,78 @@ public class AlbumListActivity extends BaseListActivity<Album>
         FilterableListActivity,
         ViewMenuItemFragment.ListActivityWithViewMenu<Album, AlbumViewDialog.AlbumListLayout, AlbumViewDialog.AlbumsSortOrder> {
 
+    @Nullable
     private AlbumViewDialog.AlbumsSortOrder sortOrder = null;
 
+    @Nullable
     private AlbumViewDialog.AlbumListLayout listLayout = null;
 
+    @Nullable
     private String searchString = null;
 
+    @Nullable
     public String getSearchString() {
         return searchString;
     }
 
-    public void setSearchString(String searchString) {
+    public void setSearchString(@Nullable String searchString) {
         this.searchString = searchString;
     }
 
+    @Nullable
     private Song song;
 
+    @Nullable
     public Song getSong() {
         return song;
     }
 
-    public void setSong(Song song) {
+    public void setSong(@Nullable Song song) {
         this.song = song;
     }
 
+    @Nullable
     private Artist artist;
 
+    @Nullable
     public Artist getArtist() {
         return artist;
     }
 
-    public void setArtist(Artist artist) {
+    public void setArtist(@Nullable Artist artist) {
         this.artist = artist;
     }
 
+    @Nullable
     private Year year;
 
+    @Nullable
     @Override
     public Year getYear() {
         return year;
     }
 
     @Override
-    public void setYear(Year year) {
+    public void setYear(@Nullable Year year) {
         this.year = year;
     }
 
+    @Nullable
     private Genre genre;
 
+    @Nullable
     @Override
     public Genre getGenre() {
         return genre;
     }
 
     @Override
-    public void setGenre(Genre genre) {
+    public void setGenre(@Nullable Genre genre) {
         this.genre = genre;
     }
 
 
+    @NonNull
     @Override
     public ItemView<Album> createItemView() {
         return (listLayout == AlbumViewDialog.AlbumListLayout.grid) ? new AlbumGridView(this) : new AlbumView(this);
@@ -186,13 +200,14 @@ public class AlbumListActivity extends BaseListActivity<Album>
                 artist, getYear(), getGenre(), song);
     }
 
+    @Nullable
     @Override
     public AlbumViewDialog.AlbumsSortOrder getSortOrder() {
         return sortOrder;
     }
 
     @Override
-    public void setSortOrder(AlbumViewDialog.AlbumsSortOrder sortOrder) {
+    public void setSortOrder(@NonNull AlbumViewDialog.AlbumsSortOrder sortOrder) {
         ISqueezeService service = getService();
         if (service == null) {
             return;
@@ -204,6 +219,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
         clearAndReOrderItems();
     }
 
+    @Nullable
     @Override
     public AlbumViewDialog.AlbumListLayout getListLayout() {
         return listLayout;
@@ -220,7 +236,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
     }
 
     @Override
-    public void setListLayout(AlbumViewDialog.AlbumListLayout listLayout) {
+    public void setListLayout(@Nullable AlbumViewDialog.AlbumListLayout listLayout) {
         new Preferences(this).setAlbumListLayout(listLayout);
         startActivity(getIntent());
         finish();
@@ -242,11 +258,11 @@ public class AlbumListActivity extends BaseListActivity<Album>
         new AlbumViewDialog().show(getSupportFragmentManager(), "AlbumOrderDialog");
     }
 
-    public static void show(Context context, Item... items) {
+    public static void show(@NonNull Context context, Item... items) {
         show(context, null, items);
     }
 
-    public static void show(Context context, AlbumViewDialog.AlbumsSortOrder sortOrder, Item... items) {
+    public static void show(@NonNull Context context, @Nullable AlbumViewDialog.AlbumsSortOrder sortOrder, @NonNull Item... items) {
         final Intent intent = new Intent(context, AlbumListActivity.class);
         if (sortOrder != null) {
             intent.putExtra(AlbumViewDialog.AlbumsSortOrder.class.getName(), sortOrder.name());

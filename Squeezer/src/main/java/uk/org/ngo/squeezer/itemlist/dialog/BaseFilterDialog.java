@@ -32,7 +32,7 @@ public abstract class BaseFilterDialog extends DialogFragment {
         EditText editText = (EditText) filterForm.findViewById(R.id.search_string);
         editText.setOnKeyListener(new OnKeyListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+            public boolean onKey(View v, int keyCode, @NonNull KeyEvent event) {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode
                         == KeyEvent.KEYCODE_ENTER)) {
                     filter();

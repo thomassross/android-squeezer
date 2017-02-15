@@ -66,15 +66,19 @@ public interface ISqueezeService {
      * @return players that the server knows about (irrespective of power, connection, or
      * other status).
      */
+    @NonNull
     List<Player> getPlayers();
 
     /**
      * @return players that are connected to the server.
      */
+    @NonNull
     java.util.Collection<Player> getConnectedPlayers();
 
     // XXX: Delete, now that PlayerState is tracked in the player?
+    @Nullable
     PlayerState getActivePlayerState();
+    @Nullable
     PlayerState getPlayerState(String playerId);
 
     // Player control
@@ -135,7 +139,9 @@ public interface ISqueezeService {
 
     boolean setSecondsElapsed(int seconds);
 
+    @Nullable
     PlayerState getPlayerState();
+    @Nullable
     String getCurrentPlaylist();
 
     /**

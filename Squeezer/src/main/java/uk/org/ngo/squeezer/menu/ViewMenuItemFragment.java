@@ -1,6 +1,7 @@
 package uk.org.ngo.squeezer.menu;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,13 +41,13 @@ public class ViewMenuItemFragment extends BaseMenuFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.viewmenuitem, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_view:
                 activity.showViewDialog();

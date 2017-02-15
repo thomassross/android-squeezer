@@ -20,6 +20,7 @@ package uk.org.ngo.squeezer.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import uk.org.ngo.squeezer.Preferences;
 import uk.org.ngo.squeezer.R;
@@ -52,7 +53,7 @@ public class ThemeManager {
         }
 
         @Override
-        public String getText(Context context) {
+        public String getText(@NonNull Context context) {
             return context.getString(mLabelId);
         }
     }
@@ -65,7 +66,7 @@ public class ThemeManager {
      *
      * @param activity The activity to be themed.
      */
-    public void onCreate(Activity activity) {
+    public void onCreate(@NonNull Activity activity) {
         // Ensure the activity uses the correct theme.
         mCurrentTheme = getThemePreference(activity);
         activity.setTheme(mCurrentTheme);
@@ -78,7 +79,7 @@ public class ThemeManager {
      *
      * @param activity The activity being themed.
      */
-    public void onResume(Activity activity) {
+    public void onResume(@NonNull Activity activity) {
         // Themes can only be applied before views are instantiated.  If the current theme
         // changed while this activity was paused (e.g., because the user went to the
         // SettingsActivity and changed it) then restart this activity with the new theme.
@@ -94,6 +95,7 @@ public class ThemeManager {
     /**
      * @return The application's default theme if the user did not choose one.
      */
+    @NonNull
     public static Theme getDefaultTheme() {
         return Theme.LIGHT_DARKACTIONBAR;
     }

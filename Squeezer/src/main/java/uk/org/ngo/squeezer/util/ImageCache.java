@@ -24,6 +24,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.StatFs;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
@@ -74,6 +75,7 @@ public class ImageCache {
 
     private static final boolean DEFAULT_INIT_DISK_CACHE_ON_CREATE = false;
 
+    @Nullable
     private DiskLruCache mDiskLruCache;
 
     private LruCache<String, Bitmap> mMemoryCache;
@@ -91,7 +93,7 @@ public class ImageCache {
      *
      * @param cacheParams The cache parameters to use to initialize the cache
      */
-    public ImageCache(ImageCacheParams cacheParams) {
+    public ImageCache(@NonNull ImageCacheParams cacheParams) {
         init(cacheParams);
     }
 
@@ -101,7 +103,7 @@ public class ImageCache {
      * @param context The context to use
      * @param uniqueName A unique name that will be appended to the cache directory
      */
-    public ImageCache(Context context, String uniqueName) {
+    public ImageCache(@NonNull Context context, String uniqueName) {
         init(new ImageCacheParams(context, uniqueName));
     }
 
@@ -114,8 +116,9 @@ public class ImageCache {
      *
      * @return An existing retained ImageCache object or a new one if one did not exist
      */
+    @NonNull
     public static ImageCache findOrCreateCache(
-            FragmentManager fragmentManager, ImageCacheParams cacheParams) {
+            FragmentManager fragmentManager, @NonNull ImageCacheParams cacheParams) {
 
         // Search for, or create an instance of the non-UI RetainFragment
         final RetainFragment mRetainFragment = RetainFragment.getInstance(TAG, fragmentManager);
@@ -137,7 +140,7 @@ public class ImageCache {
      *
      * @param cacheParams The cache parameters to initialize the cache
      */
-    private void init(ImageCacheParams cacheParams) {
+    private void init(@NonNull ImageCacheParams cacheParams) {
         mCacheParams = cacheParams;
 
         // Set up memory cache
@@ -147,7 +150,7 @@ public class ImageCache {
             }
             mMemoryCache = new LruCache<String, Bitmap>(mCacheParams.memCacheSize) {
                 @Override
-                protected int sizeOf(String key, Bitmap bitmap) {
+                protected int sizeOf(String key, @NonNull Bitmap bitmap) {
                     return (bitmap.getRowBytes() * bitmap.getHeight());
                 }
             };
@@ -190,7 +193,7 @@ public class ImageCache {
                             if (BuildConfig.DEBUG) {
                                 Log.d(TAG, "Disk cache initialized in " + diskCacheDir);
                             }
-                        } catch (final IOException e) {
+                        } catch (@NonNull final IOException e) {
                             mCacheParams.diskCacheDir = null;
                             Log.e(TAG, "initDiskCache - " + e);
                         }
@@ -208,7 +211,7 @@ public class ImageCache {
      * @param data Unique identifier for the bitmap to store
      * @param bitmap The bitmap to store
      */
-    public void addBitmapToCache(String data, Bitmap bitmap) {
+    public void addBitmapToCache(@Nullable String data, @Nullable Bitmap bitmap) {
         if (data == null || bitmap == null) {
             return;
         }
@@ -223,7 +226,7 @@ public class ImageCache {
      * @param data Unique identifier for the bitmap to store
      * @param bitmap The bitmap to store
      */
-    public void addBitmapToMemoryCache(String data, Bitmap bitmap) {
+    public void addBitmapToMemoryCache(@Nullable String data, @Nullable Bitmap bitmap) {
         if (data == null || bitmap == null) {
             return;
         }
@@ -240,7 +243,7 @@ public class ImageCache {
      * @param data Unique identifier for the bitmap to store
      * @param bitmap The bitmap to store
      */
-    public void addBitmapToDiskCache(String data, Bitmap bitmap) {
+    public void addBitmapToDiskCache(@Nullable String data, @Nullable Bitmap bitmap) {
         if (data == null || bitmap == null) {
             return;
         }
@@ -264,7 +267,7 @@ public class ImageCache {
                     } else {
                         snapshot.getInputStream(DISK_CACHE_INDEX).close();
                     }
-                } catch (final IOException e) {
+                } catch (@NonNull final IOException e) {
                     Log.e(TAG, "addBitmapToCache - " + e);
                 } catch (Exception e) {
                     Log.e(TAG, "addBitmapToCache - " + e);
@@ -286,7 +289,7 @@ public class ImageCache {
      * @param data Unique identifier for the bitmap to store
      * @param bytes The bytes to store
      */
-    public void addBytesToDiskCache(String data, byte[] bytes) {
+    public void addBytesToDiskCache(@Nullable String data, @NonNull byte[] bytes) {
         if (data == null || bytes.length == 0) {
             return;
         }
@@ -309,7 +312,7 @@ public class ImageCache {
                     } else {
                         snapshot.getInputStream(DISK_CACHE_INDEX).close();
                     }
-                } catch (final IOException e) {
+                } catch (@NonNull final IOException e) {
                     Log.e(TAG, "addBitmapToCache - " + e);
                 } catch (Exception e) {
                     Log.e(TAG, "addBitmapToCache - " + e);
@@ -332,7 +335,8 @@ public class ImageCache {
      *
      * @return The bitmap if found in cache, null otherwise
      */
-    public Bitmap getBitmapFromMemCache(String data) {
+    @Nullable
+    public Bitmap getBitmapFromMemCache(@NonNull String data) {
         Bitmap bitmap = null;
 
         if (mMemoryCache != null) {
@@ -362,7 +366,7 @@ public class ImageCache {
      * @return The bitmap if found in cache, null otherwise
      */
     @Nullable
-    public Bitmap getBitmapFromDiskCache(String data) {
+    public Bitmap getBitmapFromDiskCache(@NonNull String data) {
         final String key = hashKeyForDisk(data);
         synchronized (mDiskCacheLock) {
             while (mDiskCacheStarting) {
@@ -384,7 +388,7 @@ public class ImageCache {
                             return BitmapFactory.decodeStream(inputStream);
                         }
                     }
-                } catch (final IOException e) {
+                } catch (@NonNull final IOException e) {
                     Log.e(TAG, "getBitmapFromDiskCache - " + e);
                 } finally {
                     try {
@@ -407,7 +411,7 @@ public class ImageCache {
      * @return The bytes at that entry in the cache, null otherwise
      */
     @Nullable
-    public byte[] getBytesFromDiskCache(String data) {
+    public byte[] getBytesFromDiskCache(@NonNull String data) {
         final String key = hashKeyForDisk(data);
         synchronized (mDiskCacheLock) {
             while (mDiskCacheStarting) {
@@ -429,7 +433,7 @@ public class ImageCache {
                             return ByteStreams.toByteArray(inputStream);
                         }
                     }
-                } catch (final IOException e) {
+                } catch (@NonNull final IOException e) {
                     Log.e(TAG, "getBitmapFromDiskCache - " + e);
                 } finally {
                     try {
@@ -527,6 +531,7 @@ public class ImageCache {
 
         public final int maxDiskCacheSize = MAX_DISK_CACHE_SIZE;
 
+        @Nullable
         public File diskCacheDir;
 
         public final CompressFormat compressFormat = DEFAULT_COMPRESS_FORMAT;
@@ -541,11 +546,11 @@ public class ImageCache {
 
         public final boolean initDiskCacheOnCreate = DEFAULT_INIT_DISK_CACHE_ON_CREATE;
 
-        public ImageCacheParams(Context context, String uniqueName) {
+        public ImageCacheParams(@NonNull Context context, String uniqueName) {
             diskCacheDir = getDiskCacheDir(context, uniqueName);
         }
 
-        public ImageCacheParams(File diskCacheDir) {
+        public ImageCacheParams(@Nullable File diskCacheDir) {
             this.diskCacheDir = diskCacheDir;
         }
 
@@ -560,7 +565,7 @@ public class ImageCache {
          * @param context Context to use to fetch memory class
          * @param percent Percent of memory class to use to size memory cache
          */
-        public void setMemCacheSizePercent(Context context, float percent) {
+        public void setMemCacheSizePercent(@NonNull Context context, float percent) {
             if (percent < 0.05f || percent > 0.8f) {
                 throw new IllegalArgumentException("setMemCacheSizePercent - percent must be "
                         + "between 0.05 and 0.8 (inclusive)");
@@ -568,7 +573,7 @@ public class ImageCache {
             memCacheSize = Math.round(percent * getMemoryClass(context) * 1024 * 1024);
         }
 
-        private static int getMemoryClass(Context context) {
+        private static int getMemoryClass(@NonNull Context context) {
             return ((ActivityManager) context.getSystemService(
                     Context.ACTIVITY_SERVICE)).getMemoryClass();
         }
@@ -582,7 +587,8 @@ public class ImageCache {
      *
      * @return The cache dir
      */
-    public static File getDiskCacheDir(Context context, String uniqueName) {
+    @NonNull
+    public static File getDiskCacheDir(@NonNull Context context, String uniqueName) {
         // Check if media is mounted or storage is built-in, if so, try and use external cache dir
         // otherwise use internal cache dir
         File externalCacheDir = getExternalCacheDir(context);
@@ -599,7 +605,7 @@ public class ImageCache {
      * A hashing method that changes a string (like a URL) into a hash suitable for using as a disk
      * filename.  The hashing method is MD5.
      */
-    public static String hashKeyForDisk(String key) {
+    public static String hashKeyForDisk(@NonNull String key) {
         return mHashFunction.hashBytes(key.getBytes()).toString();
     }
 
@@ -611,7 +617,7 @@ public class ImageCache {
      * @return size in bytes
      */
     @TargetApi(12)
-    public static int getBitmapSize(Bitmap bitmap) {
+    public static int getBitmapSize(@NonNull Bitmap bitmap) {
         if (UIUtils.hasHoneycombMR1()) {
             return bitmap.getByteCount();
         }
@@ -639,8 +645,9 @@ public class ImageCache {
      *
      * @return The external cache dir
      */
+    @Nullable
     @TargetApi(8)
-    public static File getExternalCacheDir(Context context) {
+    public static File getExternalCacheDir(@NonNull Context context) {
         if (UIUtils.hasFroyo()) {
             return context.getExternalCacheDir();
         }
@@ -658,7 +665,7 @@ public class ImageCache {
      * @return The space available in bytes
      */
     @TargetApi(9)
-    public static long getUsableSpace(File path) {
+    public static long getUsableSpace(@NonNull File path) {
         if (UIUtils.hasGingerbread()) {
             return path.getUsableSpace();
         }

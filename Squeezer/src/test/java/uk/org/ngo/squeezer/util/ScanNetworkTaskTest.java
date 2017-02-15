@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.util;
 
+import android.support.annotation.NonNull;
+
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -85,7 +87,7 @@ public class ScanNetworkTaskTest extends TestCase {
             this.expected = expected;
         }
 
-        BufferTest(String message, String buffer, String expected) {
+        BufferTest(String message, @NonNull String buffer, String expected) {
             this(message, buffer.getBytes(), expected);
         }
     }

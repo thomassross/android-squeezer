@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.framework;
 
 import android.os.Parcelable.Creator;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,6 +49,7 @@ public interface ItemView<T extends Item> {
     /**
      * @return {@link android.content.res.Resources#getQuantityString(int, int)}
      */
+    @Nullable
     String getQuantityString(int quantity);
 
     /**
@@ -61,6 +63,7 @@ public interface ItemView<T extends Item> {
      *
      * @return the view to display.
      */
+    @Nullable
     View getAdapterView(View convertView, ViewGroup parent, int position, T item);
 
     /**

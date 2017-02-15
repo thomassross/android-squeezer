@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -52,12 +53,15 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 public class PluginItemListActivity extends BaseListActivity<PluginItem>
         implements NetworkErrorDialogFragment.NetworkErrorDialogListener {
 
+    @Nullable
     private Plugin plugin;
 
+    @Nullable
     private PluginItem parent;
 
     private String search;
 
+    @NonNull
     @Override
     public ItemView<PluginItem> createItemView() {
         return new PluginItemView(this);
@@ -78,7 +82,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
             searchCriteriaText.setOnKeyListener(new OnKeyListener() {
                 @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                public boolean onKey(View v, int keyCode, @NonNull KeyEvent event) {
                     if ((event.getAction() == KeyEvent.ACTION_DOWN)
                             && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                         clearAndReOrderItems(searchCriteriaText.getText().toString());
@@ -105,6 +109,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         header.setVisibility(View.VISIBLE);
     }
 
+    @Nullable
     public Plugin getPlugin() {
         return plugin;
     }
@@ -132,7 +137,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     }
 
 
-    public void show(PluginItem pluginItem) {
+    public void show(@NonNull PluginItem pluginItem) {
         final Intent intent = new Intent(this, PluginItemListActivity.class);
         intent.putExtra(plugin.getClass().getName(), plugin);
         intent.putExtra(pluginItem.getClass().getName(), pluginItem);
@@ -140,7 +145,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
-    public static void show(Activity activity, Plugin plugin) {
+    public static void show(@NonNull Activity activity, @NonNull Plugin plugin) {
         final Intent intent = new Intent(activity, PluginItemListActivity.class);
         intent.putExtra(plugin.getClass().getName(), plugin);
         activity.startActivity(intent);
@@ -154,7 +159,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     }
 
     @Override
-    public void onItemsReceived(int count, int start, final Map<String, String> parameters, List<PluginItem> items, Class<PluginItem> dataType) {
+    public void onItemsReceived(int count, int start, @NonNull final Map<String, String> parameters, @NonNull List<PluginItem> items, Class<PluginItem> dataType) {
         if (parameters.containsKey("title")) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -219,23 +224,23 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
     // Shortcuts for operations for plugin items
 
-    public boolean play(PluginItem item) {
+    public boolean play(@NonNull PluginItem item) {
         return pluginPlaylistControl(PLUGIN_PLAYLIST_PLAY, item);
     }
 
-    public boolean load(PluginItem item) {
+    public boolean load(@NonNull PluginItem item) {
         return pluginPlaylistControl(PLUGIN_PLAYLIST_PLAY_NOW, item);
     }
 
-    public boolean insert(PluginItem item) {
+    public boolean insert(@NonNull PluginItem item) {
         return pluginPlaylistControl(PLUGIN_PLAYLIST_PLAY_AFTER_CURRENT, item);
     }
 
-    public boolean add(PluginItem item) {
+    public boolean add(@NonNull PluginItem item) {
         return pluginPlaylistControl(PLUGIN_PLAYLIST_ADD_TO_END, item);
     }
 
-    private boolean pluginPlaylistControl(@PluginPlaylistControlCmd String cmd, PluginItem item) {
+    private boolean pluginPlaylistControl(@PluginPlaylistControlCmd String cmd, @NonNull PluginItem item) {
         if (getService() == null) {
             return false;
         }

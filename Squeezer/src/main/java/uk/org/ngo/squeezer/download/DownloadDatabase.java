@@ -57,6 +57,7 @@ public class DownloadDatabase {
     private static class OpenHelper  extends SQLiteOpenHelper {
 
         private static final Object mInstanceLock = new Object();
+        @Nullable
         private static OpenHelper mInstance;
 
         private OpenHelper(Context context) {
@@ -65,6 +66,7 @@ public class DownloadDatabase {
             super(context, DOWNLOAD_DATABASE.NAME, null, DOWNLOAD_DATABASE.VERSION);
         }
 
+        @Nullable
         public static OpenHelper getInstance(Context context) {
             if (mInstance == null) {
                 synchronized (mInstanceLock) {
@@ -79,7 +81,7 @@ public class DownloadDatabase {
         /**
          * Close download sync database helper instance and delete any data in the download database
          */
-        public static void clear(Context context) {
+        public static void clear(@NonNull Context context) {
             synchronized (mInstanceLock) {
                 if (mInstance != null) {
                     mInstance.close();
@@ -91,7 +93,7 @@ public class DownloadDatabase {
         }
 
         @Override
-        public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
             sqLiteDatabase.execSQL("CREATE TABLE " + DOWNLOAD_DATABASE.SONG.TABLE + "(" +
                     DOWNLOAD_DATABASE.SONG.COLUMNS.DOWNLOAD_ID + " INTEGER, " +
                     DOWNLOAD_DATABASE.SONG.COLUMNS.TEMP_NAME + " TEXT, " +
@@ -100,7 +102,7 @@ public class DownloadDatabase {
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DOWNLOAD_DATABASE.SONG.TABLE);
             // Upgrades just creates a new database. The database keeps track of
             // active downloads, so it holds only temporary information.
@@ -155,7 +157,7 @@ public class DownloadDatabase {
         return entry;
     }
 
-    public void iterateDownloadEntries(DownloadHandler callback) {
+    public void iterateDownloadEntries(@NonNull DownloadHandler callback) {
         Cursor cursor = db.rawQuery("select * from " + DOWNLOAD_DATABASE.SONG.TABLE, null);
         try {
             while (cursor.moveToNext()) {

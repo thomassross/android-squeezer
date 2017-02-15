@@ -26,6 +26,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,11 +51,13 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
 
     private static final int MSG_TIMEOUT = 2;
 
+    @NonNull
     private final BaseActivity mActivity;
 
     /**
      * Dialog displaying the volume panel.
      */
+    @NonNull
     private final Dialog mDialog;
 
     /**
@@ -62,16 +65,20 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
      */
     private final View mView;
 
+    @NonNull
     private final TextView mMessage;
 
+    @NonNull
     private final TextView mAdditionalMessage;
 
+    @NonNull
     private final ImageView mLargeStreamIcon;
 
+    @NonNull
     private final SeekBar mSeekbar;
 
     @SuppressLint({"InflateParams"}) // OK, as view is passed to Dialog.setView()
-    public VolumePanel(BaseActivity activity) {
+    public VolumePanel(@NonNull BaseActivity activity) {
         mActivity = activity;
 
         LayoutInflater inflater = (LayoutInflater) activity
@@ -94,7 +101,7 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
 
         mDialog = new Dialog(mActivity, R.style.VolumePanel) { //android.R.style.Theme_Panel) {
             @Override
-            public boolean onTouchEvent(MotionEvent event) {
+            public boolean onTouchEvent(@NonNull MotionEvent event) {
                 if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                     forceTimeout();
                     return true;
@@ -192,7 +199,7 @@ public class VolumePanel extends Handler implements SeekBar.OnSeekBarChangeListe
     }
 
     @Override
-    public void handleMessage(Message msg) {
+    public void handleMessage(@NonNull Message msg) {
         switch (msg.what) {
 
             case MSG_VOLUME_CHANGED: {

@@ -20,6 +20,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
@@ -41,6 +42,7 @@ public class SearchActivity extends ItemListActivity {
 
     private SearchAdapter searchResultsAdapter;
 
+    @Nullable
     private String searchString;
 
     @Override
@@ -58,12 +60,12 @@ public class SearchActivity extends ItemListActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         setIntent(intent);
         handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(@NonNull Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             doSearch(query);
@@ -103,7 +105,7 @@ public class SearchActivity extends ItemListActivity {
     }
 
     @Override
-    public void maybeOrderVisiblePages(AbsListView listView) {
+    public void maybeOrderVisiblePages(@NonNull AbsListView listView) {
         final int firstVisiblePosition = listView.getFirstVisiblePosition();
         int currentPagePosition = -1;
         for (int pos = 0; pos < listView.getChildCount(); pos++) {
@@ -127,7 +129,7 @@ public class SearchActivity extends ItemListActivity {
      *
      * @param searchString The string to search fo.
      */
-    private void doSearch(String searchString) {
+    private void doSearch(@Nullable String searchString) {
         this.searchString = searchString;
         if (searchString != null && searchString.length() > 0 && getService() != null) {
             clearAndReOrderItems();
@@ -150,7 +152,7 @@ public class SearchActivity extends ItemListActivity {
 
     private final IServiceItemListCallback itemListCallback = new IServiceItemListCallback() {
         @Override
-        public void onItemsReceived(final int count, final int start, Map parameters, final List items, final Class dataType) {
+        public void onItemsReceived(final int count, final int start, Map parameters, @NonNull final List items, final Class dataType) {
             SearchActivity.super.onItemsReceived(count, start, items.size());
 
             getUIThreadHandler().post(new Runnable() {
@@ -163,6 +165,7 @@ public class SearchActivity extends ItemListActivity {
             });
         }
 
+        @NonNull
         @Override
         public Object getClient() {
             return SearchActivity.this;

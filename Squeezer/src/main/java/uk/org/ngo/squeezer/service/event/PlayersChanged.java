@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.service.event;
 
+import android.support.annotation.NonNull;
+
 import java.util.Map;
 
 import uk.org.ngo.squeezer.model.Player;
@@ -31,6 +33,7 @@ public class PlayersChanged {
         this.players = players;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "{players: " + players + "}";

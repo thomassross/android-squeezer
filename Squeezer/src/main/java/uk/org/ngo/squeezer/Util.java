@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +53,7 @@ public class Util {
      *
      * @return true if target is updated. Otherwise return false.
      */
-    public static <T> boolean atomicReferenceUpdated(AtomicReference<T> target, T newValue) {
+    public static <T> boolean atomicReferenceUpdated(@NonNull AtomicReference<T> target, @Nullable T newValue) {
         T currentValue = target.get();
         if (currentValue == null && newValue == null) {
             return false;
@@ -64,7 +65,7 @@ public class Util {
         return false;
     }
 
-    public static int parseDecimalInt(String value, int defaultValue) {
+    public static int parseDecimalInt(@Nullable String value, int defaultValue) {
         if (value == null) {
             return defaultValue;
         }
@@ -130,7 +131,8 @@ public class Util {
         }
     }
 
-    public static String parseHost(String hostPort) {
+    @Nullable
+    public static String parseHost(@Nullable String hostPort) {
         if (hostPort == null) {
             return "";
         }
@@ -141,7 +143,7 @@ public class Util {
         return hostPort.substring(0, colonPos);
     }
 
-    public static int parsePort(String hostPort) {
+    public static int parsePort(@Nullable String hostPort) {
         if (hostPort == null) {
             return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
         }
@@ -165,7 +167,8 @@ public class Util {
      * @param label
      * @return a view suitable for use as a spinner view.
      */
-    public static View getSpinnerItemView(Context context, View convertView, ViewGroup parent,
+    @Nullable
+    public static View getSpinnerItemView(@NonNull Context context, View convertView, ViewGroup parent,
                                           String label) {
         return getSpinnerView(context, convertView, parent, label,
                 android.R.layout.simple_spinner_item);
@@ -179,19 +182,22 @@ public class Util {
      * @param label
      * @return a view suitable for use in a spinner's dropdown menu.
      */
-    public static View getSpinnerDropDownView(Context context, View convertView, ViewGroup parent,
-                                      String label) {
+    @Nullable
+    public static View getSpinnerDropDownView(@NonNull Context context, View convertView, ViewGroup parent,
+                                              String label) {
         return getSpinnerView(context, convertView, parent, label,
                 android.R.layout.simple_spinner_dropdown_item);
     }
 
-    public static View getActionBarSpinnerItemView(Context context, View convertView,
+    @Nullable
+    public static View getActionBarSpinnerItemView(@NonNull Context context, View convertView,
                                                    ViewGroup parent, String label) {
         return getSpinnerView(context, convertView, parent, label,
                 android.support.v7.appcompat.R.layout.support_simple_spinner_dropdown_item);
     }
 
-    private static View getSpinnerView(Context context, View convertView, ViewGroup parent,
+    @Nullable
+    private static View getSpinnerView(@NonNull Context context, @Nullable View convertView, ViewGroup parent,
                                        String label, int layout) {
         TextView view;
         view = (TextView) (convertView != null
@@ -210,7 +216,7 @@ public class Util {
      *
      * @return Number of arguments which are true
      */
-    public static int countBooleans(boolean... items) {
+    public static int countBooleans(@NonNull boolean... items) {
         int count = 0;
         for (boolean item : items) {
             if (item) {
@@ -221,7 +227,8 @@ public class Util {
     }
 
     /** Helper to set alpha value for a view, since View.setAlpha is API level 11 */
-    public static View setAlpha(View view, float alpha) {
+    @NonNull
+    public static View setAlpha(@NonNull View view, float alpha) {
         AlphaAnimation alphaAnimation = new AlphaAnimation(alpha, alpha);
         alphaAnimation.setDuration(0);
         alphaAnimation.setFillAfter(true);

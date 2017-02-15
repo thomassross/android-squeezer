@@ -39,7 +39,8 @@ public class InfoDialog extends DialogFragment {
         return builder.create();
     }
 
-    public static InfoDialog show(FragmentManager fragmentManager, int textResourceId) {
+    @NonNull
+    public static InfoDialog show(@NonNull FragmentManager fragmentManager, int textResourceId) {
         // Remove any currently showing dialog
         Fragment prev = fragmentManager.findFragmentByTag(TAG);
         if (prev != null) {

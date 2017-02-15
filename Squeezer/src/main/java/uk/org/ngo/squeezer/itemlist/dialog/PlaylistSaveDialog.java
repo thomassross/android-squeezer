@@ -44,7 +44,7 @@ public class PlaylistSaveDialog extends BaseEditTextDialog {
         return true;
     }
 
-    public static void addTo(BaseActivity activity, @Nullable String name) {
+    public static void addTo(@NonNull BaseActivity activity, @Nullable String name) {
         PlaylistSaveDialog dialog = new PlaylistSaveDialog();
         Bundle args = new Bundle();
         args.putString("name", name);
