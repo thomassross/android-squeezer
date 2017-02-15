@@ -50,7 +50,7 @@ public abstract class PlaylistItemView<T extends PlaylistItem> extends
         onSelectAction = getOnSelectAction();
     }
 
-    private final PlayableItemAction getOnSelectAction() {
+    private PlayableItemAction getOnSelectAction() {
         final PlayableItemAction.Type type = preferences.getOnItemSelectAction(getItemClass());
         return PlayableItemAction.createAction(getActivity(), type);
     }
