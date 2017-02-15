@@ -97,7 +97,7 @@ public class Plugin extends Item {
 
     private Plugin(String cmd, int iconResource) {
         setId(cmd);
-        setIconResource(iconResource);
+        this.iconResource = iconResource;
     }
 
     public Plugin(@NonNull Map<String, String> record) {

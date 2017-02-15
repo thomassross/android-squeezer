@@ -261,8 +261,8 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         cachePreferences();
 
-        setWifiLock(((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(
-                WifiManager.WIFI_MODE_FULL, "Squeezer_WifiLock"));
+        this.wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(
+                WifiManager.WIFI_MODE_FULL, "Squeezer_WifiLock");
 
         mEventBus.register(this, 1);  // Get events before other subscribers
         cli.initialize();

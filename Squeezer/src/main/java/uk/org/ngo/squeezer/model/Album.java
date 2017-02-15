@@ -94,8 +94,8 @@ public class Album extends ArtworkItem {
     public Album(@NonNull Map<String, String> record) {
         setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
         setName(record.get("album"));
-        setArtist(record.get("artist"));
-        setYear(Util.parseDecimalIntOrZero(record.get("year")));
+        this.artist = record.get("artist");
+        this.year = Util.parseDecimalIntOrZero(record.get("year"));
         setArtwork_track_id(record.get("artwork_track_id"));
         mArtworkUrl = Uri.parse(Strings.nullToEmpty(record.get("artwork_url")));
     }

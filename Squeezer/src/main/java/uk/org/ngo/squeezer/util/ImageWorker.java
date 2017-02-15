@@ -342,7 +342,7 @@ public abstract class ImageWorker {
      * @param imageCacheParams A description of the cache.
      */
     public void addImageCache(@NonNull ImageCache.ImageCacheParams imageCacheParams) {
-        setImageCache(new ImageCache(imageCacheParams));
+        mImageCache = new ImageCache(imageCacheParams);
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
 
