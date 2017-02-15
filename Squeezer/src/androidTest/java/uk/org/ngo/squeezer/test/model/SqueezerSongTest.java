@@ -1,8 +1,8 @@
 package uk.org.ngo.squeezer.test.model;
 
-import com.google.common.collect.ImmutableMap;
-
 import android.test.AndroidTestCase;
+
+import com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
 
@@ -28,6 +28,7 @@ public class SqueezerSongTest extends AndroidTestCase {
         song2 = new Song(record2);
         song3 = new Song(record3);
 
+        //noinspection EqualsWithItself
         assertTrue("A song equals itself (reflexive)", song1.equals(song1));
 
         assertTrue("Two songs with empty IDs are equal", song1.equals(song2));
@@ -36,7 +37,9 @@ public class SqueezerSongTest extends AndroidTestCase {
         assertTrue("Identical songs have the same hashcode", song1.hashCode() == song2.hashCode());
 
         Album album1 = new Album(record1);
+        //noinspection EqualsBetweenInconvertibleTypes
         assertFalse("Null song does not equal a null album", song1.equals(album1));
+        //noinspection EqualsBetweenInconvertibleTypes
         assertFalse("... and is symmetric", album1.equals(song1));
 
         song1 = new Song(ImmutableMap.of("id", "1"));
@@ -77,7 +80,9 @@ public class SqueezerSongTest extends AndroidTestCase {
 
         song1 = new Song(ImmutableMap.of("id", "1", "title", "Song"));
         album1.setId("1");
+        //noinspection EqualsBetweenInconvertibleTypes
         assertFalse("Songs and albums with the same ID are different", song1.equals(album1));
+        //noinspection EqualsBetweenInconvertibleTypes
         assertFalse("... and is symmetric", album1.equals(song1));
     }
 }
