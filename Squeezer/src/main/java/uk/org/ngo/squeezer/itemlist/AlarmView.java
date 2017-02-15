@@ -208,7 +208,7 @@ public class AlarmView extends BaseItemView<Alarm> {
         int minute = (int) ((tod / 60) % 60);
         int displayHour = hour;
         if (!viewHolder.is24HourFormat) {
-            displayHour = displayHour % 12;
+            displayHour %= 12;
             if (displayHour == 0) displayHour = 12;
         }
 
