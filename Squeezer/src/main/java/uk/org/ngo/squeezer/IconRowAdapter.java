@@ -115,7 +115,7 @@ public class IconRowAdapter extends BaseAdapter {
      * Helper class to represent a row. Each row has an identifier, a string, and an icon.
      * <p>
      * The identifier should be unique across all rows in a given {@link IconRowAdapter}, and will
-     * be used as the <code>id</code> parameter to the {@code OnItemClickListener}.
+     * be used as the {@code id} parameter to the {@code OnItemClickListener}.
      */
     public static class IconRow {
 

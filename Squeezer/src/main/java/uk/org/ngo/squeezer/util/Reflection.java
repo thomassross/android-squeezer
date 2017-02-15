@@ -68,7 +68,7 @@ public class Reflection {
      * @param currentClass The current class which must extend or implement {@code base}
      * @param base Generic base class or interface which type variables we wish to resolve.
      *
-     * @return Actual type arguments for <code>base</code> used in {@code currentClass}.
+     * @return Actual type arguments for {@code base} used in {@code currentClass}.
      *
      * @see #getGenericClass(Class, Class, int)
      */

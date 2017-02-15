@@ -769,7 +769,7 @@ class CliClient implements IClient {
     }
 
     /**
-     * Handler that adds <code>artwork_url</code> and {@code download_url} tags to items.
+     * Handler that adds {@code artwork_url} and {@code download_url} tags to items.
      */
     private class SongListHandler extends BaseListHandler<Song> {
         @Override
@@ -801,7 +801,7 @@ class CliClient implements IClient {
      * <p>
      * If an {@code artwork_url} entry already exists and is absolute it is preserved.
      * If it exists but is relative it is canonicalised.  Otherwise it is synthesised from
-     * the <code>artwork_track_id</code> tag (if it exists) otherwise the item's {@code id}.
+     * the {@code artwork_track_id} tag (if it exists) otherwise the item's {@code id}.
      *
      * @param record The record to modify.
      */

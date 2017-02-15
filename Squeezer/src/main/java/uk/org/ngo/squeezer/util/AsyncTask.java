@@ -66,8 +66,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * <p>An asynchronous task is defined by a computation that runs on a background thread and whose
  * result is published on the UI thread. An asynchronous task is defined by 3 generic types, called
- * <code>Params</code>, <code>Progress</code> and {@code Result}, and 4 steps, called
- * <code>onPreExecute</code>, <code>doInBackground</code>, {@code onProgressUpdate} and
+ * {@code Params}, {@code Progress} and {@code Result}, and 4 steps, called
+ * {@code onPreExecute}, {@code doInBackground}, {@code onProgressUpdate} and
  * {@code onPostExecute}.</p>
  * <p>
  * <div class="special reference"> <h3>Developer Guides</h3> <p>For more information about using

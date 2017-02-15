@@ -35,7 +35,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 /**
  * Display a list of Squeezebox music folders.
  * <p>
- * If the <code>extras</code> bundle contains a key that matches {@code MusicFolder.class.getName()}
+ * If the {@code extras} bundle contains a key that matches {@code MusicFolder.class.getName()}
  * the value is assumed to be an instance of that class, and that folder will be displayed.
  * <p>
  * Otherwise the root music folder is shown.
