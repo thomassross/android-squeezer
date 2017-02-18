@@ -74,7 +74,7 @@ public class IconRowAdapter extends BaseAdapter {
      *
      * @param context
      * @param items Item text.
-     * @param images Image resources.
+     * @param icons Image resources.
      */
     public IconRowAdapter(Activity context, @NonNull CharSequence[] items, int[] icons) {
         this.activity = context;

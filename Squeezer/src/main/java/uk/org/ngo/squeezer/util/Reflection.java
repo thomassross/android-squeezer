@@ -109,7 +109,7 @@ public class Reflection {
      *
      * @param currentClass The current class which may implement {@code base}
      * @param baseInterface Generic interface which type variables we wish to resolve.
-     * @param actualTypeArguments Resolved type arguments from parent
+     * @param pActualTypeArguments Resolved type arguments from parent
      *
      * @return Actual type arguments for {@code baseInterface} used in
      * {@code currentClass} or null.

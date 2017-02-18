@@ -12,7 +12,7 @@ import uk.org.ngo.squeezer.R;
 /**
  * A fragment that implements a "Filter" menu.
  * <p>
- * Activities that host this fragment must implement {@link #FilterableListActivity}.
+ * Activities that host this fragment must implement {@link FilterableListActivity}.
  *
  * <pre>
  * public void onCreate(Bundle savedInstanceState) {

@@ -171,6 +171,11 @@ class CliClient implements IClient {
             this.parserInfos = parserInfos;
         }
 
+        public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
+                                      ListHandler<? extends Item> handler, String... columns) {
+            this(HANDLER_LIST_GLOBAL, cmd, taggedParameters, new SqueezeParserInfo(handler, columns));
+        }
+
         /**
          * A global command to the server where items in the response have a delimiter other than "id:".
          *
@@ -180,11 +185,6 @@ class CliClient implements IClient {
          *    a new block of information.
          * @param handler The handler used to construct new model objects from the response.
          */
-        public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
-                                      ListHandler<? extends Item> handler, String... columns) {
-            this(HANDLER_LIST_GLOBAL, cmd, taggedParameters, new SqueezeParserInfo(handler, columns));
-        }
-
         public ExtendedQueryFormatCmd(String cmd, Set<String> taggedParameters,
                                       String itemDelimiter, ListHandler<? extends Item> handler) {
             this(HANDLER_LIST_GLOBAL, cmd, taggedParameters, new SqueezeParserInfo(itemDelimiter, handler));
@@ -1011,10 +1011,8 @@ class CliClient implements IClient {
         });
         handlers.put("version", new CmdHandler() {
             /**
-             * Seeing the {@code version} result indicates that the
-             * handshake has completed (see
-             * {@link SqueezeService#onCliPortConnectionEstablished(String, String)}),
-             * post a {@link HandshakeComplete} event.
+             * Seeing the {@code version} result indicates that the handshake has completed
+             * (see {@link CliClient#onAuthenticated()}), post a {@link HandshakeComplete} event.
              */
             @Override
             public void handle(List<String> tokens) {
@@ -1443,7 +1441,7 @@ class CliClient implements IClient {
     /**
      * Handshake with the SqueezeServer, learn some of its supported features, and start listening
      * for asynchronous updates of server state.
-     *
+     * <p>
      * Note: Authentication may not actually have completed at this point. The server has
      * responded to the "login" request, but if the username/password pair was incorrect it
      * has (probably) not yet disconnected the socket. See
