@@ -33,6 +33,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.ViewTreeObserver;
@@ -44,8 +45,6 @@ import com.google.common.base.Joiner;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-
-import javax.annotation.Nullable;
 
 import uk.org.ngo.squeezer.BuildConfig;
 
@@ -433,8 +432,8 @@ public abstract class ImageWorker {
      * @return Retrieve the currently active work task (if any) associated with this imageView. null
      * if there is no such task.
      */
-    @android.support.annotation.Nullable
-    private static BitmapWorkerTask getBitmapWorkerTask(@android.support.annotation.Nullable ImageView imageView) {
+    @Nullable
+    private static BitmapWorkerTask getBitmapWorkerTask(@Nullable ImageView imageView) {
         if (imageView != null) {
             final Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AsyncDrawable) {

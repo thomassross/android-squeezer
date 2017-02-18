@@ -357,6 +357,10 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
     @Nullable
     public PlayerState getPlayerState(String playerId) {
+        if (playerId == null) {
+            return null;
+        }
+
         Player player = mPlayers.get(playerId);
 
         if (player == null)
@@ -1139,6 +1143,10 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         @Override
         @Nullable
         public PlayerState getPlayerState(String playerId) {
+            if (playerId == null) {
+                return null;
+            }
+
             Player player = mPlayers.get(playerId);
             if (player == null) {
                 return null;
