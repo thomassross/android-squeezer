@@ -21,7 +21,7 @@ public class PlaylistsDeleteDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         activity = (PlaylistsActivity) getActivity();
-        builder.setTitle(getString(R.string.delete_title, activity.getCurrentPlaylist().getName()));
+        builder.setTitle(getString(R.string.delete_title, activity.getCurrentPlaylist().name()));
         builder.setMessage(R.string.delete__message);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

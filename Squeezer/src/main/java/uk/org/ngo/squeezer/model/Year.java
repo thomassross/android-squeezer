@@ -16,58 +16,36 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
+
+import com.google.auto.value.AutoValue;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 
-public class Year extends PlaylistItem {
-
+@AutoValue
+public abstract class Year extends PlaylistItem implements Parcelable {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "year_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "year";
     }
 
-    public Year(Map<String, String> record) {
-        setId(record.get("year"));
-    }
-
-    public static final Creator<Year> CREATOR = new Creator<Year>() {
-        @Override
-        public Year[] newArray(int size) {
-            return new Year[size];
-        }
-
-        @Override
-        public Year createFromParcel(Parcel source) {
-            return new Year(source);
-        }
-    };
-
-    private Year(Parcel source) {
-        setId(source.readString());
+    public static Year fromMap(@NonNull Map<String, String> record) {
+        return new AutoValue_Year(record.get("year"), record.get("year"));
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
+    public String intentExtraKey() {
+        return Year.class.getName();
     }
-
-    @Override
-    public String getName() {
-        return getId();
-    }
-
-    @Override
-    public String toString() {
-        return "year=" + getId();
-    }
-
 }

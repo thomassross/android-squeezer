@@ -42,11 +42,11 @@ public class SongFilterDialog extends BaseFilterDialog {
 
         if (activity.getArtist() != null) {
             ((EditText) filterForm.findViewById(R.id.artist))
-                    .setText(activity.getArtist().getName());
+                    .setText(activity.getArtist().name());
             filterForm.findViewById(R.id.artist_view).setVisibility(View.VISIBLE);
         }
         if (activity.getAlbum() != null) {
-            ((EditText) filterForm.findViewById(R.id.album)).setText(activity.getAlbum().getName());
+            ((EditText) filterForm.findViewById(R.id.album)).setText(activity.getAlbum().name());
             filterForm.findViewById(R.id.album_view).setVisibility(View.VISIBLE);
         }
 

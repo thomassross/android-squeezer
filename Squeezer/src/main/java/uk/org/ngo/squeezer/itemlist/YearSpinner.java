@@ -66,7 +66,7 @@ public class YearSpinner {
                             public View getAdapterView(View convertView, ViewGroup parent,
                                     int position, Year item) {
                                 return Util.getSpinnerItemView(getActivity(), convertView, parent,
-                                        item.getName());
+                                        item.name());
                             }
 
                             @Override

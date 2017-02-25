@@ -74,7 +74,7 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
             List<String> playerNames = new ArrayList<String>();
             for (int i = 0; i < this.getCount(); i++) {
                 Player p = this.getItem(i);
-                playerNames.add(p.getName());
+                playerNames.add(p.name());
             }
             syncGroupName = Joiner.on(", ").join(playerNames);
         }
@@ -232,12 +232,12 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
      */
     @Override
     public long getGroupId(int groupPosition) {
-        return mChildAdapters.get(groupPosition).getItem(0).getIdAsLong();
+        return mChildAdapters.get(groupPosition).getItem(0).idAsLong();
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return mChildAdapters.get(groupPosition).getItem(childPosition).getIdAsLong();
+        return mChildAdapters.get(groupPosition).getItem(childPosition).idAsLong();
     }
 
     @Override
@@ -256,11 +256,11 @@ class PlayerListAdapter extends BaseExpandableListAdapter implements View.OnCrea
         String header = syncGroup.syncGroupName;
         text1.setText(mActivity.getString(R.string.player_group_header, header));
 
-        Song groupSong = syncGroup.getItem(0).getPlayerState().getCurrentSong();
+        Song groupSong = syncGroup.getItem(0).playerState().currentSong();
 
         if (groupSong != null) {
-            text2.setText(mJoiner.join(groupSong.getName(), groupSong.getArtist(),
-                    groupSong.getAlbumName()));
+            text2.setText(mJoiner.join(groupSong.name(), groupSong.artist(),
+                    groupSong.albumName()));
         }
         return row;
     }

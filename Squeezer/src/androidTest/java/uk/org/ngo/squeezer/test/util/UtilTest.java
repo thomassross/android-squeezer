@@ -1,8 +1,9 @@
 package uk.org.ngo.squeezer.test.util;
 
+import com.google.common.collect.ImmutableMap;
+
 import junit.framework.TestCase;
 
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import uk.org.ngo.squeezer.Util;
@@ -32,23 +33,24 @@ public class UtilTest extends TestCase {
         assertEquals(null, atomicString.get());
 
         AtomicReference<Item> atomicItem = new AtomicReference<Item>();
-        Album album = new Album("1", "album");
-        Song song = new Song(new HashMap<String, String>());
-        song.setId("1");
+        Album album = Album.fromMap(ImmutableMap.of("id", "1", "album", "The Album", "artist", "The Artist"));
 
         assertFalse(Util.atomicReferenceUpdated(atomicItem, null));
         assertEquals(null, atomicItem.get());
         assertTrue(Util.atomicReferenceUpdated(atomicItem, album));
         assertEquals(album, atomicItem.get());
 
-        album.setName("newname");
+        album = Album.fromMap(ImmutableMap.of("id", "1", "album", "The New Album", "artist", "The Artist"));
         assertFalse(Util.atomicReferenceUpdated(atomicItem, album));
         assertEquals(album, atomicItem.get());
 
+        Song song = Song.fromMap(ImmutableMap.of(
+                "id", "1", "title", "A song", "album_id", "1", "album", "The album", "artist", "The Artist"
+        ));
         assertTrue(Util.atomicReferenceUpdated(atomicItem, song));
         assertEquals(song, atomicItem.get());
 
-        album.setId("2");
+        album = Album.fromMap(ImmutableMap.of("id", "2", "album", "Another Album", "artist", "The Artist"));
         assertTrue(Util.atomicReferenceUpdated(atomicItem, album));
         assertEquals(album, atomicItem.get());
 

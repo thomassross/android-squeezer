@@ -18,9 +18,9 @@ public class PlaylistsRenameDialog extends BaseEditTextDialog {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
 
         activity = (PlaylistsActivity) getActivity();
-        dialog.setTitle(getString(R.string.rename_title, activity.getCurrentPlaylist().getName()));
+        dialog.setTitle(getString(R.string.rename_title, activity.getCurrentPlaylist().name()));
         editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        editText.setText(activity.getCurrentPlaylist().getName());
+        editText.setText(activity.getCurrentPlaylist().name());
 
         return dialog;
     }

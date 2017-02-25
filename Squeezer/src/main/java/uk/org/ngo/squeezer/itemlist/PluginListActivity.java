@@ -140,7 +140,7 @@ public class PluginListActivity extends BaseListActivity<Plugin>
             if (service == null) {
                 playerName = "Unknown";
             } else {
-                playerName = service.getActivePlayer().getName();
+                playerName = service.getActivePlayer().name();
             }
 
             String errorMsg = parameters.get("networkerror");
@@ -173,7 +173,7 @@ public class PluginListActivity extends BaseListActivity<Plugin>
         if (getService() == null) {
             return false;
         }
-        getService().pluginPlaylistControl(plugin, cmd, item.getId());
+        getService().pluginPlaylistControl(plugin, cmd, item.id());
         return true;
     }
 

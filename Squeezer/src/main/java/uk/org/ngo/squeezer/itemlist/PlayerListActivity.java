@@ -178,19 +178,19 @@ public class PlayerListActivity extends ItemListActivity implements
 
         // Make a copy of the players we know about, ignoring unconnected ones.
         for (Player player : players) {
-            if (!player.getConnected())
+            if (!player.connected())
                 continue;
 
-            connectedPlayers.put(player.getId(), player);
+            connectedPlayers.put(player.id(), player);
         }
 
         mPlayerSyncGroups.clear();
 
         // Iterate over all the connected players to build the list of master players.
         for (Player player : connectedPlayers.values()) {
-            String playerId = player.getId();
-            PlayerState playerState = player.getPlayerState();
-            String syncMaster = playerState.getSyncMaster();
+            String playerId = player.id();
+            PlayerState playerState = player.playerState();
+            String syncMaster = playerState.syncMaster();
 
             // If a player doesn't have a sync master then it's in a group of its own.
             if (syncMaster == null) {
@@ -246,7 +246,7 @@ public class PlayerListActivity extends ItemListActivity implements
         }
 
         service.playerRename(currentPlayer, newName);
-        this.currentPlayer.setName(newName);
+        currentPlayer = currentPlayer.withName(newName);
         mResultsAdapter.notifyDataSetChanged();
     }
 

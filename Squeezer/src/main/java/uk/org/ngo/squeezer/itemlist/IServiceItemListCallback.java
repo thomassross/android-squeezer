@@ -15,6 +15,7 @@
  */
 
 package uk.org.ngo.squeezer.itemlist;
+
 import java.util.List;
 import java.util.Map;
 

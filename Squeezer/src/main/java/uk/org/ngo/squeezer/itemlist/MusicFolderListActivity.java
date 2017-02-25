@@ -74,7 +74,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
         if (extras != null) {
             mFolder = extras.getParcelable(MusicFolderItem.class.getName());
             TextView header = (TextView) findViewById(R.id.header);
-            header.setText(mFolder.getName());
+            header.setText(mFolder.name());
             header.setVisibility(View.VISIBLE);
         }
     }
@@ -148,7 +148,7 @@ public class MusicFolderListActivity extends BaseListActivity<MusicFolderItem> {
      */
     public static void show(Activity activity, MusicFolderItem folder) {
         final Intent intent = new Intent(activity, MusicFolderListActivity.class);
-        intent.putExtra(folder.getClass().getName(), folder);
+        intent.putExtra(folder.intentExtraKey(), folder);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }

@@ -335,8 +335,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
                     Player player = mService.getActivePlayer();
 
                     if (playerState != null  && mVolumePanel != null) {
-                        mVolumePanel.postVolumeChanged(playerState.getCurrentVolume(),
-                                player == null ? "" : player.getName());
+                        mVolumePanel.postVolumeChanged(playerState.currentVolume(),
+                                player == null ? "" : player.name());
                     }
 
                     return true;
@@ -402,8 +402,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     public void onEvent(PlayerVolume event) {
-        if (!mIgnoreVolumeChange && mVolumePanel != null && event.player == mService.getActivePlayer()) {
-            mVolumePanel.postVolumeChanged(event.volume, event.player.getName());
+        if (!mIgnoreVolumeChange && mVolumePanel != null && event.player.equals(mService.getActivePlayer())) {
+            mVolumePanel.postVolumeChanged(event.volume, event.player.name());
         }
     }
 
@@ -450,7 +450,7 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
         }
 
         mService.playlistControl(cmd, item, index);
-        Toast.makeText(this, getString(resId, item.getName()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(resId, item.name()), Toast.LENGTH_SHORT).show();
     }
 
     /**

@@ -67,7 +67,7 @@ public class GenreSpinner {
                             public View getAdapterView(View convertView, ViewGroup parent,
                                     int position, Genre item) {
                                 return Util.getSpinnerItemView(getActivity(), convertView, parent,
-                                        item.getName());
+                                        item.name());
                             }
 
                             @Override

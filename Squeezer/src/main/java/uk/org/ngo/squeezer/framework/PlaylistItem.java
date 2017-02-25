@@ -19,7 +19,7 @@ package uk.org.ngo.squeezer.framework;
 /**
  * Items that can be added to Squeezeserver playlists (anything that can be passed to the
  * <code>playlistcontrol</code> command) should derive from this class and implement {@link
- * #getPlaylistTag()} to provide the correct playlist tag.
+ * #playlistTag()} to provide the correct playlist tag.
  * <p>
  * See {@link BaseActivity#playlistControl}.
  *
@@ -32,17 +32,17 @@ public abstract class PlaylistItem extends Item implements FilterItem {
      *
      * @return the tag, e.g., "album_id".
      */
-    abstract public String getPlaylistTag();
+    public abstract String playlistTag();
 
 
     /** @return The parameter to use in the <code>playlistcontrol</code> command for this item.
      */
     public String getPlaylistParameter() {
-        return getPlaylistTag() + ":" + getId();
+        return playlistTag() + ':' + id();
     }
 
     @Override
     public String getFilterParameter() {
-        return getFilterTag() + ":" + getId();
+        return filterTag() + ':' + id();
     }
 }

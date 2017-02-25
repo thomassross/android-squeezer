@@ -43,14 +43,14 @@ public class PluginItemView extends BaseItemView<PluginItem> {
     public void bindView(View view, PluginItem item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
+        viewHolder.text1.setText(item.name());
 
         // Show/hide the context menu if this item is playable.
         viewHolder.btnContextMenu.setVisibility(item.isAudio() ? View.VISIBLE : View.GONE);
 
         // If the item has an image, then fetch and display it
-        if (item.getImage() != null) {
-            ImageFetcher.getInstance(getActivity()).loadImage(item.getImage(), viewHolder.icon,
+        if (item.image() != null) {
+            ImageFetcher.getInstance(getActivity()).loadImage(item.image(), viewHolder.icon,
                     mIconWidth, mIconHeight);
         } else {
             // Otherwise we will revert to some other icon. This is not an exact approach, more
@@ -58,10 +58,10 @@ public class PluginItemView extends BaseItemView<PluginItem> {
             if (!item.isAudio()) {
                 // If this item has sub-items we use the icon of the parent and if that fails,
                 // the current plugin.
-                if (mActivity.getPlugin().getIconResource() != 0) {
-                    viewHolder.icon.setImageResource(mActivity.getPlugin().getIconResource());
+                if (mActivity.getPlugin().iconResource() != 0) {
+                    viewHolder.icon.setImageResource(mActivity.getPlugin().iconResource());
                 } else {
-                    ImageFetcher.getInstance(getActivity()).loadImage(mActivity.getPlugin().getIcon(),
+                    ImageFetcher.getInstance(getActivity()).loadImage(mActivity.getPlugin().icon(),
                             viewHolder.icon, mIconWidth, mIconHeight);
                 }
             } else {
@@ -79,7 +79,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
 
     @Override
     public boolean isSelectable(PluginItem item) {
-        return item.isHasitems();
+        return item.hasitems();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
             case R.id.play_now:
                 if (mActivity.play(selectedItem)) {
                     Toast.makeText(mActivity,
-                            mActivity.getString(R.string.ITEM_PLAYING, selectedItem.getName()),
+                            mActivity.getString(R.string.ITEM_PLAYING, selectedItem.name()),
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;
@@ -113,7 +113,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
             case R.id.add_to_playlist:
                 if (mActivity.add(selectedItem)) {
                     Toast.makeText(mActivity,
-                            mActivity.getString(R.string.ITEM_ADDED, selectedItem.getName()),
+                            mActivity.getString(R.string.ITEM_ADDED, selectedItem.name()),
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;
@@ -121,7 +121,7 @@ public class PluginItemView extends BaseItemView<PluginItem> {
             case R.id.play_next:
                 if (mActivity.insert(selectedItem)) {
                     Toast.makeText(mActivity,
-                            mActivity.getString(R.string.ITEM_INSERTED, selectedItem.getName()),
+                            mActivity.getString(R.string.ITEM_INSERTED, selectedItem.name()),
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;

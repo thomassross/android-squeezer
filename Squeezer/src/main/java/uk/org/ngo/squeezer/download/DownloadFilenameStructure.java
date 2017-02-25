@@ -10,37 +10,37 @@ public enum DownloadFilenameStructure implements EnumWithText{
     NUMBER_TITLE(R.string.download_filename_structure_number_title) {
         @Override
         public String get(Song song) {
-            return formatTrackNumber(song.getTrackNum()) + " - " + song.getName();
+            return formatTrackNumber(song.trackNum()) + " - " + song.name();
         }
     },
     ARTIST_TITLE(R.string.download_filename_structure_artist_title) {
         @Override
         public String get(Song song) {
-            return song.getArtist() + " - " + song.getName();
+            return song.artist() + " - " + song.name();
         }
     },
     ARTIST_NUMBER_TITLE(R.string.download_filename_structure_artist_number_title) {
         @Override
         public String get(Song song) {
-            return song.getArtist() + " - " + formatTrackNumber(song.getTrackNum()) + " - " + song.getName();
+            return song.artist() + " - " + formatTrackNumber(song.trackNum()) + " - " + song.name();
         }
     },
     ALBUMARTIST_NUMBER_TITLE(R.string.download_filename_structure_albumartist_number_title) {
         @Override
         public String get(Song song) {
-            return song.getAlbum().getArtist() + " - " + formatTrackNumber(song.getTrackNum()) + " - " + song.getName();
+            return song.album().artist() + " - " + formatTrackNumber(song.trackNum()) + " - " + song.name();
         }
     },
     TITLE(R.string.download_filename_structure_title) {
         @Override
         public String get(Song song) {
-            return song.getName();
+            return song.name();
         }
     },
     NUMBER_DOT_ARTIST_TITLE(R.string.download_filename_structure_number_dot_artist_title) {
         @Override
         public String get(Song song) {
-            return formatTrackNumber(song.getTrackNum()) + ". " + song.getArtist() + " - " + song.getName();
+            return formatTrackNumber(song.trackNum()) + ". " + song.artist() + " - " + song.name();
         }
     };
 

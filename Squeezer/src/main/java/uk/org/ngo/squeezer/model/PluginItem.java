@@ -16,7 +16,13 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.google.auto.value.AutoValue;
+import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
@@ -26,122 +32,63 @@ import uk.org.ngo.squeezer.framework.Item;
 /**
  * Represents a single item in a plugin.
  */
-public class PluginItem extends Item {
+@AutoValue
+public abstract class PluginItem extends Item {
+    /** tag="hasitems", true if this item has sub-items. */
+    public abstract boolean hasitems();
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public PluginItem setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    private String description;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    /** tag="isaudio", true if the item is audio. */
+    public abstract boolean isAudio();
 
     /**
-     * Relative URL to the icon to use for this item.
+     * tag="type", stream content type, "link" means subitems must be fetched.
+     * Expected values include "link", "text", "audio", "playlist".
      */
-    private String image;
+    @NonNull
+    public abstract String type();
 
-    /**
-     * @return the absolute URL to the icon to use for this item
-     */
-    public String getImage() {
-        return image;
+    /** tag="description", more information about the plugin. */
+    @NonNull
+    public abstract String description();
+
+    /** tag="image", Relative URL to the icon to use for this item. */
+    @Nullable
+    public abstract String image();
+
+    @NonNull
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_PluginItem.Builder();
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    @AutoValue.Builder
+    public abstract static class Builder {
+        abstract Builder id(final String id);
+        abstract Builder name(final String name);
+        abstract Builder description(final String description);
+        abstract Builder image(final String image);
+        abstract Builder hasitems(final boolean hasitems);
+        abstract Builder type(final String type);
+        abstract Builder isAudio(final boolean isAudio);
+        abstract PluginItem build();
     }
 
-    private boolean hasitems;
-
-    public boolean isHasitems() {
-        return hasitems;
-    }
-
-    public void setHasitems(boolean hasitems) {
-        this.hasitems = hasitems;
-    }
-
-    private String type;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    private boolean audio;
-
-    public boolean isAudio() {
-        return audio;
-    }
-
-    public void setAudio(boolean audio) {
-        this.audio = audio;
-    }
-
-    public PluginItem(Map<String, String> record) {
-        setId(record.get("id"));
-        name = record.containsKey("name") ? record.get("name") : record.get("title");
-        description = record.get("description");
-        type = record.get("type");
-        image = record.get("image");
-        hasitems = (Util.parseDecimalIntOrZero(record.get("hasitems")) != 0);
-        audio = (Util.parseDecimalIntOrZero(record.get("isaudio")) != 0);
-    }
-
-    public static final Creator<PluginItem> CREATOR = new Creator<PluginItem>() {
-        @Override
-        public PluginItem[] newArray(int size) {
-            return new PluginItem[size];
-        }
-
-        @Override
-        public PluginItem createFromParcel(Parcel source) {
-            return new PluginItem(source);
-        }
-    };
-
-    private PluginItem(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-        description = source.readString();
-        type = source.readString();
-        image = source.readString();
-        hasitems = (source.readInt() != 0);
-        audio = (source.readInt() != 0);
+    @NonNull
+    public static PluginItem fromMap(@NonNull Map<String, String> record) {
+        return PluginItem.builder()
+                .id(record.get("id"))
+                .name(record.containsKey("name") ? record.get("name") : record.get("title"))
+                .description(Strings.nullToEmpty(record.get("description")))
+                .image(record.get("image"))
+                .hasitems(Util.parseDecimalIntOrZero(record.get("hasitems")) != 0)
+                .type(Strings.nullToEmpty(record.get("type")))
+                .isAudio(Util.parseDecimalIntOrZero(record.get("isaudio")) != 0)
+                .build();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(description);
-        dest.writeString(type);
-        dest.writeString(image);
-        dest.writeInt(hasitems ? 1 : 0);
-        dest.writeInt(audio ? 1 : 0);
-    }
-
-    @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + ", type: " + getType() + ", hasItems: " + isHasitems() +
-                ", audio: " + isAudio() + ", description: " + getDescription();
+    public String intentExtraKey() {
+        return PluginItem.class.getName();
     }
 }
+

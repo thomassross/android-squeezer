@@ -16,8 +16,6 @@
 
 package uk.org.ngo.squeezer.service;
 
-import uk.org.ngo.squeezer.model.Player;
-
 /**
  * Interface implemented by all network clients of the server.
  */
@@ -28,5 +26,5 @@ interface IClient {
      *
      * @param command The command to send
      */
-    void sendPlayerCommand(final Player player, final String command);
+    void sendPlayerCommand(final String playerId, final String command);
 }

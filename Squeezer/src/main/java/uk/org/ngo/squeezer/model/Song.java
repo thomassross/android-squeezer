@@ -17,11 +17,15 @@
 package uk.org.ngo.squeezer.model;
 
 import android.net.Uri;
-import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.Contract;
 
 import java.io.File;
 import java.util.Map;
@@ -31,219 +35,148 @@ import uk.org.ngo.squeezer.download.DownloadFilenameStructure;
 import uk.org.ngo.squeezer.download.DownloadPathStructure;
 import uk.org.ngo.squeezer.framework.ArtworkItem;
 
-public class Song extends ArtworkItem {
-    private static final String TAG = "Song";
-
+/**
+ * Used to handle songs returned by the "songs", "playlists tracks",
+ * "search", and "status" queries (see calls to
+ * {@link uk.org.ngo.squeezer.service.CliClient.SongListHandler})
+ * </p>
+ * The list of fields returned for a song are controlled by the value of
+ * {@link uk.org.ngo.squeezer.service.SqueezeService#SONGTAGS}.
+ */
+@AutoValue
+public abstract class Song extends ArtworkItem implements Parcelable {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "track_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "track_id";
     }
 
-    /** The "track" or "title" value from the server. */
-    @NonNull private final String mName;
+    /** tag="artist", artist name. */
+    @Nullable
+    public abstract String artist();
 
-    @Override
-    @NonNull
-    public String getName() {
-        return mName;
-    }
+    /** tag="compilation", true if the song is part of a compilation. */
+    public abstract boolean compilation();
 
-    @NonNull private final String mArtist;
+    /** tag="duration", duration of the song, in seconds. */
+    public abstract int duration();
 
-    @NonNull
-    public String getArtist() {
-        return mArtist;
-    }
+    /** tag="album_id", ID of the album. May be null if song is not associated with an album. */
+    @Nullable
+    public abstract String albumId();
 
-    @NonNull private Album mAlbum;
+    /** tag="coverart", true if coverart is available for the song. */
+    public abstract boolean coverart();
 
-    @NonNull
-    public Album getAlbum() {
-        return mAlbum;
-    }
+    /**
+     * tag="artwork_url", full URL to remote artwork, for remote songs. Created by
+     * CliClient.addArtworkUrlTag
+     */
+    public abstract Uri artworkUrl();
 
-    @NonNull private final String mAlbumName;
+    /** tag="album", name of the album the song is part of. May be null. */
+    public abstract String albumName();
 
-    @NonNull
-    public String getAlbumName() {
-        return mAlbumName;
-    }
+    /** tag="artist_id", ID of the artist. */
+    @Nullable
+    public abstract String artistId();
 
-    private final boolean mCompilation;
+    /** tag="tracknum", track number of the song on the album. */
+    public abstract int trackNum();
 
-    public boolean getCompilation() {
-        return mCompilation;
-    }
+    /** tag="remote", true if this is a remote song (i.e., being streamed). */
+    public abstract boolean remote();
 
-    private final int mDuration;
+    /** tag="url", URL of the track on the server. This is the file:/// URL,
+     * not the URL to download it.
+     */
+    @NonNull public abstract Uri url();
 
-    public int getDuration() {
-        return mDuration;
-    }
+    /** tag="year", year of the song (if known). */
+    public abstract int year();
 
-    private final int mYear;
+    /** tag="download_url", The URL to use to download the song. */
+    @Nullable public abstract Uri downloadUrl();
 
-    public int getYear() {
-        return mYear;
-    }
+    /** tag="buttons", for remote songs indicates that track control buttons are available. */
+    @NonNull public abstract String buttons();
 
-    @NonNull private final String mArtistId;
-
-    @NonNull
-    public String getArtistId() {
-        return mArtistId;
-    }
-
-    @NonNull private final String mAlbumId;
-
-    @NonNull
-    public String getAlbumId() {
-        return mAlbumId;
-    }
-
-    private boolean mRemote;
-
-    public boolean isRemote() {
-        return mRemote;
-    }
-
-    private final int mTrackNum;
-
-    public int getTrackNum() {
-        return mTrackNum;
-    }
-
-    /** The URL of the track on the server. This is the file:/// URL, not the URL to download it. */
-    @NonNull private final Uri mUrl;
-
-    @NonNull
-    public Uri getUrl() {
-        return mUrl;
-    }
-
-    /** The URL to use to download the song. */
-    @NonNull private Uri mDownloadUrl;
-
-    @NonNull
-    public Uri getDownloadUrl() {
-        return mDownloadUrl;
-    }
-
-    @NonNull private final String mButtons;
-
-    @NonNull
-    public String getButtons() {
-        return mButtons;
-    }
-
-    @NonNull private Uri mArtworkUrl = Uri.EMPTY;
+    /** Album object for the song. */
+    @NonNull public abstract Album album();
 
     /**
      * @return Whether the song has artwork associated with it.
      */
     public boolean hasArtwork() {
-        return ! (mArtworkUrl.equals(Uri.EMPTY));
+        return ! (artworkUrl().equals(Uri.EMPTY));
     }
 
     @NonNull
-    public Uri getArtworkUrl() {
-        return mArtworkUrl;
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_Song.Builder();
     }
 
-    public Song(Map<String, String> record) {
-        if (getId() == null) {
-            setId(record.get("track_id"));
-        }
-        if (getId() == null) {
-            setId(record.get("id"));
-        }
-
-        mName = record.containsKey("track") ? Strings.nullToEmpty(record.get("track"))
-                : Strings.nullToEmpty(record.get("title"));
-
-        mArtist = Strings.nullToEmpty(record.get("artist"));
-        mAlbumName = Strings.nullToEmpty(record.get("album"));
-        mCompilation = Util.parseDecimalIntOrZero(record.get("compilation")) == 1;
-        mDuration = Util.parseDecimalIntOrZero(record.get("duration"));
-        mYear = Util.parseDecimalIntOrZero(record.get("year"));
-        mArtistId = Strings.nullToEmpty(record.get("artist_id"));
-        mAlbumId = Strings.nullToEmpty(record.get("album_id"));
-        mRemote = Util.parseDecimalIntOrZero(record.get("remote")) != 0;
-        mTrackNum = Util.parseDecimalInt(record.get("tracknum"), 1);
-
-        mArtworkUrl = Uri.parse(Strings.nullToEmpty(record.get("artwork_url")));
-        mUrl = Uri.parse(Strings.nullToEmpty(record.get("url")));
-        mDownloadUrl = Uri.parse(Strings.nullToEmpty(record.get("download_url")));
-        mButtons = Strings.nullToEmpty(record.get("buttons"));
-
-        String artworkTrackId = record.get("artwork_track_id");
-
-        Album album = new Album(mAlbumId, mAlbumName);
-        album.setArtist(mCompilation ? "Various" : mArtist);
-        album.setArtwork_track_id(artworkTrackId);
-        album.setArtworkUrl(mArtworkUrl);
-        album.setYear(mYear);
-        mAlbum = album;
+    @AutoValue.Builder
+    abstract static class Builder {
+        public abstract Builder id(final String id);
+        public abstract Builder name(final String name);
+        public abstract Builder artist(final String artist);
+        public abstract Builder compilation(final boolean compilation);
+        public abstract Builder duration(final int duration);
+        public abstract Builder albumId(final String albumId);
+        public abstract Builder coverart(final boolean coverart);
+        public abstract Builder artworkTrackId(final String artworkTrackId);
+        public abstract Builder artworkUrl(final Uri artworkUrl);
+        public abstract Builder albumName(final String albumName);
+        public abstract Builder artistId(final String artistId);
+        public abstract Builder trackNum(final int trackNum);
+        public abstract Builder remote(final boolean remote);
+        public abstract Builder url(final Uri url);
+        public abstract Builder year(final int year);
+        public abstract Builder downloadUrl(final Uri downloadUrl);
+        public abstract Builder buttons(final String buttons);
+        public abstract Builder album(final Album album);
+        public abstract Song build();
     }
 
-    public static final Creator<Song> CREATOR = new Creator<Song>() {
-        @Override
-        public Song[] newArray(int size) {
-            return new Song[size];
-        }
-
-        @Override
-        public Song createFromParcel(Parcel source) {
-            return new Song(source);
-        }
-    };
-
-    private Song(Parcel source) {
-        setId(source.readString());
-        mName = source.readString();
-        mArtist = source.readString();
-        mAlbumName = source.readString();
-        mCompilation = source.readInt() == 1;
-        mDuration = source.readInt();
-        mYear = source.readInt();
-        mArtistId = source.readString();
-        mAlbumId = source.readString();
-        setArtwork_track_id(source.readString());
-        mTrackNum = source.readInt();
-        mUrl = Uri.parse(source.readString());
-        mButtons = source.readString();
-        mDownloadUrl = Uri.parse(source.readString());
+    @NonNull
+    public static Song fromMap(@NonNull Map<String, String> record) {
+        return Song.builder()
+                // TODO: Explain why this might be "id" or "track_id".
+                .id(record.containsKey("track_id") ? record.get("track_id") : record.get("id"))
+                // TODO: Explain why this might be "track" or "title".
+                .name(record.containsKey("track") ? Strings.nullToEmpty(record.get("track"))
+                        : Strings.nullToEmpty(record.get("title")))
+                .artist(record.get("artist"))
+                .artistId(Strings.nullToEmpty(record.get("artist_id")))
+                .albumName(Strings.nullToEmpty(record.get("album")))
+                .albumId(Strings.nullToEmpty(record.get("album_id")))
+                .compilation(Util.parseDecimalIntOrZero(record.get("compilation")) == 1)
+                .coverart(Util.parseDecimalIntOrZero(record.get("coverart")) == 1)
+                .duration(Util.parseDecimalIntOrZero(record.get("duration")))
+                .year(Util.parseDecimalIntOrZero(record.get("year")))
+                .remote(Util.parseDecimalIntOrZero(record.get("remote")) != 0)
+                .trackNum(Util.parseDecimalInt(record.get("tracknum"), 1))
+                .url(Uri.parse(Strings.nullToEmpty(record.get("url"))))
+                .artworkUrl(Uri.parse(Strings.nullToEmpty(record.get("artwork_url"))))
+                .downloadUrl(Uri.parse(Strings.nullToEmpty(record.get("download_url"))))
+                .buttons(Strings.nullToEmpty(record.get("buttons")))
+                .album(Album.fromMap(record))
+                .build();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(mName);
-        dest.writeString(mArtist);
-        dest.writeString(mAlbumName);
-        dest.writeInt(mCompilation ? 1 : 0);
-        dest.writeInt(mDuration);
-        dest.writeInt(mYear);
-        dest.writeString(mArtistId);
-        dest.writeString(mAlbumId);
-        dest.writeString(getArtwork_track_id());
-        dest.writeInt(mTrackNum);
-        dest.writeString(mUrl.toString());
-        dest.writeString(mButtons);
-        dest.writeString(mDownloadUrl.toString());
+    public String getLocalPath(DownloadPathStructure downloadPathStructure, DownloadFilenameStructure downloadFilenameStructure) {
+        return new File(downloadPathStructure.get(this), downloadFilenameStructure.get(this)).getPath();
     }
 
-    @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + ", mArtist: " + mArtist + ", year: " + mYear;
-    }
-
-    /**
+    /*
      * Extend the equality test by looking at additional track information.
      * <p>
      * This is to deal with songs from remote streams where the stream might provide a single
@@ -259,21 +192,21 @@ public class Song extends ArtworkItem {
         }
 
         // super.equals() has already checked that o is not null and is of the same class.
-        Song s = (Song)o;
+        Song s = (Song) o;
 
-        if (! s.getName().equals(mName)) {
+        if (!s.name().equals(name())) {
             return false;
         }
 
-        if (! s.getAlbumName().equals(mAlbumName)) {
+        if (!s.albumName().equals(albumName())) {
             return false;
         }
 
-        if (! s.getArtist().equals(mArtist)) {
+        if (!s.artist().equals(artist())) {
             return false;
         }
 
-        if (! s.getArtworkUrl().equals(mArtworkUrl)) {
+        if (!s.artworkUrl().equals(artworkUrl())) {
             return false;
         }
 
@@ -282,10 +215,11 @@ public class Song extends ArtworkItem {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId(), mName, mAlbumName, mArtist, mArtworkUrl);
+        return Objects.hashCode(id(), name(), albumName(), artist(), artworkUrl());
     }
 
-    public String getLocalPath(DownloadPathStructure downloadPathStructure, DownloadFilenameStructure downloadFilenameStructure) {
-        return new File(downloadPathStructure.get(this), downloadFilenameStructure.get(this)).getPath();
+    @Override
+    public String intentExtraKey() {
+        return Song.class.getName();
     }
 }

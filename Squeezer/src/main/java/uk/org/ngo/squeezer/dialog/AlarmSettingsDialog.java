@@ -161,7 +161,7 @@ public class AlarmSettingsDialog extends DialogFragment {
 
         Builder builder = new Builder(getActivity());
         builder.setView(view);
-        builder.setTitle(getResources().getString(R.string.alarms_settings_dialog_title, mHostActivity.getPlayer().getName()));
+        builder.setTitle(getResources().getString(R.string.alarms_settings_dialog_title, mHostActivity.getPlayer().name()));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

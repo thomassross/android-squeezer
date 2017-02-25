@@ -16,6 +16,7 @@
 
 package uk.org.ngo.squeezer.framework;
 
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.BaseAdapter;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 import uk.org.ngo.squeezer.R;
@@ -44,7 +46,6 @@ import uk.org.ngo.squeezer.R;
  */
 public class ItemAdapter<T extends Item> extends BaseAdapter implements
         OnCreateContextMenuListener {
-
     /**
      * View logic for this adapter
      */
@@ -134,7 +135,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
 
     public void onItemSelected(int position) {
         T item = getItem(position);
-        if (item != null && item.getId() != null) {
+        if (item != null && item.id() != null) {
             mItemView.onItemSelected(position, item);
         }
     }
@@ -158,7 +159,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         ItemView.ContextMenuInfo c = new ItemView.ContextMenuInfo(position, selectedItem, this,
                 getActivity().getMenuInflater());
 
-        if (selectedItem != null && selectedItem.getId() != null) {
+        if (selectedItem != null && selectedItem.id() != null) {
             mItemView.onCreateContextMenu(menu, v, c);
         }
     }
@@ -188,7 +189,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         int pageNumber = pageNumber(position);
         T[] page = pages.get(pageNumber);
         if (page == null) {
-            pages.put(pageNumber, page = arrayInstance(pageSize));
+            pages.put(pageNumber, page = (T[]) Array.newInstance(Item.class, pageSize));
         }
         return page;
     }
@@ -230,7 +231,7 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
     @Override
     public boolean isEnabled(int position) {
         T item = getItem(position);
-        return item != null && item.getId() != null && mItemView.isSelectable(item);
+        return item != null && item.id() != null && mItemView.isSelectable(item);
     }
 
     /**
@@ -333,8 +334,21 @@ public class ItemAdapter<T extends Item> extends BaseAdapter implements
         notifyDataSetChanged();
     }
 
-    protected T[] arrayInstance(int size) {
-        return mItemView.getCreator().newArray(size);
+    /**
+     * Searches for the first occurrence of oldItem in the adapter, and if it exists, replaces it
+     * with newItem.
+     *
+     * @param oldItem Item to find. May not be null.
+     * @param newItem Item to replace it with. May not be null.
+     */
+    public void replaceItem(@NonNull T oldItem, @NonNull T newItem) {
+        for(int pos = 0; pos < count; pos++) {
+            T item = getItem(pos);
+            if (oldItem.equals(item)) {
+                setItem(pos, newItem);
+                notifyDataSetChanged();
+                return;
+            }
+        }
     }
-
 }

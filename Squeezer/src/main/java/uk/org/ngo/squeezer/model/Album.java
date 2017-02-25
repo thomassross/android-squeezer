@@ -17,124 +17,76 @@
 package uk.org.ngo.squeezer.model;
 
 import android.net.Uri;
-import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.ArtworkItem;
 
-public class Album extends ArtworkItem {
-
+@AutoValue
+public abstract class Album extends ArtworkItem implements Parcelable {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "album_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "album_id";
     }
 
-    private String name;
+    /** tag="artist", album artist, or "Various" if compilation tag is set. */
+    @Nullable
+    public abstract String artist();
 
-    @Override
-    public String getName() {
-        return name;
+    /** tag="year", album year */
+    public abstract int year();
+
+    @NonNull
+    public abstract Uri artworkUrl();
+
+    @NonNull
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_Album.Builder();
+    }
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+        public abstract Builder id(final String id);
+        public abstract Builder name(final String name);
+        public abstract Builder artist(final String artist);
+        public abstract Builder year(final int year);
+        public abstract Builder artworkUrl(final Uri artworkUrl);
+        public abstract Builder artworkTrackId(final String artworkTrackId);
+        public abstract Album build();
     }
 
     @NonNull
-    private Uri mArtworkUrl = Uri.EMPTY;
-
-    @NonNull
-    public Uri getArtworkUrl() {
-        return mArtworkUrl;
-    }
-
-    public void setArtworkUrl(@NonNull Uri artworkUrl) {
-        mArtworkUrl = artworkUrl;
-    }
-
-    public Album setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    private String artist;
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String model) {
-        this.artist = model;
-    }
-
-    private int year;
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public Album(String albumId, String album) {
-        setId(albumId);
-        setName(album);
-    }
-
-    public Album(Map<String, String> record) {
-        setId(record.containsKey("album_id") ? record.get("album_id") : record.get("id"));
-        setName(record.get("album"));
-        setArtist(record.get("artist"));
-        setYear(Util.parseDecimalIntOrZero(record.get("year")));
-        setArtwork_track_id(record.get("artwork_track_id"));
-        mArtworkUrl = Uri.parse(Strings.nullToEmpty(record.get("artwork_url")));
-    }
-
-    public static final Creator<Album> CREATOR = new Creator<Album>() {
-        @Override
-        public Album[] newArray(int size) {
-            return new Album[size];
-        }
-
-        @Override
-        public Album createFromParcel(Parcel source) {
-            return new Album(source);
-        }
-    };
-
-    public Album() {
-
-    }
-
-    private Album(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-        artist = source.readString();
-        year = source.readInt();
-        setArtwork_track_id(source.readString());
-        mArtworkUrl = Uri.parse(Strings.nullToEmpty(source.readString()));
+    public static Album fromMap(@NonNull Map<String, String> record) {
+        return Album.builder()
+                .id(record.containsKey("album_id") ? record.get("album_id") : record.get("id"))
+                .name(record.get("album"))
+                .artist(Util.parseDecimalIntOrZero(record.get("compilation")) == 1?
+                        "Various" : record.get("artist"))
+                .year(Util.parseDecimalIntOrZero(record.get("year")))
+                .artworkUrl(Uri.parse(Strings.nullToEmpty(record.get("artwork_url"))))
+                .artworkTrackId(Strings.nullToEmpty(record.get("artwork_track_id")))
+                .build();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(artist);
-        dest.writeInt(year);
-        dest.writeString(getArtwork_track_id());
-        dest.writeString(mArtworkUrl.toString());
+    public String intentExtraKey() {
+        return Album.class.getName();
     }
-
-    @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + ", artist: " + artist + ", year: " + year;
-    }
-
 }

@@ -115,7 +115,7 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
     public static void show(Context context, Item... items) {
         final Intent intent = new Intent(context, ArtistListActivity.class);
         for (Item item : items) {
-            intent.putExtra(item.getClass().getName(), item);
+            intent.putExtra(item.intentExtraKey(), item);
         }
         context.startActivity(intent);
     }

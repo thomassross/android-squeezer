@@ -35,7 +35,7 @@ public class ApplicationListActivity extends PluginListActivity {
 
     public static void show(Activity activity, Plugin plugin) {
         final Intent intent = new Intent(activity, ApplicationListActivity.class);
-        intent.putExtra(plugin.getClass().getName(), plugin);
+        intent.putExtra(plugin.intentExtraKey(), plugin);
         activity.startActivity(intent);
     }
 }

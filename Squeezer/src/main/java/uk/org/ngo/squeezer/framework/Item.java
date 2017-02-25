@@ -17,6 +17,9 @@
 package uk.org.ngo.squeezer.framework;
 
 import android.os.Parcelable;
+import android.util.Log;
+
+import java.util.Map;
 
 /**
  * Base class for SqueezeServer data. Specializations must implement all the necessary boilerplate
@@ -25,31 +28,34 @@ import android.os.Parcelable;
  * @author Kurt Aaholst
  */
 public abstract class Item implements Parcelable {
+    public abstract String id();
+    public abstract String name();
 
-    private String id;
-
-    public void setId(String id) {
-        this.id = id;
+    public static Item fromMap(Map<String, String> record) {
+        Log.e("Item", "fromMap not overridden, record is: " + record);
+        return null;
     }
-
-    public String getId() {
-        return id;
-    }
-
-    abstract public String getName();
 
     public Item() {
 
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * The key that should be used when objects of this type are placed in an intent using
+     * {@code putExtra}.
+     * <p>
+     * {@code getClass().getName()} can't be used for AutoValue classes, as the result is the
+     * {@code AutoValue_...} class name.
+     *
+     * @return The key to use for this item. Must include the package prefix.
+     */
+    public String intentExtraKey() {
+        throw new UnsupportedOperationException("Subclass did not implement intentExtraKey: " + getClass());
     }
 
     @Override
     public int hashCode() {
-        return (getId() != null ? getId().hashCode() : 0);
+        return (id() != null ? id().hashCode() : 0);
     }
 
     @Override
@@ -69,19 +75,10 @@ public abstract class Item implements Parcelable {
 
         // Both might be empty items. For example a Song initialised
         // with an empty token map, because no song is currently playing.
-        if (getId() == null && ((Item) o).getId() == null) {
+        if (id() == null && ((Item) o).id() == null) {
             return true;
         }
 
-        return getId() != null && getId().equals(((Item) o).getId());
-    }
-
-    protected String toStringOpen() {
-        return getClass().getSimpleName() + " { id: " + getId() + ", name: " + getName();
-    }
-
-    @Override
-    public String toString() {
-        return toStringOpen() + " }";
+        return id() != null && id().equals(((Item) o).id());
     }
 }

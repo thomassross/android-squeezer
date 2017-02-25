@@ -13,31 +13,31 @@ public enum DownloadPathStructure implements EnumWithText{
     ARTIST_ARTISTALBUM(R.string.download_path_structure_artist_artistalbum) {
         @Override
         public String get(Album album) {
-            return new File(album.getArtist(), album.getArtist() + " - " + album.getName()).getPath();
+            return new File(album.artist(), album.artist() + " - " + album.name()).getPath();
         }
     },
     ARTIST_ALBUM(R.string.download_path_structure_artist_album) {
         @Override
         public String get(Album album) {
-            return new File(album.getArtist(), album.getName()).getPath();
+            return new File(album.artist(), album.name()).getPath();
         }
     },
     ARTISTALBUM(R.string.download_path_structure_artistalbum) {
         @Override
         public String get(Album album) {
-            return album.getArtist() + " - " + album.getName();
+            return album.artist() + " - " + album.name();
         }
     },
     ALBUM(R.string.download_path_structure_album) {
         @Override
         public String get(Album album) {
-            return album.getName();
+            return album.name();
         }
     },
     ARTIST(R.string.download_path_structure_artist) {
         @Override
         public String get(Album album) {
-            return album.getArtist();
+            return album.artist();
         }
     };
 
@@ -55,6 +55,6 @@ public enum DownloadPathStructure implements EnumWithText{
     }
 
     public String get(Song song) {
-        return get(song.getAlbum());
+        return get(song.album());
     }
 }

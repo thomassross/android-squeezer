@@ -33,7 +33,7 @@ public abstract class SpinnerItemView<T extends Item> extends BaseItemView<T> {
     }
 
     public View getDropDownAdapterView(View convertView, ViewGroup parent, int position, T item) {
-        return Util.getSpinnerDropDownView(getActivity(), convertView, parent, item.getName());
+        return Util.getSpinnerDropDownView(getActivity(), convertView, parent, item.name());
     }
 
     public View getDropDownAdapterView(View convertView, ViewGroup parent, String text) {

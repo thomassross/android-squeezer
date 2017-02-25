@@ -18,9 +18,9 @@ public class PlayerRenameDialog extends BaseEditTextDialog {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
 
         activity = (PlayerListActivity) getActivity();
-        dialog.setTitle(getString(R.string.rename_title, activity.getCurrentPlayer().getName()));
+        dialog.setTitle(getString(R.string.rename_title, activity.getCurrentPlayer().name()));
         editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        editText.setText(activity.getCurrentPlayer().getName());
+        editText.setText(activity.getCurrentPlayer().name());
 
         return dialog;
     }

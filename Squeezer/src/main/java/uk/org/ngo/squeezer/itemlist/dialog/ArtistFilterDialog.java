@@ -36,7 +36,7 @@ public class ArtistFilterDialog extends BaseFilterDialog {
         new GenreSpinner(activity, activity, genreSpinnerView);
 
         if (activity.getAlbum() != null) {
-            ((EditText) filterForm.findViewById(R.id.album)).setText(activity.getAlbum().getName());
+            ((EditText) filterForm.findViewById(R.id.album)).setText(activity.getAlbum().name());
             filterForm.findViewById(R.id.album_view).setVisibility(View.VISIBLE);
         }
 

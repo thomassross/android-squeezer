@@ -148,18 +148,18 @@ public class AlbumListActivity extends BaseListActivity<Album>
         @AlbumView.SecondLineDetails int details = AlbumView.DETAILS_ALL;
         if (artist != null) {
             details &= ~AlbumView.DETAILS_ARTIST;
-            header.setText(getString(R.string.albums_by_artist_header, artist.getName()));
+            header.setText(getString(R.string.albums_by_artist_header, artist.name()));
             header.setVisibility(View.VISIBLE);
             ((AlbumView) getItemView()).setArtist(artist);
         }
         if (genre != null) {
             details &= ~AlbumView.DETAILS_GENRE;
-            header.setText(getString(R.string.albums_by_genre_header, genre.getName()));
+            header.setText(getString(R.string.albums_by_genre_header, genre.name()));
             header.setVisibility(View.VISIBLE);
         }
         if (year != null) {
             details &= ~AlbumView.DETAILS_YEAR;
-            header.setText(getString(R.string.albums_by_year_header, year.getName()));
+            header.setText(getString(R.string.albums_by_year_header, year.name()));
             header.setVisibility(View.VISIBLE);
         }
         ((AlbumView) getItemView()).setDetails(details);
@@ -252,7 +252,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
             intent.putExtra(AlbumViewDialog.AlbumsSortOrder.class.getName(), sortOrder.name());
         }
         for (Item item : items) {
-            intent.putExtra(item.getClass().getName(), item);
+            intent.putExtra(item.intentExtraKey(), item);
         }
         context.startActivity(intent);
     }

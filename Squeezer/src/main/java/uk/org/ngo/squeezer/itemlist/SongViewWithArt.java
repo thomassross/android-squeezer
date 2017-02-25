@@ -45,10 +45,10 @@ public class SongViewWithArt extends SongView {
         super.bindView(view, item);
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-        Uri artworkUrl = item.getArtworkUrl();
+        Uri artworkUrl = item.artworkUrl();
         if (artworkUrl.equals(Uri.EMPTY)) {
             viewHolder.icon.setImageResource(
-                    item.isRemote() ? R.drawable.icon_iradio_noart : R.drawable.icon_album_noart);
+                    item.remote() ? R.drawable.icon_iradio_noart : R.drawable.icon_album_noart);
         } else {
             ImageFetcher.getInstance(getActivity()).loadImage(artworkUrl, viewHolder.icon,
                     mIconWidth, mIconHeight);

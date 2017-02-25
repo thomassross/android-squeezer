@@ -52,6 +52,7 @@ import uk.org.ngo.squeezer.service.ISqueezeService;
 public class PluginItemListActivity extends BaseListActivity<PluginItem>
         implements NetworkErrorDialogFragment.NetworkErrorDialogListener {
 
+    @NonNull
     private Plugin plugin;
 
     private PluginItem parent;
@@ -117,7 +118,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
     }
 
     private boolean isSearchable() {
-        return plugin.isSearchable() || (parent != null && "search".equals(parent.getType()));
+        return plugin.isSearchable() || (parent != null && "search".equals(parent.type()));
     }
 
     @Override
@@ -134,15 +135,15 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
     public void show(PluginItem pluginItem) {
         final Intent intent = new Intent(this, PluginItemListActivity.class);
-        intent.putExtra(plugin.getClass().getName(), plugin);
-        intent.putExtra(pluginItem.getClass().getName(), pluginItem);
+        intent.putExtra(plugin.intentExtraKey(), plugin);
+        intent.putExtra(pluginItem.intentExtraKey(), pluginItem);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     public static void show(Activity activity, Plugin plugin) {
         final Intent intent = new Intent(activity, PluginItemListActivity.class);
-        intent.putExtra(plugin.getClass().getName(), plugin);
+        intent.putExtra(plugin.intentExtraKey(), plugin);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
@@ -175,7 +176,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
             if (service == null) {
                 playerName = "Unknown";
             } else {
-                playerName = service.getActivePlayer().getName();
+                playerName = service.getActivePlayer().name();
             }
 
             String errorMsg = parameters.get("networkerror");
@@ -190,7 +191,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         // Automatically fetch subitems, if this is the only item.
         // TODO: Seen an NPE here (before adding size() > 0) check. Find out
         // why count == 1 might be true, but items.size might be 0.
-        if (count == 1 && !items.isEmpty() && items.get(0).isHasitems()) {
+        if (count == 1 && !items.isEmpty() && items.get(0).hasitems()) {
             parent = items.get(0);
             getUIThreadHandler().post(new Runnable() {
                 @Override
@@ -239,7 +240,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
         if (getService() == null) {
             return false;
         }
-        getService().pluginPlaylistControl(plugin, cmd, item.getId());
+        getService().pluginPlaylistControl(plugin, cmd, item.id());
         return true;
     }
 

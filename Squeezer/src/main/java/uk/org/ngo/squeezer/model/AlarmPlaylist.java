@@ -16,72 +16,48 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.support.annotation.NonNull;
+
+import com.google.auto.value.AutoValue;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.Item;
 
+@AutoValue
+public abstract class AlarmPlaylist extends Item {
 
-public class AlarmPlaylist extends Item {
+    /** tag="category", category under which the playlist is grouped. */
+    public abstract String category();
 
-    private String title;
+    /** tag="singleton", true if the item is the only one in its category, false otherwise. */
+    public abstract boolean singleton();
 
-    @Override
-    public String getName() {
-        return title;
+    @NonNull
+    @Contract(" -> !null")
+    private static AlarmPlaylist.Builder builder() {
+        return new AutoValue_AlarmPlaylist.Builder();
     }
 
-    private String category;
-    public String getCategory() {
-        return category;
-    }
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    private boolean singleton;
-    public boolean isSingleton() {
-        return singleton;
+    @AutoValue.Builder
+    public abstract static class Builder {
+        public abstract Builder id(final String id);
+        public abstract Builder name(final String name);
+        public abstract Builder category(final String category);
+        public abstract Builder singleton(final boolean singleton);
+        public abstract AlarmPlaylist build();
     }
 
-    public AlarmPlaylist() {
-    }
-
-    public AlarmPlaylist(Map<String, String> record) {
-        setId(record.get("url"));
-        title = record.get("title");
-        category = record.get("category");
-        singleton = Util.parseDecimalIntOrZero(record.get("singleton")) == 1;
-    }
-
-    public static final Creator<AlarmPlaylist> CREATOR = new Creator<AlarmPlaylist>() {
-        public AlarmPlaylist[] newArray(int size) {
-            return new AlarmPlaylist[size];
-        }
-
-        public AlarmPlaylist createFromParcel(Parcel source) {
-            return new AlarmPlaylist(source);
-        }
-    };
-
-    private AlarmPlaylist(Parcel source) {
-        setId(source.readString());
-        title = source.readString();
-        category = source.readString();
-        singleton = (source.readInt() == 1);
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(title);
-        dest.writeString(category);
-        dest.writeInt(singleton ? 1 : 0);
-    }
-
-    @Override
-    public String toString() {
-        return "url=" + getId() + ", title=" + getName();
+    @NonNull
+    public static AlarmPlaylist fromMap(@NonNull Map<String, String> record) {
+        return AlarmPlaylist.builder()
+                .id(record.get("url"))
+                .name(record.get("title"))
+                .category(record.get("category"))
+                .singleton(Util.parseDecimalIntOrZero(record.get("singleton")) == 1)
+                .build();
     }
 }

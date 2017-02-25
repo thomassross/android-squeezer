@@ -265,8 +265,8 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
 
     public void onEventMainThread(MusicChanged event) {
         if (event.player.equals(getService().getActivePlayer())) {
-            Log.d(getTag(), "onMusicChanged " + event.playerState.getCurrentSong());
-            currentPlaylistIndex = event.playerState.getCurrentPlaylistIndex();
+            Log.d(getTag(), "onMusicChanged " + event.playerState.currentSong());
+            currentPlaylistIndex = event.playerState.currentPlaylistIndex();
             getItemAdapter().notifyDataSetChanged();
         }
     }
@@ -307,7 +307,7 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
             return;
         }
 
-        currentPlaylistIndex = service.getPlayerState().getCurrentPlaylistIndex();
+        currentPlaylistIndex = service.getPlayerState().currentPlaylistIndex();
         // Initially position the list at the currently playing song.
         // Do it again once it has loaded because the newly displayed items
         // may push the current song outside the displayed area.

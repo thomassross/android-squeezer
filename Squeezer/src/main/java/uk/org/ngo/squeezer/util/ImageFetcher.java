@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer.util;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.common.io.ByteStreams;
@@ -27,8 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.annotation.Nullable;
 
 import uk.org.ngo.squeezer.R;
 

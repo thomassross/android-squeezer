@@ -2,6 +2,8 @@ package uk.org.ngo.squeezer.test.framework;
 
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -155,7 +157,7 @@ public class ItemAdapterTest extends ActivityInstrumentationTestCase2<ArtistList
             int skipCount = 0;
             for (int j = 0; j < artistItemAdapter.getCount(); j++) {
                 List<Integer> subList = selectedItems.subList(0, i + 1);
-                while (subList.contains(Integer.valueOf(artists[j + skipCount].getId())))
+                while (subList.contains(Integer.valueOf(artists[j + skipCount].id())))
                     skipCount++;
                 assertEquals(artists[j + skipCount], artistItemAdapter.getItem(j));
             }
@@ -165,26 +167,40 @@ public class ItemAdapterTest extends ActivityInstrumentationTestCase2<ArtistList
         for (int i = 0; i < selectedItems.size(); i++) {
             int pos = 0;
             while (pos < artistItemAdapter.getCount() &&
-                    Integer.valueOf(artistItemAdapter.getItem(pos).getId()) < selectedItems.get(i))
+                    Integer.valueOf(artistItemAdapter.getItem(pos).id()) < selectedItems.get(i))
                 pos++;
             artistItemAdapter.insertItem(pos, artists[selectedItems.get(i)]);
             assertEquals(artists.length - selectedItems.size() + i + 1, artistItemAdapter.getCount());
             int skipCount = 0;
             for (int j = 0; j < artistItemAdapter.getCount(); j++) {
                 List<Integer> subList = selectedItems.subList(i+1, selectedItems.size());
-                while (subList.contains(Integer.valueOf(artists[j + skipCount].getId())))
+                while (subList.contains(Integer.valueOf(artists[j + skipCount].id())))
                     skipCount++;
                 assertEquals(artists[j + skipCount], artistItemAdapter.getItem(j));
             }
         }
     }
 
-    private Artist[] getArtists() {
+    public void testReplaceItem() {
+        artistItemAdapter.update(artists.length, 0, Arrays.asList(artists));
+        Artist newArtist = Artist.fromMap(ImmutableMap.of("id", "200", "artist", "New artist"));
+
+        int count = artistItemAdapter.getCount();
+
+        // Replace the artist at position 3 with new artist.
+        Artist oldArtist = artistItemAdapter.getItem(3);
+        artistItemAdapter.replaceItem(oldArtist, newArtist);
+
+        assertEquals(newArtist, artistItemAdapter.getItem(3));
+        assertEquals(count, artistItemAdapter.getCount());
+    }
+
+    private static Artist[] getArtists() {
         int N = 109;
         Artist[] result = new Artist[N];
 
         for (int i = 0; i < N; i++) {
-            result[i] = new Artist(String.valueOf(i), "Artist " + i);
+            result[i] = Artist.fromMap(ImmutableMap.of("id", String.valueOf(i), "artist", "Artist " + i));
         }
 
         return result;

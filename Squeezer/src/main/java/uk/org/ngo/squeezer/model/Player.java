@@ -17,15 +17,19 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Build;
-import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 
+import com.google.auto.value.AutoValue;
+import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
-import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+
+import org.jetbrains.annotations.Contract;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
@@ -38,30 +42,51 @@ import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.Item;
 
 
-public class Player extends Item implements Comparable {
+@AutoValue
+public abstract class Player extends Item implements Comparable, Parcelable {
 
-    private String mName;
+    /** tag="ip", player IP and port number. */
+    @NonNull
+    public abstract String ip();
 
-    private final String mIp;
+    /** tag="model", player model name. */
+    @NonNull
+    public abstract String model();
 
-    private final String mModel;
+    /** tag="canpoweroff", true if the player can be powered off. */
+    public abstract boolean canPowerOff();
 
-    private final boolean mCanPowerOff;
+    /** The player's current state. */
+    @NonNull
+    public abstract PlayerState playerState();
 
-    /** Hash function to generate at least 64 bits of hashcode from a player's ID. */
-    private static final HashFunction mHashFunction = Hashing.goodFastHash(64);
+    /** tag="connected", true if the player is connected to the server. */
+    public abstract boolean connected();
 
-    /**  A hash of the player's ID. */
-    private final HashCode mHashCode;
+    @Memoized
+    public long idAsLong() {
+        HashFunction hf = Hashing.goodFastHash(64);
 
-    private PlayerState mPlayerState = new PlayerState();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            return hf.hashString(id(), Charsets.UTF_8).asLong();
+        }
 
-    /** Is the player connected? */
-    private boolean mConnected;
+        // API versions < GINGERBREAD do not have String.getBytes(Charset charset),
+        // which hashString() ends up calling. This will trigger an exception.
+        byte[] bytes;
+        try {
+            bytes = id().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Can't happen, Android's native charset is UTF-8. But just in case
+            // we're running on something wacky, fallback to the un-parsed bytes.
+            bytes = id().getBytes();
+        }
+        return hf.hashBytes(bytes).asInt();
+    }
 
     @Override
-    public int compareTo(Object otherPlayer) {
-        return this.mName.compareToIgnoreCase(((Player)otherPlayer).mName);
+    public int compareTo(@NonNull Object another) {
+        return name().compareToIgnoreCase(((Player) another).name());
     }
 
     public static class Pref {
@@ -80,128 +105,48 @@ public class Player extends Item implements Comparable {
                 ALARMS_ENABLED);
     }
 
-    public Player(Map<String, String> record) {
-        setId(record.get("playerid"));
-        mIp = record.get("ip");
-        mName = record.get("name");
-        mModel = record.get("model");
-        mCanPowerOff = Util.parseDecimalIntOrZero(record.get("canpoweroff")) == 1;
-        mConnected = Util.parseDecimalIntOrZero(record.get("connected")) == 1;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            mHashCode = mHashFunction.hashString(getId(), Charsets.UTF_8);
-        } else {
-            // API versions < GINGERBREAD do not have String.getBytes(Charset charset),
-            // which hashString() ends up calling. This will trigger an exception.
-            byte[] bytes;
-            try {
-                bytes = getId().getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                // Can't happen, Android's native charset is UTF-8. But just in case
-                // we're running on something wacky, fallback to the un-parsed bytes.
-                bytes = getId().getBytes();
-            }
-            mHashCode = mHashFunction.hashBytes(bytes);
-        }
+    private static Builder builder() {
+        return new AutoValue_Player.Builder()
+                // playerState can not be null, so ensure it's initialised if not provided.
+                .playerState(PlayerState.builder().build());
     }
 
-    private Player(Parcel source) {
-        setId(source.readString());
-        mIp = source.readString();
-        mName = source.readString();
-        mModel = source.readString();
-        mCanPowerOff = (source.readByte() == 1);
-        mConnected = (source.readByte() == 1);
-        mHashCode = HashCode.fromString(source.readString());
+    @AutoValue.Builder
+    abstract static class Builder {
+        abstract Builder id(final String id);
+        abstract Builder name(final String name);
+        abstract Builder ip(final String ip);
+        abstract Builder model(final String model);
+        abstract Builder canPowerOff(final boolean canPowerOff);
+        abstract Builder connected(final boolean connected);
+        abstract Builder playerState(final PlayerState playerState);
+        abstract Player build();
     }
 
-    @Override
-    public String getName() {
-        return mName;
+    @Contract("_ -> !null")
+    public static Player fromMap(@NonNull Map<String, String> record) {
+        return Player.builder()
+                .id(record.get("playerid"))
+                .name(record.get("name"))
+                .ip(record.get("ip"))
+                .model(record.get("model"))
+                .canPowerOff(Util.parseDecimalIntOrZero(record.get("canpoweroff")) == 1)
+                .connected(Util.parseDecimalIntOrZero(record.get("connected")) == 1)
+                .playerState(PlayerState.builder().playerId(record.get("playerid")).build())
+                .build();
     }
 
-    public Player setName(String name) {
-        this.mName = name;
-        return this;
-    }
+    @CheckResult
+    public abstract Player withName(String name);
 
-    public String getIp() {
-        return mIp;
-    }
+    @CheckResult
+    public abstract Player withPlayerState(PlayerState playerState);
 
-    public String getModel() {
-        return mModel;
-    }
-
-    public boolean isCanpoweroff() {
-        return mCanPowerOff;
-    }
-
-    public void setConnected(boolean connected) {
-        mConnected = connected;
-    }
-
-    public boolean getConnected() {
-        return mConnected;
-    }
-
-    @NonNull
-    public PlayerState getPlayerState() {
-        return mPlayerState;
-    }
-
-    public void setPlayerState(@NonNull PlayerState playerState) {
-        mPlayerState = playerState;
-    }
-
-    public static final Creator<Player> CREATOR = new Creator<Player>() {
-        @Override
-        public Player[] newArray(int size) {
-            return new Player[size];
-        }
-
-        @Override
-        public Player createFromParcel(Parcel source) {
-            return new Player(source);
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(mIp);
-        dest.writeString(mName);
-        dest.writeString(mModel);
-        dest.writeByte(mCanPowerOff ? (byte) 1 : (byte) 0);
-        dest.writeByte(mConnected ? (byte) 1 : (byte) 0);
-        dest.writeString(mHashCode.toString());
-    }
-
-    /**
-     * Returns a 64 bit identifier for the player.  The ID tracked by the server is a unique
-     * string that identifies the player.  It may be -- but is not required to be -- the
-     * player's MAC address.  Rather than assume it is the MAC address, calculate a 64 bit
-     * hash of the ID and use that.
-     *
-     * @return The hash of the player's ID.
-     */
-    public long getIdAsLong() {
-        return mHashCode.asLong();
-    }
-
-    /**
-     * Comparator to compare two players by ID.
-     */
+    /** Comparator to compare two players by ID. */
     public static final Comparator<Player> compareById = new Comparator<Player>() {
         @Override
-        public int compare(Player lhs, Player rhs) {
-            return lhs.getId().compareTo(rhs.getId());
+        public int compare(@NonNull Player lhs, @NonNull Player rhs) {
+            return lhs.id().compareTo(rhs.id());
         }
     };
-
-    @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + ", model: " + mModel + ", canpoweroff: " + mCanPowerOff
-                + ", ip: " + mIp + ", connected: " + mConnected;
-    }
 }

@@ -96,11 +96,11 @@ public class PlayerSyncDialog extends DialogFragment {
         for (String masterId : masterIds) {
             // Do not show an entry for the group the current player is in.  That might be...
             // 1. Because it's the master of this group, or...
-            if (masterId.equals(currentPlayer.getId()))
+            if (masterId.equals(currentPlayer.id()))
                 continue;
 
             // 2. Because it's a member of this group.
-            if (masterId.equals(currentPlayer.getPlayerState().getSyncMaster()))
+            if (masterId.equals(currentPlayer.playerState().syncMaster()))
                 continue;
 
             // Collect the player names and master ID for this sync group.
@@ -109,7 +109,7 @@ public class PlayerSyncDialog extends DialogFragment {
             Collections.sort(slaves, Player.compareById);
 
             for (Player slave : slaves) {
-                playerNames.add(slave.getName());
+                playerNames.add(slave.name());
             }
             playerSyncGroupNames.add(Joiner.on(", ").join(playerNames));
             playerSyncGroupMasterIds.add(masterId);
@@ -122,7 +122,7 @@ public class PlayerSyncDialog extends DialogFragment {
                 android.R.layout.simple_list_item_single_choice, playerSyncGroupNames);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.sync_title, currentPlayer.getName()))
+        builder.setTitle(getString(R.string.sync_title, currentPlayer.name()))
                 .setSingleChoiceItems(playerSyncGroupAdapter, mSelectedGroup,
                         new DialogInterface.OnClickListener() {
                             @Override

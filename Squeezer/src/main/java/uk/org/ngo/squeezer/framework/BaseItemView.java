@@ -222,7 +222,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
     public void bindView(View view, T item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
+        viewHolder.text1.setText(item.name());
     }
 
     /**
@@ -332,7 +332,7 @@ public abstract class BaseItemView<T extends Item> implements ItemView<T> {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ItemView.ContextMenuInfo menuInfo) {
-        menu.setHeaderTitle(menuInfo.item.getName());
+        menu.setHeaderTitle(menuInfo.item.name());
     }
 
     /**

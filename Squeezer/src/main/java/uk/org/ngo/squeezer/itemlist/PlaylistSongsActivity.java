@@ -68,14 +68,14 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
     }
 
     public void playlistRename(String newName) {
-        oldName = playlist.getName();
+        oldName = playlist.name();
         ISqueezeService service = getService();
         if (service == null) {
             return;
         }
 
         service.playlistsRename(playlist, newName);
-        playlist.setName(newName);
+        playlist = playlist.withName(newName);
         getIntent().putExtra("playlist", playlist);
         setResult(PlaylistsActivity.PLAYLIST_RENAMED);
     }
@@ -245,7 +245,7 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
     }
 
     public void onEvent(PlaylistRenameFailed event) {
-        playlist.setName(oldName);
+        playlist = playlist.withName(oldName);
         getIntent().putExtra("playlist", playlist);
         showServiceMessage(event.failureMessage);
     }

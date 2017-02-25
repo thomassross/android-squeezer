@@ -90,8 +90,8 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
         }
 
         service.playlistsRename(currentPlaylist, newName);
-        oldName = currentPlaylist.getName();
-        currentPlaylist.setName(newName);
+        oldName = currentPlaylist.name();
+        currentPlaylist = currentPlaylist.withName(newName);
         getItemAdapter().notifyDataSetChanged();
     }
 
@@ -171,7 +171,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
 
     public void onEvent(PlaylistRenameFailed event) {
         if (currentIndex != -1) {
-            currentPlaylist.setName(oldName);
+            currentPlaylist = currentPlaylist.withName(oldName);
         }
         showServiceMessage(event.failureMessage);
     }

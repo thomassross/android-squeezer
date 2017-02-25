@@ -58,7 +58,6 @@ import java.util.List;
 import uk.org.ngo.squeezer.R;
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.BaseItemView;
-import uk.org.ngo.squeezer.framework.BaseListActivity;
 import uk.org.ngo.squeezer.model.Alarm;
 import uk.org.ngo.squeezer.model.AlarmPlaylist;
 import uk.org.ngo.squeezer.service.ServerString;
@@ -117,8 +116,8 @@ public class AlarmView extends BaseItemView<Alarm> {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     if (getActivity().getService() != null) {
-                        viewHolder.alarm.setEnabled(b);
-                        getActivity().getService().alarmEnable(viewHolder.alarm.getId(), b);
+                        viewHolder.alarm = viewHolder.alarm.withEnabled(b);
+                        getActivity().getService().alarmEnable(viewHolder.alarm.id(), b);
                     }
                 }
             });
@@ -127,8 +126,8 @@ public class AlarmView extends BaseItemView<Alarm> {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     if (getActivity().getService() != null) {
-                        viewHolder.alarm.setRepeat(b);
-                        getActivity().getService().alarmRepeat(viewHolder.alarm.getId(), b);
+                        viewHolder.alarm = viewHolder.alarm.withRepeat(b);
+                        getActivity().getService().alarmRepeat(viewHolder.alarm.id(), b);
                         viewHolder.dowHolder.setVisibility(b ? View.VISIBLE : View.GONE);
                     }
                 }
@@ -147,11 +146,11 @@ public class AlarmView extends BaseItemView<Alarm> {
                             final Alarm alarm = viewHolder.alarm;
                             boolean wasChecked = alarm.isDayActive(finalDay);
                             if (wasChecked) {
-                                alarm.clearDay(finalDay);
-                                getActivity().getService().alarmRemoveDay(alarm.getId(), finalDay);
+                                viewHolder.alarm = alarm.clearDay(finalDay);
+                                getActivity().getService().alarmRemoveDay(alarm.id(), finalDay);
                             } else {
-                                alarm.setDay(finalDay);
-                                getActivity().getService().alarmAddDay(alarm.getId(), finalDay);
+                                viewHolder.alarm = alarm.setDay(finalDay);
+                                getActivity().getService().alarmAddDay(alarm.id(), finalDay);
                             }
                             setDowText(viewHolder, finalDay);
                         }
@@ -183,10 +182,10 @@ public class AlarmView extends BaseItemView<Alarm> {
                     final AlarmPlaylist selectedAlarmPlaylist = mAlarmPlaylists.get(position);
                     final Alarm alarm = viewHolder.alarm;
                     if (getActivity().getService() != null &&
-                            selectedAlarmPlaylist.getId() != null &&
-                            !selectedAlarmPlaylist.getId().equals(alarm.getUrl())) {
-                        alarm.setUrl(selectedAlarmPlaylist.getId());
-                        getActivity().getService().alarmSetPlaylist(alarm.getId(), selectedAlarmPlaylist);
+                            selectedAlarmPlaylist.id() != null &&
+                            !selectedAlarmPlaylist.id().equals(alarm.url())) {
+                        viewHolder.alarm = alarm.withUrl(selectedAlarmPlaylist.id());
+                        getActivity().getService().alarmSetPlaylist(alarm.id(), selectedAlarmPlaylist);
                     }
                 }
 
@@ -202,7 +201,7 @@ public class AlarmView extends BaseItemView<Alarm> {
     }
 
     private void bindView(final AlarmViewHolder viewHolder, final int position, final Alarm item) {
-        long tod = item.getTod();
+        long tod = item.tod();
         int hour = (int) (tod / 3600);
         int minute = (int) ((tod / 60) % 60);
         int displayHour = hour;
@@ -221,13 +220,13 @@ public class AlarmView extends BaseItemView<Alarm> {
             }
         });
         viewHolder.amPm.setText(hour < 12 ? viewHolder.am : viewHolder.pm);
-        viewHolder.enabled.setChecked(item.isEnabled());
-        viewHolder.repeat.setChecked(item.isRepeat());
+        viewHolder.enabled.setChecked(item.enabled());
+        viewHolder.repeat.setChecked(item.repeat());
         if (!mAlarmPlaylists.isEmpty()) {
             viewHolder.playlist.setAdapter(new AlarmPlaylistSpinnerAdapter());
             for (int i = 0; i < mAlarmPlaylists.size(); i++) {
                 AlarmPlaylist alarmPlaylist = mAlarmPlaylists.get(i);
-                if (alarmPlaylist.getId() != null && alarmPlaylist.getId().equals(item.getUrl())) {
+                if (alarmPlaylist.id() != null && alarmPlaylist.id().equals(item.url())) {
                     viewHolder.playlist.setSelection(i);
                     break;
                 }
@@ -235,7 +234,7 @@ public class AlarmView extends BaseItemView<Alarm> {
 
         }
 
-        viewHolder.dowHolder.setVisibility(item.isRepeat() ? View.VISIBLE : View.GONE);
+        viewHolder.dowHolder.setVisibility(item.repeat() ? View.VISIBLE : View.GONE);
         for (int day = 0; day < 7; day++) {
             setDowText(viewHolder, day);
         }
@@ -268,21 +267,11 @@ public class AlarmView extends BaseItemView<Alarm> {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
     }
 
-    // Require an immutable list so that caller's can't modify it when this method iterates
-    // over it.
+    // Require an immutable list so that caller's can't modify it inbetween clearing the list
+    // and adding the playlists.
     public void setAlarmPlaylists(ImmutableList<AlarmPlaylist> alarmPlaylists) {
-        String currentCategory = null;
-
         mAlarmPlaylists.clear();
-        for (AlarmPlaylist alarmPlaylist : alarmPlaylists) {
-            if (!alarmPlaylist.getCategory().equals(currentCategory)) {
-                AlarmPlaylist categoryAlarmPlaylist = new AlarmPlaylist();
-                categoryAlarmPlaylist.setCategory(alarmPlaylist.getCategory());
-                mAlarmPlaylists.add(categoryAlarmPlaylist);
-            }
-            mAlarmPlaylists.add(alarmPlaylist);
-            currentCategory = alarmPlaylist.getCategory();
-        }
+        mAlarmPlaylists.addAll(alarmPlaylists);
     }
 
     private static class AlarmViewHolder {
@@ -303,20 +292,20 @@ public class AlarmView extends BaseItemView<Alarm> {
     }
 
     public static class TimePickerFragment extends TimePickerDialog implements TimePickerDialog.OnTimeSetListener {
-        BaseListActivity activity;
+        AlarmsActivity activity;
         Alarm alarm;
 
         @Override
         @NonNull
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            activity = (BaseListActivity) getActivity();
+            activity = (AlarmsActivity) getActivity();
             alarm = getArguments().getParcelable("alarm");
             setOnTimeSetListener(this);
             return super.onCreateDialog(savedInstanceState);
         }
 
         public static void show(FragmentManager manager, Alarm alarm, boolean is24HourFormat, boolean dark) {
-            long tod = alarm.getTod();
+            long tod = alarm.tod();
             int hour = (int) (tod / 3600);
             int minute = (int) ((tod / 60) % 60);
 
@@ -333,9 +322,9 @@ public class AlarmView extends BaseItemView<Alarm> {
         public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
             if (activity.getService() != null) {
                 int time = (hourOfDay * 60 + minute) * 60;
-                alarm.setTod(time);
-                activity.getService().alarmSetTime(alarm.getId(), time);
-                activity.getItemAdapter().notifyDataSetChanged();
+                Alarm newAlarm = alarm.withTod(time);
+                activity.getService().alarmSetTime(alarm.id(), time);
+                activity.getItemAdapter().replaceItem(alarm, newAlarm);
             }
         }
     }
@@ -353,12 +342,12 @@ public class AlarmView extends BaseItemView<Alarm> {
 
         @Override
         public boolean isEnabled(int position) {
-            return (mAlarmPlaylists.get(position).getId() != null);
+            return (mAlarmPlaylists.get(position).id() != null);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-           return Util.getSpinnerItemView(getActivity(), convertView, parent, getItem(position).getName());
+           return Util.getSpinnerItemView(getActivity(), convertView, parent, getItem(position).name());
         }
 
         @Override
@@ -366,7 +355,7 @@ public class AlarmView extends BaseItemView<Alarm> {
             if (!isEnabled(position)) {
                 FrameLayout view = (FrameLayout) getActivity().getLayoutInflater().inflate(R.layout.alarm_playlist_category_dropdown_item, parent, false);
                 CheckedTextView spinnerItemView = (CheckedTextView) view.findViewById(R.id.text);
-                spinnerItemView.setText(getItem(position).getCategory());
+                spinnerItemView.setText(getItem(position).category());
                 spinnerItemView.setTypeface(spinnerItemView.getTypeface(), Typeface.BOLD);
                 // Hide the checkmark for headings.
                 spinnerItemView.setCheckMarkDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -374,7 +363,7 @@ public class AlarmView extends BaseItemView<Alarm> {
             } else {
                 FrameLayout view = (FrameLayout) getActivity().getLayoutInflater().inflate(R.layout.alarm_playlist_dropdown_item, parent, false);
                 TextView spinnerItemView = (TextView) view.findViewById(R.id.text);
-                spinnerItemView.setText(getItem(position).getName());
+                spinnerItemView.setText(getItem(position).name());
                 return view;
             }
         }
@@ -397,7 +386,7 @@ public class AlarmView extends BaseItemView<Alarm> {
         @Override
         public void onDone() {
             if (mActivity.getService() != null) {
-                mActivity.getService().alarmDelete(alarm.getId());
+                mActivity.getService().alarmDelete(alarm.id());
             }
         }
     }

@@ -74,18 +74,18 @@ public class AlbumView extends AlbumArtView<Album> {
     public void bindView(View view, Album item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
+        viewHolder.text1.setText(item.name());
 
         String text2 = "";
-        if (item.getId() != null) {
+        if (item.id() != null) {
             text2 = mJoiner.join(
-                    (mDetails & DETAILS_ARTIST) != 0 ? item.getArtist() : null,
-                    (mDetails & DETAILS_YEAR) != 0 && item.getYear() != 0 ? item.getYear() : null
+                    (mDetails & DETAILS_ARTIST) != 0 ? item.artist() : null,
+                    (mDetails & DETAILS_YEAR) != 0 && item.year() != 0 ? item.year() : null
             );
         }
         viewHolder.text2.setText(text2);
 
-        Uri artworkUrl = item.getArtworkUrl();
+        Uri artworkUrl = item.artworkUrl();
         if (artworkUrl.equals(Uri.EMPTY)) {
             viewHolder.icon.setImageResource(R.drawable.icon_album_noart);
         } else {
@@ -105,7 +105,7 @@ public class AlbumView extends AlbumArtView<Album> {
         if (mArtist != null) {
             MenuItem item = menu.findItem(R.id.browse_songs_by_artist);
             item.setVisible(true);
-            item.setTitle(getActivity().getString(R.string.BROWSE_SONGS_BY_ITEM, mArtist.getName()));
+            item.setTitle(getActivity().getString(R.string.BROWSE_SONGS_BY_ITEM, mArtist.name()));
         }
     }
 

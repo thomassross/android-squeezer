@@ -24,10 +24,10 @@ package uk.org.ngo.squeezer.framework;
 public interface FilterItem {
 
     /** @return The id of this item. To be used with the filter tag, to filter by this item. */
-    String getId();
+    String id();
 
     /** @return The tag to filters by this item in a CLI query. */
-    String getFilterTag();
+    String filterTag();
 
     /** @return Tagged parameter to filter by this item. */
     String getFilterParameter();

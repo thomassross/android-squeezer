@@ -18,14 +18,14 @@ package uk.org.ngo.squeezer.service;
 
 import android.net.Uri;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+import com.google.common.base.Objects;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -441,8 +441,9 @@ class CliClient implements IClient {
      *
      * @param command The command to send
      */
-    public void sendPlayerCommand(final Player player, final String command) {
-        sendCommand(Util.encode(player.getId()) + " " + command);
+    @Override
+    public void sendPlayerCommand(final String playerId, final String command) {
+        sendCommand(Util.encode(playerId) + " " + command);
     }
 
     /**
@@ -536,8 +537,8 @@ class CliClient implements IClient {
         internalRequestItems(playerId, cmd, (full_list ? 0 : start), (start == 0 ? 1 : pageSize), parameters, callback);
     }
 
-    void requestItems(Player player, String cmd, int start, List<String> parameters, IServiceItemListCallback callback) {
-        internalRequestItems(player.getId(), cmd, start, parameters, callback);
+    void requestItems(String playerId, String cmd, int start, List<String> parameters, IServiceItemListCallback callback) {
+        internalRequestItems(playerId, cmd, start, parameters, callback);
     }
 
     void requestItems(String cmd, int start, List<String> parameters, IServiceItemListCallback callback) {
@@ -556,11 +557,11 @@ class CliClient implements IClient {
         requestItems(cmd, start, pageSize, null, callback);
     }
 
-    void requestPlayerItems(@Nullable Player player, String cmd, int start, List<String> parameters, IServiceItemListCallback callback) {
-        if (player == null) {
+    void requestPlayerItems(@Nullable String playerId, String cmd, int start, List<String> parameters, IServiceItemListCallback callback) {
+        if (playerId == null) {
             return;
         }
-        requestItems(player, cmd, start, parameters, callback);
+        requestItems(playerId, cmd, start, parameters, callback);
     }
 
     /**
@@ -1157,43 +1158,53 @@ class CliClient implements IClient {
             @Override
             public void handle(List<String> tokens) {
                 if (tokens.size() >= 3 && "-".equals(tokens.get(2))) {
-                    Player player = mPlayers.get(Util.decode(tokens.get(0)));
+                    String playerId = Util.decode(tokens.get(0));
+                    Player player = mPlayers.get(playerId);
 
                     // XXX: Can we ever see a status for a player we don't know about?
                     // XXX: Maybe the better thing to do is to add it.
                     if (player == null)
                         return;
 
-                    PlayerState playerState = player.getPlayerState();
+                    PlayerState playerState = player.playerState();
 
                     HashMap<String, String> tokenMap = parseTokens(tokens);
                     addArtworkUrlTag(tokenMap);
                     addDownloadUrlTag(tokenMap);
+                    // Make sure that playerid shows up.
+                    tokenMap.put("playerid", playerId);
 
-                    boolean unknownRepeatStatus = playerState.getRepeatStatus() == null;
-                    boolean unknownShuffleStatus = playerState.getShuffleStatus() == null;
+                    boolean unknownRepeatStatus = playerState.repeatStatus() == null;
+                    boolean unknownShuffleStatus = playerState.shuffleStatus() == null;
 
-                    boolean changedPower = playerState.setPoweredOn(Util.parseDecimalIntOrZero(tokenMap.get("power")) == 1);
-                    boolean changedShuffleStatus = playerState.setShuffleStatus(tokenMap.get("playlist shuffle"));
-                    boolean changedRepeatStatus = playerState.setRepeatStatus(tokenMap.get("playlist repeat"));
-                    boolean changedCurrentPlaylistTracksNum = playerState.setCurrentPlaylistTracksNum(Util.parseDecimalIntOrZero(tokenMap.get("playlist_tracks")));
-                    boolean changedCurrentPlaylistIndex = playerState.setCurrentPlaylistIndex(Util.parseDecimalIntOrZero(tokenMap.get("playlist_cur_index")));
-                    boolean changedCurrentPlaylist = playerState.setCurrentPlaylist(tokenMap.get("playlist_name"));
-                    boolean changedSleep = playerState.setSleep(Util.parseDecimalIntOrZero(tokenMap.get("will_sleep_in")));
-                    boolean changedSleepDuration = playerState.setSleepDuration(Util.parseDecimalIntOrZero(tokenMap.get("sleep")));
-                    boolean changedSong = playerState.setCurrentSong(new Song(tokenMap));
-                    boolean changedSongDuration = playerState.setCurrentSongDuration(Util.parseDecimalIntOrZero(tokenMap.get("duration")));
-                    boolean changedSongTime = playerState.setCurrentTimeSecond(Util.parseDecimalIntOrZero(tokenMap.get("time")));
-                    boolean changedVolume = playerState.setCurrentVolume(Util.parseDecimalIntOrZero(tokenMap.get("mixer volume")));
-                    boolean changedSyncMaster = playerState.setSyncMaster(tokenMap.get("sync_master"));
-                    boolean changedSyncSlaves = playerState.setSyncSlaves(Splitter.on(",").omitEmptyStrings().splitToList(Strings.nullToEmpty(tokenMap.get("sync_slaves"))));
-                    boolean changedSubscription = playerState.setSubscriptionType(tokenMap.get("subscribe"));
+                    PlayerState newPlayerState = PlayerState.fromMap(tokenMap);
 
-                    player.setPlayerState(playerState);
+                    boolean changedPlayStatus = !Objects.equal(playerState.playStatus(), newPlayerState.playStatus());
+                    boolean changedPower = playerState.poweredOn() != newPlayerState.poweredOn();
+                    boolean changedShuffleStatus = playerState.shuffleStatus() != newPlayerState.shuffleStatus();
+                    boolean changedRepeatStatus = playerState.repeatStatus() != newPlayerState.repeatStatus();
+                    boolean changedCurrentPlaylistTracksNum = playerState.currentPlaylistTracksNum() != newPlayerState.currentPlaylistTracksNum();
+                    boolean changedCurrentPlaylistIndex = playerState.currentPlaylistIndex() != newPlayerState.currentPlaylistIndex();
+                    boolean changedCurrentPlaylist = !playerState.currentPlaylist().equals(newPlayerState.currentPlaylist());
+                    boolean changedSleep = playerState.sleep() != newPlayerState.sleep();
+                    boolean changedSleepDuration = playerState.sleepDuration() != newPlayerState.sleepDuration();
+                    boolean changedSong = !Objects.equal(playerState.currentSong(), newPlayerState.currentSong());
+                    boolean changedSongDuration = playerState.currentSongDuration() != newPlayerState.currentSongDuration();
+                    boolean changedSongTime = playerState.currentTimeSecond() != newPlayerState.currentTimeSecond();
+                    boolean changedVolume = playerState.currentVolume() != newPlayerState.currentVolume();
+                    boolean changedSyncMaster = !Objects.equal(playerState.syncMaster(), newPlayerState.syncMaster());
+                    boolean changedSyncSlaves = !playerState.syncSlaves().equals(newPlayerState.syncSlaves());
+                    boolean changedSubscription = !Objects.equal(playerState.subscriptionType(), newPlayerState.subscriptionType());
+
+                    player = player.withPlayerState(newPlayerState);
+                    mPlayers.put(playerId, player);
 
                     // Kept as its own method because other methods call it, unlike the explicit
                     // calls to the callbacks below.
-                    updatePlayStatus(player.getId(), tokenMap.get("mode"));
+                    //updatePlayStatus(player.id(), tokenMap.get("mode"));
+                    if (changedPlayStatus) {
+                        mEventBus.post(new PlayStatusChanged(newPlayerState.playStatus(), player));
+                    }
 
                     // XXX: Handled by onEvent(PlayStatusChanged) in the service.
                     //updatePlayerSubscription(player, calculateSubscriptionTypeFor(player));
@@ -1213,39 +1224,38 @@ class CliClient implements IClient {
 
                     if (changedPower || changedSleep || changedSleepDuration || changedVolume
                             || changedSong || changedSyncMaster || changedSyncSlaves) {
-                        mEventBus.post(new PlayerStateChanged(player, playerState));
+                        mEventBus.post(new PlayerStateChanged(player, newPlayerState));
                     }
 
                     // Power status
                     if (changedPower) {
                         mEventBus.post(new PowerStatusChanged(
-                                player,
-                                !player.getPlayerState().isPoweredOn(),
-                                !player.getPlayerState().isPoweredOn()));
+                                player, !newPlayerState.poweredOn(), !newPlayerState.poweredOn()));
                     }
 
                     // Current song
                     if (changedSong) {
-                        mEventBus.postSticky(new MusicChanged(player, playerState));
+                        mEventBus.postSticky(new MusicChanged(player, newPlayerState));
                     }
 
                     // Shuffle status.
                     if (changedShuffleStatus) {
                         mEventBus.post(new ShuffleStatusChanged(player,
-                                unknownShuffleStatus, playerState.getShuffleStatus()));
+                                unknownShuffleStatus, newPlayerState.shuffleStatus()));
                     }
 
                     // Repeat status.
                     if (changedRepeatStatus) {
                         mEventBus.post(new RepeatStatusChanged(player,
-                                unknownRepeatStatus, playerState.getRepeatStatus()));
+                                unknownRepeatStatus, newPlayerState.repeatStatus()));
                     }
 
                     // Position in song
                     if (changedSongDuration || changedSongTime) {
+                        Log.d(TAG, "Posting new SongTimeChanged");
                         mEventBus.post(new SongTimeChanged(player,
-                                playerState.getCurrentTimeSecond(),
-                                playerState.getCurrentSongDuration()));
+                                newPlayerState.currentTimeSecond(),
+                                newPlayerState.currentSongDuration()));
                     }
                 } else {
                     parseSqueezerList(extQueryFormatCmdMap.get("status"), tokens);
@@ -1258,13 +1268,16 @@ class CliClient implements IClient {
                 Log.v(TAG, "Prefset received: " + tokens);
                 if (tokens.size() == 5 && tokens.get(2).equals("server")) {
                     String playerId = Util.decode(tokens.get(0));
-                    Player player = mPlayers.get(playerId);
-                    if (player == null) {
-                        return;
-                    }
+                    Player player;
 
                     if (tokens.get(3).equals("volume")) {
-                        updatePlayerVolume(playerId, Util.parseDecimalIntOrZero(tokens.get(4)));
+                        player = updatePlayerVolume(playerId, Util.parseDecimalIntOrZero(tokens.get(4)));
+                    } else {
+                        player = mPlayers.get(playerId);
+                    }
+
+                    if (player == null) {
+                        return;
                     }
 
                     @Player.Pref.Name String pref = tokens.get(3);
@@ -1408,13 +1421,24 @@ class CliClient implements IClient {
         // messages don't have this problem.
     }
 
-    private void updatePlayerVolume(String playerId, int newVolume) {
+    /**
+     *
+     * @param playerId
+     * @param newVolume
+     * @return The player with the new volume set. Null if no player with that ID exists.
+     */
+    @CheckResult
+    @Nullable
+    private Player updatePlayerVolume(String playerId, int newVolume) {
         Player player = mPlayers.get(playerId);
         if (player == null) {
-            return;
+            return null;
         }
-        player.getPlayerState().setCurrentVolume(newVolume);
+
+        player = player.withPlayerState(player.playerState().withCurrentVolume(newVolume));
+        mPlayers.put(playerId, player);
         mEventBus.post(new PlayerVolume(newVolume, player));
+        return player;
     }
 
     private void updatePlayStatus(@NonNull String playerId, String playStatus) {
@@ -1431,11 +1455,15 @@ class CliClient implements IClient {
             return;
         }
 
-        PlayerState playerState = player.getPlayerState();
+        PlayerState playerState = player.playerState();
 
-        if (playerState.setPlayStatus(playStatus)) {
-            mEventBus.post(new PlayStatusChanged(playStatus, player));
+        if (playStatus.equals(playerState.playStatus())) {
+            return;
         }
+
+        player = player.withPlayerState(playerState.withPlayStatus(playStatus));
+        mPlayers.put(playerId, player);
+        mEventBus.post(new PlayStatusChanged(playStatus, player));
     }
 
     /**
@@ -1480,7 +1508,7 @@ class CliClient implements IClient {
             public void onItemsReceived(int count, int start, Map<String, String> parameters,
                                         List<Player> items, Class<Player> dataType) {
                 for (Player player : items) {
-                    players.put(player.getId(), player);
+                    players.put(player.id(), player);
                 }
 
                 // If all players have been received then determine the new active player.

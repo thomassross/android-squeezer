@@ -16,63 +16,52 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+
+import com.google.auto.value.AutoValue;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.framework.PlaylistItem;
 
-
-public class Playlist extends PlaylistItem {
-
+@AutoValue
+public abstract class Playlist extends PlaylistItem {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "playlist_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "playlist_id";
     }
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
+    @NonNull
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_Playlist.Builder();
     }
 
-    public Playlist setName(String name) {
-        this.name = name;
-        return this;
+    @AutoValue.Builder
+    public abstract static class Builder {
+        public abstract Builder id(final String id);
+        public abstract Builder name(final String name);
+        public abstract Playlist build();
     }
 
-    public Playlist(Map<String, String> record) {
-        setId(record.containsKey("playlist_id") ? record.get("playlist_id") : record.get("id"));
-        name = record.get("playlist");
+    @NonNull
+    public static Playlist fromMap(@NonNull Map<String, String> record) {
+        return Playlist.builder()
+                .id(record.containsKey("playlist_id") ? record.get("playlist_id") : record.get("id"))
+                .name(record.get("playlist"))
+                .build();
     }
 
-    public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
-        @Override
-        public Playlist[] newArray(int size) {
-            return new Playlist[size];
-        }
-
-        @Override
-        public Playlist createFromParcel(Parcel source) {
-            return new Playlist(source);
-        }
-    };
-
-    private Playlist(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-    }
-
+    @CheckResult
+    public abstract Playlist withName(String name);
 }

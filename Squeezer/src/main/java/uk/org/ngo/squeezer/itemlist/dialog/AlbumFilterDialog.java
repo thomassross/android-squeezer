@@ -41,12 +41,12 @@ public class AlbumFilterDialog extends BaseFilterDialog {
         new YearSpinner(activity, activity, yearSpinnerView);
 
         if (activity.getSong() != null) {
-            ((EditText) filterForm.findViewById(R.id.track)).setText(activity.getSong().getName());
+            ((EditText) filterForm.findViewById(R.id.track)).setText(activity.getSong().name());
             filterForm.findViewById(R.id.track_view).setVisibility(View.VISIBLE);
         }
         if (activity.getArtist() != null) {
             ((EditText) filterForm.findViewById(R.id.artist))
-                    .setText(activity.getArtist().getName());
+                    .setText(activity.getArtist().name());
             filterForm.findViewById(R.id.artist_view).setVisibility(View.VISIBLE);
         }
 

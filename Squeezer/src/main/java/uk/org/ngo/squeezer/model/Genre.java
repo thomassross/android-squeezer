@@ -16,63 +16,36 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
+
+import com.google.auto.value.AutoValue;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.framework.PlaylistItem;
 
-
-public class Genre extends PlaylistItem {
-
+@AutoValue
+public abstract class Genre extends PlaylistItem implements Parcelable {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "genre_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "genre_id";
     }
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public Genre setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public Genre(Map<String, String> record) {
-        setId(record.containsKey("genre_id") ? record.get("genre_id") : record.get("id"));
-        name = record.get("genre");
-    }
-
-    public static final Creator<Genre> CREATOR = new Creator<Genre>() {
-        @Override
-        public Genre[] newArray(int size) {
-            return new Genre[size];
-        }
-
-        @Override
-        public Genre createFromParcel(Parcel source) {
-            return new Genre(source);
-        }
-    };
-
-    private Genre(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
+    public static Genre fromMap(@NonNull Map<String, String> record) {
+        return new AutoValue_Genre(record.containsKey("genre_id") ? record.get("genre_id") : record.get("id"),
+                record.get("genre"));
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
+    public String intentExtraKey() {
+        return Genre.class.getName();
     }
-
 }

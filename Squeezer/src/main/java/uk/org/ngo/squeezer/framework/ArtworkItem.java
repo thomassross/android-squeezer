@@ -17,23 +17,16 @@
 package uk.org.ngo.squeezer.framework;
 
 
+import android.support.annotation.Nullable;
+
 /**
  * A PlaylistItem that has associated artwork.
  */
 public abstract class ArtworkItem extends PlaylistItem {
-
-    private String artwork_track_id;
-
-    public String getArtwork_track_id() {
-        return artwork_track_id;
-    }
-
-    public void setArtwork_track_id(String artwork_track_id) {
-        this.artwork_track_id = artwork_track_id;
-    }
-
-    @Override
-    protected String toStringOpen() {
-        return super.toStringOpen() + ", artwork_track_id: " + artwork_track_id;
-    }
+    /**
+     * tag="artwork_track_id", ID of the song to use for coverart for this song. May be null
+     * if there is no cover art.
+     */
+    @Nullable
+    public abstract String artworkTrackId();
 }

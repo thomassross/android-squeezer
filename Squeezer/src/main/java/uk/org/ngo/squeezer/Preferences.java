@@ -258,11 +258,11 @@ public final class Preferences {
         }
     }
 
-    private String getOnSelectItemActionKey(Class<? extends PlaylistItem> clazz) {
+    private static String getOnSelectItemActionKey(Class<? extends PlaylistItem> clazz) {
         String key = null;
-        if (clazz == Song.class) key = KEY_ON_SELECT_SONG_ACTION; else
-        if (clazz == MusicFolderItem.class) key = KEY_ON_SELECT_SONG_ACTION; else
-        if (clazz == Album.class) key = KEY_ON_SELECT_ALBUM_ACTION;
+        if (Song.class.isAssignableFrom(clazz)) key = KEY_ON_SELECT_SONG_ACTION; else
+        if (MusicFolderItem.class.isAssignableFrom(clazz)) key = KEY_ON_SELECT_SONG_ACTION; else
+        if (Album.class.isAssignableFrom(clazz)) key = KEY_ON_SELECT_ALBUM_ACTION;
         if (key == null) {
             throw new IllegalArgumentException("Default action for class '" + clazz + " is not supported");
         }

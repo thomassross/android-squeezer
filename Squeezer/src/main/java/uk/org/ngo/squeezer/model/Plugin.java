@@ -16,7 +16,14 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+
+import com.google.auto.value.AutoValue;
+import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
@@ -25,121 +32,76 @@ import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.Item;
 
 
-public class Plugin extends Item {
+@AutoValue
+public abstract class Plugin extends Item {
 
-    public static final Plugin FAVORITE = new Plugin("favorites", R.drawable.ic_favorites);
-    public static final Plugin MY_APPS = new Plugin("myapps", R.drawable.ic_my_apps);
+    public static final Plugin FAVORITE = Plugin.create("favorites", R.drawable.ic_favorites);
+    public static final Plugin MY_APPS = Plugin.create("myapps", R.drawable.ic_my_apps);
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public Plugin setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    private String icon;
+    /** Icon resource for this plugin if it is embedded in the Squeezer app, or 0. */
+    public abstract int iconResource();
 
     /**
-     * @return Relative URL path to an icon for this radio or music service, for example
+     * tag="icon", relative URL path to an icon for this radio or music service, for example
      * "plugins/Picks/html/images/icon.png"
      */
-    public String getIcon() {
-        return icon;
-    }
+    @Nullable
+    public abstract String icon();
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
+    /** tag="weight", numeric weight to use when sorting results, sort lowest to highest. */
+    public abstract int weight();
 
-    private int iconResource;
-
-    /**
-     * @return Icon resource for this plugin if it is embedded in the Squeezer app, or null.
-     */
-    public int getIconResource() {
-        return iconResource;
-    }
-
-    public void setIconResource(int iconResource) {
-        this.iconResource = iconResource;
-    }
-
-    private int weight;
-
-    public int getWeight() {
-        return weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
-
-    private String type;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    /** tag="type", plugin type. Expected values include "xmlbrowser" and "xmlbrowser_search". */
+    @NonNull
+    public abstract String type();
 
     public boolean isSearchable() {
-        return "xmlbrowser_search".equals(type);
+        return "xmlbrowser_search".equals(type());
     }
 
-    private Plugin(String cmd, int iconResource) {
-        setId(cmd);
-        setIconResource(iconResource);
+    @NonNull
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_Plugin.Builder();
     }
 
-    public Plugin(Map<String, String> record) {
-        setId(record.get("cmd"));
-        name = record.get("name");
-        type = record.get("type");
-        icon = record.get("icon");
-        weight = Util.parseDecimalIntOrZero(record.get("weight"));
+    @AutoValue.Builder
+    abstract static class Builder {
+        abstract Builder id(final String id);
+        abstract Builder name(final String name);
+        abstract Builder iconResource(final int iconResource);
+        abstract Builder icon(final String icon);
+        abstract Builder weight(final int weight);
+        abstract Builder type(final String type);
+        abstract Plugin build();
     }
 
-    public static final Creator<Plugin> CREATOR = new Creator<Plugin>() {
-        @Override
-        public Plugin[] newArray(int size) {
-            return new Plugin[size];
-        }
-
-        @Override
-        public Plugin createFromParcel(Parcel source) {
-            return new Plugin(source);
-        }
-    };
-
-    private Plugin(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-        type = source.readString();
-        icon = source.readString();
-        iconResource = source.readInt();
-        weight = source.readInt();
+    @VisibleForTesting
+    protected static Plugin create(String cmd, int iconResource) {
+        return Plugin.builder()
+                .id(cmd)
+                .name("")
+                .iconResource(iconResource)
+                .icon("")
+                .weight(0)
+                .type("")
+                .build();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(type);
-        dest.writeString(icon);
-        dest.writeInt(iconResource);
-        dest.writeInt(weight);
+    @NonNull
+    public static Plugin fromMap(@NonNull Map<String, String> record) {
+        return Plugin.builder()
+                .id(record.get("cmd"))
+                .name(record.get("name"))
+                .icon(record.get("icon"))
+                .iconResource(0)
+                .weight(Util.parseDecimalIntOrZero(record.get("weight")))
+                .type(Strings.nullToEmpty(record.get("type")))
+                .build();
     }
 
     @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + "type: " + getType() + ", weight: " + getWeight();
+    public String intentExtraKey() {
+        return Plugin.class.getName();
     }
-
 }

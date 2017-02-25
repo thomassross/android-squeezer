@@ -16,127 +16,157 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.support.annotation.CheckResult;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
+import com.google.auto.value.AutoValue;
+import com.google.common.base.Splitter;
+
+import org.jetbrains.annotations.Contract;
+
+import java.util.BitSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import uk.org.ngo.squeezer.Util;
 import uk.org.ngo.squeezer.framework.Item;
 
+@AutoValue
+public abstract class Alarm extends Item {
 
-public class Alarm extends Item {
+    /** tag="dow", days of the week the alarm is active, 0=Sunday, 6=Saturday. */
+    public abstract BitSet dow();
 
-    @Override
-    public String getName() {
-        return String.valueOf(tod);
-    }
+    /** tag="enabled", true if the alarm is enabled. */
+    public abstract boolean enabled();
 
-    public Alarm(Map<String, String> record) {
-        setId(record.get("id"));
-        tod = Util.parseDecimalIntOrZero(record.get("time"));
-        setDow(record.get("dow"));
-        enabled = Util.parseDecimalIntOrZero(record.get("enabled")) == 1;
-        repeat = Util.parseDecimalIntOrZero(record.get("repeat")) == 1;
-        url = record.get("url");
-        if ("CURRENT_PLAYLIST".equals(url)) url = "";
-    }
+    /** tag="repeat", true if the alarm repeats. */
+    public abstract boolean repeat();
 
-    private int tod;
-    public int getTod() {
-        return tod;
-    }
-    public void setTod(int tod) {
-        this.tod = tod;
+    /** tag="time", time of day the alarm fires, in seconds-since-midnight. */
+    public abstract int tod();
+
+    /** tag="url", URL of the alarm's playlist, or the string "CURRENT_PLAYLIST". */
+    public abstract String url();
+
+    @NonNull
+    @Contract(" -> !null")
+    private static Builder builder() {
+        return new AutoValue_Alarm.Builder();
     }
 
-    private boolean repeat;
-    public boolean isRepeat() {
-        return repeat;
-    }
-    public void setRepeat(boolean repeat) {
-        this.repeat = repeat;
+    abstract Builder toBuilder();
+
+    @AutoValue.Builder
+    abstract static class Builder {
+        abstract Builder id(final String id);
+        abstract Builder name(final String name);
+        abstract Builder dow(final BitSet dow);
+        abstract Builder enabled(final boolean enabled);
+        abstract Builder repeat(final boolean repeat);
+        abstract Builder tod(final int tod);
+        abstract Builder url(final String url);
+        abstract Alarm build();
     }
 
-    private boolean enabled;
-    public boolean isEnabled() {
-        return enabled;
-    }
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    @NonNull
+    public static Alarm fromMap(@NonNull Map<String, String> record) {
+        String url = record.get("url");
+        if ("CURRENT_PLAYLIST".equals(url)) {
+            url = "";
+        }
+
+        return Alarm.builder()
+                .id(record.get("id"))
+                .name("")  // Alarms have no name
+                .dow(dowFromString(record.get("dow")))
+                .enabled(Util.parseDecimalIntOrZero(record.get("enabled")) == 1)
+                .repeat(Util.parseDecimalIntOrZero(record.get("repeat")) == 1)
+                .tod(Util.parseDecimalIntOrZero(record.get("time")))
+                .url(url)
+                .build();
     }
 
-    private String url;
-    public String getUrl() {
-        return url;
-    }
-    public void setUrl(String url) {
-        this.url = url;
-    }
+    /**
+     * Construct a bitset from the given string.
+     *
+     * @param dowString Comma-separated string of numbers in range [0-6].
+     */
+    @NonNull
+    @VisibleForTesting
+    static BitSet dowFromString(@NonNull String dowString) {
+        BitSet bits = new BitSet(7);
 
-    private Set<Integer> dow = new TreeSet<Integer>();
+        if ("".equals(dowString)) {
+            return bits;
+        }
 
-    private void setDow(String dowString) {
-        dow.clear();
-        String[] days = dowString.split(",");
+        final Iterable<String> days = Splitter.on(',')
+                .trimResults().omitEmptyStrings().split(dowString);
+
         for (String day : days) {
-            dow.add(Util.parseDecimalIntOrZero(day));
-        }
-    }
-
-    public boolean isDayActive(int day) {
-        return dow.contains(day);
-    }
-
-    public void setDay(int day) {
-        dow.add(day);
-    }
-
-    public void clearDay(int day) {
-        dow.remove(day);
-    }
-
-    private String serializeDow() {
-        StringBuilder sb = new StringBuilder();
-        for (int day : dow) {
-            if (sb.length() == 0) sb.append(',');
-            sb.append(day);
-        }
-        return sb.toString();
-    }
-
-    public static final Creator<Alarm> CREATOR = new Creator<Alarm>() {
-        public Alarm[] newArray(int size) {
-            return new Alarm[size];
+            int i = Util.parseDecimalIntOrZero(day);
+            if (i <= 6) {
+                bits.set(i, true);
+            }
         }
 
-        public Alarm createFromParcel(Parcel source) {
-            return new Alarm(source);
+        return bits;
+    }
+
+    public boolean isDayActive(@IntRange(from=0,to=6) int day) {
+        if (day < 0 || day > 6) {
+            Util.crashlyticsLog(Log.ERROR, "Alarm", "isDayActive(): day out of range: " + day);
+            return false;
         }
-    };
-
-    private Alarm(Parcel source) {
-        setId(source.readString());
-        tod = source.readInt();
-        setDow(source.readString());
-        enabled = (source.readInt() != 0);
-        repeat = (source.readInt() != 0);
-        url = source.readString();
+        return dow().get(day);
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeInt(tod);
-        dest.writeString(serializeDow());
-        dest.writeInt(enabled ? 1 : 0);
-        dest.writeInt(repeat ? 1 : 0);
-        dest.writeString(url);
+    /**
+     * Return a copy of the alarm with the additional day set.
+     *
+     * @param day The day to set, 0=Sunday, 6=Saturday.
+     * @return a new Alarm.
+     */
+    @CheckResult
+    public Alarm setDay(@IntRange(from=0,to=6) int day) {
+        if (day < 0 || day > 6) {
+            Util.crashlyticsLog(Log.ERROR, "Alarm", "isDayActive(): day out of range: " + day);
+            return toBuilder().build();
+        }
+        BitSet bits = dow().get(0, 7);  // Copy, so next .set() doesn't modify this object.
+        bits.set(day, true);
+        return toBuilder().dow(bits).build();
     }
 
-    @Override
-    public String toString() {
-        return "id=" + getId() + ", tod=" + getName();
+    /**
+     * Return a copy of the alarm with given day cleared.
+     *
+     * @param day The day to set, 0=Sunday, 6=Saturday.
+     * @return a new Alarm.
+     */
+    @CheckResult
+    public Alarm clearDay(@IntRange(from=0,to=6) int day) {
+        if (day < 0 || day > 6) {
+            Util.crashlyticsLog(Log.ERROR, "Alarm", "isDayActive(): day out of range: " + day);
+            return toBuilder().build();
+        }
+        BitSet bits = dow().get(0, 7);  // Copy, so next .set() doesn't modify this object.
+        bits.set(day, false);
+        return toBuilder().dow(bits).build();
     }
 
+    @CheckResult
+    public abstract Alarm withEnabled(boolean enabled);
+
+    @CheckResult
+    public abstract Alarm withRepeat(boolean repeat);
+
+    @CheckResult
+    public abstract Alarm withUrl(String url);
+
+    @CheckResult
+    public abstract Alarm withTod(int tod);
 }

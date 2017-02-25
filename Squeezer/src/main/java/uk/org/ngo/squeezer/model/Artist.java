@@ -16,69 +16,48 @@
 
 package uk.org.ngo.squeezer.model;
 
-import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
+
+import com.google.auto.value.AutoValue;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
 import uk.org.ngo.squeezer.framework.PlaylistItem;
 
 
-public class Artist extends PlaylistItem {
-
+@AutoValue
+public abstract class Artist extends PlaylistItem implements Parcelable {
+    @NonNull
     @Override
-    public String getPlaylistTag() {
+    public String playlistTag() {
         return "artist_id";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "artist_id";
     }
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
+    @NonNull
+    @Contract("_, _ -> !null")
+    public static Artist create(@NonNull String id, @NonNull String name) {
+        return new AutoValue_Artist(id, name);
     }
 
-    public Artist setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public Artist(String artistId, String artist) {
-        setId(artistId);
-        setName(artist);
-    }
-
-    public Artist(Map<String, String> record) {
-        setId(record.containsKey("contributor_id") ? record.get("contributor_id")
-                : record.get("id"));
-        name = record.containsKey("contributor") ? record.get("contributor") : record.get("artist");
-    }
-
-    public static final Creator<Artist> CREATOR = new Creator<Artist>() {
-        @Override
-        public Artist[] newArray(int size) {
-            return new Artist[size];
-        }
-
-        @Override
-        public Artist createFromParcel(Parcel source) {
-            return new Artist(source);
-        }
-    };
-
-    private Artist(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
+    @Contract("_ -> !null")
+    public static Artist fromMap(@NonNull Map<String, String> record) {
+        return new AutoValue_Artist(
+                record.containsKey("contributor_id") ? record.get("contributor_id")
+                        : record.get("id"),
+                record.containsKey("contributor") ? record.get("contributor") : record.get("artist"));
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
+    public String intentExtraKey() {
+        return Artist.class.getName();
     }
-
 }

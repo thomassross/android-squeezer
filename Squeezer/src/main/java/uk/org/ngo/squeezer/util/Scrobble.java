@@ -11,6 +11,8 @@ import uk.org.ngo.squeezer.Squeezer;
 import uk.org.ngo.squeezer.model.PlayerState;
 import uk.org.ngo.squeezer.model.Song;
 
+import static uk.org.ngo.squeezer.model.PlayerState.PLAY_STATE_UNKNOWN;
+
 public class Scrobble {
 
     public static boolean haveScrobbleDroid() {
@@ -39,10 +41,10 @@ public class Scrobble {
         if (playerState == null || !Scrobble.canScrobble())
             return;
 
-        @PlayerState.PlayState String playStatus = playerState.getPlayStatus();
-        Song currentSong = playerState.getCurrentSong();
+        @PlayerState.PlayState String playStatus = playerState.playStatus();
+        Song currentSong = playerState.currentSong();
 
-        if (playStatus == null || currentSong == null)
+        if (playStatus.equals(PLAY_STATE_UNKNOWN) || currentSong == null)
             return;
 
         Log.d("Scrobble", "Scrobbling, playing is: " + (PlayerState.PLAY_STATE_PLAY.equals(playStatus)));
@@ -54,19 +56,19 @@ public class Scrobble {
             i.putExtra("state", PlayerState.PLAY_STATE_PLAY.equals(playStatus) ? 0 : 2);
             i.putExtra("app-name", context.getText(R.string.app_name));
             i.putExtra("app-package", "uk.org.ngo.squeezer");
-            i.putExtra("track", currentSong.getName());
-            i.putExtra("album", currentSong.getAlbumName());
-            i.putExtra("artist", currentSong.getArtist());
-            i.putExtra("duration", currentSong.getDuration());
+            i.putExtra("track", currentSong.name());
+            i.putExtra("album", currentSong.albumName());
+            i.putExtra("artist", currentSong.artist());
+            i.putExtra("duration", currentSong.duration());
             i.putExtra("source", "P");
         } else if (Scrobble.haveScrobbleDroid()) {
             // http://code.google.com/p/scrobbledroid/wiki/DeveloperAPI
             i.setAction("net.jjc1138.android.scrobbler.action.MUSIC_STATUS");
             i.putExtra("playing", PlayerState.PLAY_STATE_PLAY.equals(playStatus));
-            i.putExtra("track", currentSong.getName());
-            i.putExtra("album", currentSong.getAlbumName());
-            i.putExtra("artist", currentSong.getArtist());
-            i.putExtra("secs", currentSong.getDuration());
+            i.putExtra("track", currentSong.name());
+            i.putExtra("album", currentSong.albumName());
+            i.putExtra("artist", currentSong.artist());
+            i.putExtra("secs", currentSong.duration());
             i.putExtra("source", "P");
         }
         context.sendBroadcast(i);

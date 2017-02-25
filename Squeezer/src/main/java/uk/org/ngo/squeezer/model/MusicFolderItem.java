@@ -17,10 +17,13 @@
 package uk.org.ngo.squeezer.model;
 
 import android.net.Uri;
-import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Map;
 
@@ -31,120 +34,56 @@ import uk.org.ngo.squeezer.framework.PlaylistItem;
  * <p>
  * An item has a name and a type. The name is free text, the type may be one of "track", "folder",
  * "playlist", or "unknown".
- *
- * @author nik
  */
-public class MusicFolderItem extends PlaylistItem {
+@AutoValue
+public abstract class MusicFolderItem extends PlaylistItem implements Parcelable {
 
+    @NonNull
     @Override
-    public String getPlaylistTag() {
-        if ("track".equals(type)) {
+    public String playlistTag() {
+        if ("track".equals(type())) {
             return "track_id";
         }
 
-        if ("playlist".equals(type)) {
+        if ("playlist".equals(type())) {
             return "playlist_id";
         }
 
-        if ("folder".equals(type)) {
+        if ("folder".equals(type())) {
             return "folder_id";
         }
 
-        return "Unknown_type_in_getTag()";
+        return "Unknown_type_in_playlistTag()";
     }
 
+    @NonNull
     @Override
-    public String getFilterTag() {
+    public String filterTag() {
         return "folder_id";
     }
 
-    private String name;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public MusicFolderItem setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * The folder item's type, "track", "folder", "playlist", "unknown".
-     */
-    // XXX: Should be an enum.
-    private String type;
-
-    public String getType() {
-        return type;
-    }
-
-    public MusicFolderItem setType(String type) {
-        this.type = type;
-        return this;
-    }
+    /** tag="type", the folder item's type, "track", "folder", "playlist", "unknown". */
+    public abstract String type();
 
     @NonNull
-    private Uri url = Uri.EMPTY;
+    public abstract Uri url();
 
+    /** tag="download_url", the URL to use to download the song. */
     @NonNull
-    public Uri getUrl() {
-        return url;
-    }
+    public abstract Uri downloadUrl();
 
-    public void setUrl(@NonNull Uri url) {
-        this.url = url;
-    }
-
-    /** The URL to use to download the song. */
-    @NonNull
-    private Uri mDownloadUrl = Uri.EMPTY;
-
-    @NonNull
-    public Uri getDownloadUrl() {
-        return mDownloadUrl;
-    }
-
-    public MusicFolderItem(Map<String, String> record) {
-        setId(record.get("id"));
-        name = record.get("filename");
-        type = record.get("type");
-        url = Uri.parse(Strings.nullToEmpty(record.get("url")));
-        mDownloadUrl = Uri.parse(Strings.nullToEmpty(record.get("download_url")));
-    }
-
-    public static final Creator<MusicFolderItem> CREATOR = new Creator<MusicFolderItem>() {
-        @Override
-        public MusicFolderItem[] newArray(int size) {
-            return new MusicFolderItem[size];
-        }
-
-        @Override
-        public MusicFolderItem createFromParcel(Parcel source) {
-            return new MusicFolderItem(source);
-        }
-    };
-
-    private MusicFolderItem(Parcel source) {
-        setId(source.readString());
-        name = source.readString();
-        type = source.readString();
-        url = Uri.parse(source.readString());
-        mDownloadUrl = Uri.parse(source.readString());
+    @Contract("_ -> !null")
+    public static MusicFolderItem fromMap(@NonNull Map<String, String> record) {
+        return new AutoValue_MusicFolderItem(
+                record.get("id"),
+                record.get("filename"),
+                record.get("type"),
+                Uri.parse(Strings.nullToEmpty(record.get("url"))),
+                Uri.parse(Strings.nullToEmpty(record.get("download_url"))));
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getId());
-        dest.writeString(name);
-        dest.writeString(type);
-        dest.writeString(url.toString());
-        dest.writeString(mDownloadUrl.toString());
-    }
-
-    @Override
-    public String toStringOpen() {
-        return super.toStringOpen() + ", type: " + type;
+    public String intentExtraKey() {
+        return MusicFolderItem.class.getName();
     }
 }

@@ -63,11 +63,11 @@ public class PlayerView extends BaseItemView<Player> {
     @Override
     public void bindView(View view, Player item) {
         final PlayerListActivity activity = (PlayerListActivity) getActivity();
-        PlayerState playerState = activity.getPlayerState(item.getId());
+        PlayerState playerState = activity.getPlayerState(item.id());
         PlayerViewHolder viewHolder = (PlayerViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
-        viewHolder.icon.setImageResource(getModelIcon(item.getModel()));
+        viewHolder.text1.setText(item.name());
+        viewHolder.icon.setImageResource(getModelIcon(item.model()));
 
         if (viewHolder.volumeBar == null) {
             viewHolder.volumeBar = (SeekBar) view.findViewById(R.id.volume_slider);
@@ -77,17 +77,17 @@ public class PlayerView extends BaseItemView<Player> {
         viewHolder.volumeBar.setVisibility(playerState != null ? View.VISIBLE : View.GONE);
 
         if (playerState != null) {
-            if (playerState.isPoweredOn()) {
+            if (playerState.poweredOn()) {
                 Util.setAlpha(viewHolder.text1, 1.0f);
             } else {
                 Util.setAlpha(viewHolder.text1, 0.25f);
             }
 
-            viewHolder.volumeBar.setProgress(playerState.getCurrentVolume());
+            viewHolder.volumeBar.setProgress(playerState.currentVolume());
 
-            viewHolder.text2.setVisibility(playerState.getSleepDuration() > 0 ? View.VISIBLE : View.INVISIBLE);
+            viewHolder.text2.setVisibility(playerState.sleepDuration() > 0 ? View.VISIBLE : View.INVISIBLE);
             viewHolder.text2.setText(activity.getServerString(ServerString.SLEEPING_IN)
-                    + " " + Util.formatElapsedTime(playerState.getSleep()));
+                    + " " + Util.formatElapsedTime(playerState.sleep()));
         }
     }
 
@@ -108,17 +108,17 @@ public class PlayerView extends BaseItemView<Player> {
         menu.findItem(R.id.in_60_minutes).setTitle(String.format(xMinutes, "60"));
         menu.findItem(R.id.in_90_minutes).setTitle(String.format(xMinutes, "90"));
 
-        PlayerState playerState = activity.getPlayerState(menuInfo.item.getId());
+        PlayerState playerState = activity.getPlayerState(menuInfo.item.id());
         if (playerState != null) {
-            if (playerState.getSleepDuration() != 0) {
+            if (playerState.sleepDuration() != 0) {
                 MenuItem cancelSleepItem = menu.findItem(R.id.cancel_sleep);
                 cancelSleepItem.setTitle(activity.getServerString(ServerString.SLEEP_CANCEL));
                 cancelSleepItem.setVisible(true);
             }
 
-            Song currentSong = playerState.getCurrentSong();
+            Song currentSong = playerState.currentSong();
             boolean isPlaying = (playerState.isPlaying() && currentSong != null);
-            if (isPlaying && !currentSong.isRemote()) {
+            if (isPlaying && !currentSong.remote()) {
                 MenuItem sleepAtEndOfSongItem = menu.findItem(R.id.end_of_song);
                 sleepAtEndOfSongItem.setTitle(activity.getServerString(ServerString.SLEEP_AT_END_OF_SONG));
                 sleepAtEndOfSongItem.setVisible(true);
@@ -126,7 +126,7 @@ public class PlayerView extends BaseItemView<Player> {
 
             MenuItem togglePowerItem = menu.findItem(R.id.toggle_power);
             togglePowerItem.setTitle(
-                    activity.getString(playerState.isPoweredOn() ? R.string.menu_item_power_off
+                    activity.getString(playerState.poweredOn() ? R.string.menu_item_power_off
                             : R.string.menu_item_power_on));
             togglePowerItem.setVisible(true);
         }
@@ -173,16 +173,15 @@ public class PlayerView extends BaseItemView<Player> {
         Player currentPlayer = activity.getCurrentPlayer();
         switch (menuItem.getItemId()) {
             case R.id.end_of_song:
-                PlayerState playerState = activity.getPlayerState(currentPlayer.getId());
+                PlayerState playerState = activity.getPlayerState(currentPlayer.id());
                 if (playerState != null) {
-                    Song currentSong = playerState.getCurrentSong();
+                    Song currentSong = playerState.currentSong();
                     boolean isPlaying = (playerState.isPlaying() && currentSong != null);
-                    if (isPlaying && !currentSong.isRemote()) {
-                        int sleep = playerState.getCurrentSongDuration() - playerState.getCurrentTimeSecond() + 1;
+                    if (isPlaying && !currentSong.remote()) {
+                        int sleep = playerState.currentSongDuration() - playerState.currentTimeSecond() + 1;
                         if (sleep >= 0)
                             service.sleep(currentPlayer, sleep);
                     }
-
                 }
                 return true;
             case R.id.in_15_minutes:

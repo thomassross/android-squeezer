@@ -234,7 +234,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
         // Only include players that are connected to the server.
         ArrayList<Player> connectedPlayers = new ArrayList<>();
         for (Player player : event.players.values()) {
-            if (player.getConnected()) {
+            if (player.connected()) {
                 connectedPlayers.add(player);
             }
         }
@@ -248,7 +248,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
 
         Player newActivePlayer = getService().getActivePlayer();
         if (newActivePlayer != null && newActivePlayer.equals(mActivePlayer)
-                && mActivePlayer.getConnected() == newActivePlayer.getConnected()) {
+                && mActivePlayer.connected() == newActivePlayer.connected()) {
             return;
         }
 

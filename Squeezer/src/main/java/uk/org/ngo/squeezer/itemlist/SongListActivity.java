@@ -137,13 +137,13 @@ public class SongListActivity extends BaseListActivity<Song>
             TextView yearView = (TextView) findViewById(R.id.yearname);
             ImageView btnContextMenu = (ImageView) findViewById(R.id.context_menu);
 
-            albumView.setText(album.getName());
-            artistView.setText(album.getArtist());
-            if (album.getYear() != 0) {
-                yearView.setText(Integer.toString(album.getYear()));
+            albumView.setText(album.name());
+            artistView.setText(album.artist());
+            if (album.year() != 0) {
+                yearView.setText(Integer.toString(album.year()));
             }
 
-            Uri artworkUrl = album.getArtworkUrl();
+            Uri artworkUrl = album.artworkUrl();
 
             if (artworkUrl.equals(Uri.EMPTY)) {
                 artwork.setImageResource(R.drawable.icon_album_noart);
@@ -163,7 +163,7 @@ public class SongListActivity extends BaseListActivity<Song>
         if (artist != null) {
             TextView header = (TextView) findViewById(R.id.header);
             header.setVisibility(View.VISIBLE);
-            header.setText(getString(R.string.songs_by_header, artist.getName()));
+            header.setText(getString(R.string.songs_by_header, artist.name()));
         }
 
         // Adapter has been created (or restored from the fragment) by this point,
@@ -214,7 +214,7 @@ public class SongListActivity extends BaseListActivity<Song>
         // Set artwork that requires a service connection.
         if (album != null) {
             ImageView artwork = (ImageView) findViewById(R.id.album);
-            Uri artworkUrl = album.getArtworkUrl();
+            Uri artworkUrl = album.artworkUrl();
 
             if (artworkUrl.equals(Uri.EMPTY)) {
                 artwork.setImageResource(R.drawable.icon_album_noart);
@@ -239,7 +239,7 @@ public class SongListActivity extends BaseListActivity<Song>
     public static void show(Context context, Item... items) {
         final Intent intent = new Intent(context, SongListActivity.class);
         for (Item item : items) {
-            intent.putExtra(item.getClass().getName(), item);
+            intent.putExtra(item.intentExtraKey(), item);
         }
         context.startActivity(intent);
     }
@@ -384,9 +384,9 @@ public class SongListActivity extends BaseListActivity<Song>
         if (album == null && playlistItem != null) {
             getMenuInflater().inflate(R.menu.playmenu, menu);
             playButton = menu.findItem(R.id.play_now);
-            playButton.setTitle(getString(R.string.PLAY_ITEM, playlistItem.getName()));
+            playButton.setTitle(getString(R.string.PLAY_ITEM, playlistItem.name()));
             addButton = menu.findItem(R.id.add_to_playlist);
-            addButton.setTitle(getString(R.string.ADD_ITEM_TO_END, playlistItem.getName()));
+            addButton.setTitle(getString(R.string.ADD_ITEM_TO_END, playlistItem.name()));
         }
         return super.onCreateOptionsMenu(menu);
     }

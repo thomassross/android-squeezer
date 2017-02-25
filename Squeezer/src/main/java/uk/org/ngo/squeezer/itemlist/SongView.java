@@ -17,8 +17,6 @@
 package uk.org.ngo.squeezer.itemlist;
 
 
-import com.google.common.base.Strings;
-
 import android.support.annotation.IntDef;
 import android.view.ContextMenu;
 import android.view.View;
@@ -91,16 +89,16 @@ public class SongView extends PlaylistItemView<Song> {
     public void bindView(View view, Song item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
+        viewHolder.text1.setText(item.name());
 
         viewHolder.text2.setText(mJoiner.join(
-                (mDetails & DETAILS_TRACK_NO) > 0 ? item.getTrackNum() : null,
-                (mDetails & DETAILS_DURATION) > 0 ? formatElapsedTime(item.getDuration()) : null,
-                (mDetails & DETAILS_ARTIST) > 0 ? Strings.emptyToNull(item.getArtist()) : null,
-                (mDetails & DETAILS_ARTIST_IF_COMPILATION) > 0 && item.getCompilation() ?
-                        Strings.emptyToNull(item.getArtist()) : null,
-                (mDetails & DETAILS_ALBUM) > 0 ? Strings.emptyToNull(item.getAlbumName()) : null,
-                (mDetails & DETAILS_YEAR) > 0 ? item.getYear() : null
+                (mDetails & DETAILS_TRACK_NO) > 0 ? item.trackNum() : null,
+                (mDetails & DETAILS_DURATION) > 0 ? formatElapsedTime(item.duration()) : null,
+                (mDetails & DETAILS_ARTIST) > 0 ? item.artist() : null,
+                (mDetails & DETAILS_ARTIST_IF_COMPILATION) > 0 && item.compilation() ? item
+                        .artist() : null,
+                (mDetails & DETAILS_ALBUM) > 0 ? item.albumName() : null,
+                (mDetails & DETAILS_YEAR) > 0 ? item.year() : null
         ));
     }
 
@@ -137,15 +135,15 @@ public class SongView extends PlaylistItemView<Song> {
             menu.findItem(R.id.play_from_here).setVisible(true);
         }
 
-        if (!"".equals(song.getAlbumId()) && !hasAlbum()) {
+        if (!"".equals(song.albumId()) && !hasAlbum()) {
             menu.findItem(R.id.view_this_album).setVisible(true);
         }
 
-        if (!"".equals(song.getArtistId())) {
+        if (!"".equals(song.artistId())) {
             menu.findItem(R.id.view_albums_by_song).setVisible(true);
         }
 
-        if (!"".equals(song.getArtistId()) && !hasArtist()) {
+        if (!"".equals(song.artistId()) && !hasArtist()) {
             menu.findItem(R.id.view_songs_by_artist).setVisible(true);
         }
     }
@@ -158,18 +156,18 @@ public class SongView extends PlaylistItemView<Song> {
                 return true;
 
             case R.id.view_this_album:
-                SongListActivity.show(getActivity(), selectedItem.getAlbum());
+                SongListActivity.show(getActivity(), selectedItem.album());
                 return true;
 
             // XXX: Is this actually "view albums by artist"?
             case R.id.view_albums_by_song:
                 AlbumListActivity.show(getActivity(),
-                        new Artist(selectedItem.getArtistId(), selectedItem.getArtist()));
+                        Artist.create(selectedItem.artistId(), selectedItem.artist()));
                 return true;
 
             case R.id.view_songs_by_artist:
                 SongListActivity.show(getActivity(),
-                        new Artist(selectedItem.getArtistId(), selectedItem.getArtist()));
+                        Artist.create(selectedItem.artistId(), selectedItem.artist()));
                 return true;
         }
 

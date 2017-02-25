@@ -50,9 +50,9 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
     public void bindView(View view, MusicFolderItem item) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.text1.setText(item.getName());
+        viewHolder.text1.setText(item.name());
 
-        String type = item.getType();
+        String type = item.type();
         int icon_resource = R.drawable.ic_unknown;
 
         if ("folder".equals(type)) {
@@ -70,10 +70,10 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
 
     @Override
     public boolean isSelectable(MusicFolderItem item) {
-        if ("track".equals(item.getType())) {
+        if ("track".equals(item.type())) {
             return super.isSelectable(item);
         } else
-        if ("folder".equals(item.getType())) {
+        if ("folder".equals(item.type())) {
             return true;
         }
         return false;
@@ -81,10 +81,10 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
 
     @Override
     public void onItemSelected(int index, MusicFolderItem item) {
-        if ("track".equals(item.getType())) {
+        if ("track".equals(item.type())) {
             super.onItemSelected(index, item);
         } else
-        if ("folder".equals(item.getType())) {
+        if ("folder".equals(item.type())) {
             MusicFolderListActivity.show(getActivity(), item);
         }
     }
@@ -95,7 +95,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         MusicFolderItem item = (MusicFolderItem) menuInfo.item;
-        if ("folder".equals(item.getType())) {
+        if ("folder".equals(item.type())) {
             menu.add(Menu.NONE, R.id.browse_songs, Menu.NONE, R.string.BROWSE_SONGS);
         }
         menu.add(Menu.NONE, R.id.play_now, Menu.NONE, R.string.PLAY_NOW);
@@ -106,8 +106,8 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
         // them. At least one server seen in the wild does not, see the crash at
         // https://www.crashlytics.com/squeezer/android/apps/uk.org.ngo.squeezer/issues/5480783765f8dfea153f1e34/sessions/5480787e0060000179ac2a75b3a3f1e2
         // for an example.
-        if (("track".equals(item.getType()) || "folder".equals(item.getType()))
-                && (item.getUrl() != null)) {
+        if (("track".equals(item.type()) || "folder".equals(item.type()))
+                && (item.url() != null)) {
             menu.add(Menu.NONE, R.id.download, Menu.NONE, R.string.DOWNLOAD);
         }
     }
@@ -119,7 +119,7 @@ public class MusicFolderView extends PlaylistItemView<MusicFolderItem> {
                 MusicFolderListActivity.show(getActivity(), selectedItem);
                 return true;
             case R.id.download:
-                if ("track".equals(selectedItem.getType()) || "folder".equals(selectedItem.getType())) {
+                if ("track".equals(selectedItem.type()) || "folder".equals(selectedItem.type())) {
                     getActivity().downloadItem(selectedItem);
                 }
                 return true;
