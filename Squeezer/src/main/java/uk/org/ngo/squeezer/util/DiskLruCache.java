@@ -361,7 +361,7 @@ public final class DiskLruCache implements Closeable {
                     || !Integer.toString(valueCount).equals(valueCountString)
                     || !"".equals(blank)) {
                 throw new IOException("unexpected journal header: ["
-                        + magic + ", " + version + ", " + valueCountString + ", " + blank + "]");
+                        + magic + ", " + version + ", " + valueCountString + ", " + blank + ']');
             }
 
             while (true) {
@@ -730,7 +730,7 @@ public final class DiskLruCache implements Closeable {
     private void validateKey(@NonNull String key) {
         if (key.contains(" ") || key.contains("\n") || key.contains("\r")) {
             throw new IllegalArgumentException(
-                    "keys must not contain spaces or newlines: \"" + key + "\"");
+                    "keys must not contain spaces or newlines: \"" + key + '"');
         }
     }
 
@@ -964,12 +964,12 @@ public final class DiskLruCache implements Closeable {
 
         @NonNull
         public File getCleanFile(int i) {
-            return new File(directory, key + "." + i);
+            return new File(directory, key + '.' + i);
         }
 
         @NonNull
         public File getDirtyFile(int i) {
-            return new File(directory, key + "." + i + ".tmp");
+            return new File(directory, key + '.' + i + ".tmp");
         }
     }
 }

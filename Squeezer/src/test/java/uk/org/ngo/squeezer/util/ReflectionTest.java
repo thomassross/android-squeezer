@@ -251,7 +251,7 @@ public class ReflectionTest extends TestCase {
             sb.append(sb.length() > 0 ? "," : "[");
             sb.append(type);
         }
-        return sb.append("]").toString();
+        return sb.append(']').toString();
     }
 
     public void testGetGenericClass() {

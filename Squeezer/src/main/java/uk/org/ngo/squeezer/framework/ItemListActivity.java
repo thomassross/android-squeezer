@@ -194,7 +194,7 @@ public abstract class ItemListActivity extends BaseActivity {
      * @param size The number of items in this update
      */
     protected void onItemsReceived(final int count, final int start, int size) {
-        Log.d(getTag(), "onItemsReceived(" + count + ", " + start + ", " + size + ")");
+        Log.d(getTag(), "onItemsReceived(" + count + ", " + start + ", " + size + ')');
 
         // If this doesn't add any items, then don't register the page a received
         if (start < count && size != 0) {

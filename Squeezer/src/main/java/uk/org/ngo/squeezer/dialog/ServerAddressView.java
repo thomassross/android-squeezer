@@ -213,7 +213,7 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
 
         Preferences.ServerAddress serverAddress = new Preferences.ServerAddress();
         serverAddress.bssId = mBssId;
-        serverAddress.address = host + ":" + port;
+        serverAddress.address = host + ':' + port;
 
         mServerAddressEditText.setText(serverAddress.address);
         mUserNameEditText.setText(mPreferences.getUserName(serverAddress));

@@ -36,6 +36,6 @@ public class PlayersChanged {
     @NonNull
     @Override
     public String toString() {
-        return "{players: " + players + "}";
+        return "{players: " + players + '}';
     }
 }

@@ -94,7 +94,7 @@ public class DownloadDatabase {
 
         @Override
         public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
-            sqLiteDatabase.execSQL("CREATE TABLE " + DOWNLOAD_DATABASE.SONG.TABLE + "(" +
+            sqLiteDatabase.execSQL("CREATE TABLE " + DOWNLOAD_DATABASE.SONG.TABLE + '(' +
                     DOWNLOAD_DATABASE.SONG.COLUMNS.DOWNLOAD_ID + " INTEGER, " +
                     DOWNLOAD_DATABASE.SONG.COLUMNS.TEMP_NAME + " TEXT, " +
                     DOWNLOAD_DATABASE.SONG.COLUMNS.FILE_NAME + " TEXT, " +

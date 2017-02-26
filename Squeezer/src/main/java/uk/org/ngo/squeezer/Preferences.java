@@ -160,7 +160,7 @@ public final class Preferences {
         WifiInfo connectionInfo = mWifiManager.getConnectionInfo();
         serverAddress.bssId = (connectionInfo != null ? connectionInfo.getBSSID() : null);
         if (serverAddress.bssId != null)
-            serverAddress.address = getStringPreference(KEY_SERVER_ADDRESS + "_" + serverAddress.bssId, null);
+            serverAddress.address = getStringPreference(KEY_SERVER_ADDRESS + '_' + serverAddress.bssId, null);
         if (serverAddress.address == null)
             serverAddress.address = getStringPreference(KEY_SERVER_ADDRESS, null);
 
@@ -176,7 +176,7 @@ public final class Preferences {
         @NonNull
         @Override
         public String toString() {
-            return (bssId != null ? bssId + "_ " : "") + address + "_";
+            return (bssId != null ? bssId + "_ " : "") + address + '_';
         }
     }
 
@@ -188,7 +188,7 @@ public final class Preferences {
         String bssId = (connectionInfo != null ? connectionInfo.getBSSID() : null);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(bssId != null ? KEY_SERVER_ADDRESS + "_" + bssId : KEY_SERVER_ADDRESS, address);
+        editor.putString(bssId != null ? KEY_SERVER_ADDRESS + '_' + bssId : KEY_SERVER_ADDRESS, address);
         editor.commit();
 
         ServerAddress serverAddress = new ServerAddress();

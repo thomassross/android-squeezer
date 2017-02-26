@@ -152,8 +152,8 @@ public class AlbumListActivity extends BaseListActivity<Album>
                 } else if (AlbumViewDialog.AlbumsSortOrder.class.getName().equals(key)) {
                     sortOrder = AlbumViewDialog.AlbumsSortOrder.valueOf(extras.getString(key));
                 } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
+                    Log.e(getTag(), "Unexpected extra value: " + key + '('
+                            + extras.get(key).getClass().getName() + ')');
                 }
             }
         }

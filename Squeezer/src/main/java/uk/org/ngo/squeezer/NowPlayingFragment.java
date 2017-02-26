@@ -523,7 +523,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                                     .equals(mService.getActivePlayer())) {
                                 Log.i(TAG,
                                         "onNavigationItemSelected.setActivePlayer(" + playerAdapter
-                                                .getItem(position) + ")");
+                                                .getItem(position) + ')');
                                 mService.setActivePlayer(playerAdapter.getItem(position));
                                 updateUiFromPlayerState(mService.getActivePlayerState());
                             }

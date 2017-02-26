@@ -329,7 +329,7 @@ public class ConnectionState {
 
         final int port = Util.parsePort(hostPort);
         final String host = Util.parseHost(hostPort);
-        final String cleanHostPort = host + ":" + port;
+        final String cleanHostPort = host + ':' + port;
 
         currentHost.set(host);
         cliPort.set(port);
@@ -393,7 +393,7 @@ public class ConnectionState {
      */
     void onCliPortConnectionEstablished(@NonNull final EventBus eventBus, @NonNull final CliClient cli, final String userName, final String password) {
         setConnectionState(eventBus, ConnectionState.LOGIN_STARTED);
-        cli.sendCommandImmediately("login " + Util.encode(userName) + " " + Util.encode(password));
+        cli.sendCommandImmediately("login " + Util.encode(userName) + ' ' + Util.encode(password));
     }
 
 

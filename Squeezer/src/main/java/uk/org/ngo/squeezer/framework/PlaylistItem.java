@@ -42,12 +42,12 @@ public abstract class PlaylistItem extends Item implements FilterItem {
      */
     @NonNull
     public String getPlaylistParameter() {
-        return getPlaylistTag() + ":" + getId();
+        return getPlaylistTag() + ':' + getId();
     }
 
     @NonNull
     @Override
     public String getFilterParameter() {
-        return getFilterTag() + ":" + getId();
+        return getFilterTag() + ':' + getId();
     }
 }

@@ -146,7 +146,7 @@ public class ImageCache {
         // Set up memory cache
         if (mCacheParams.memoryCacheEnabled) {
             if (BuildConfig.DEBUG) {
-                Log.d(TAG, "Memory cache created (size = " + mCacheParams.memCacheSize + ")");
+                Log.d(TAG, "Memory cache created (size = " + mCacheParams.memCacheSize + ')');
             }
             mMemoryCache = new LruCache<String, Bitmap>(mCacheParams.memCacheSize) {
                 @Override

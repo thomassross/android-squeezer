@@ -111,7 +111,7 @@ public class PlaylistsActivity extends BaseListActivity<Playlist> {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
-        Log.d(getTag(), "onActivityResult(" + requestCode + "," + resultCode + ",'" + data + "')");
+        Log.d(getTag(), "onActivityResult(" + requestCode + ',' + resultCode + ",'" + data + "')");
         if (requestCode == PLAYLIST_SONGS_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data.getBooleanExtra(PLAYLIST_RENAMED, false)) {
                 currentPlaylist = data.getParcelableExtra(CURRENT_PLAYLIST);

@@ -97,8 +97,8 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
                 } else if (Genre.class.getName().equals(key)) {
                     genre = extras.getParcelable(key);
                 } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
+                    Log.e(getTag(), "Unexpected extra value: " + key + '('
+                            + extras.get(key).getClass().getName() + ')');
                 }
             }
         }

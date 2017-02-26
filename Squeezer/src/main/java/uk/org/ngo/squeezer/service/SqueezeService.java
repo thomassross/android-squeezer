@@ -450,7 +450,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
                     Log.v(TAG, "Clearing " + Preferences.KEY_LAST_PLAYER);
                     editor.remove(Preferences.KEY_LAST_PLAYER);
                 } else {
-                    Log.v(TAG, "Saving " + Preferences.KEY_LAST_PLAYER + "=" + newActivePlayer.getId());
+                    Log.v(TAG, "Saving " + Preferences.KEY_LAST_PLAYER + '=' + newActivePlayer.getId());
                     editor.putString(Preferences.KEY_LAST_PLAYER, newActivePlayer.getId());
                 }
 
@@ -855,7 +855,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
             DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             DownloadDatabase downloadDatabase = new DownloadDatabase(this);
             String tempFile = UUID.randomUUID().toString();
-            String credentials = mUsername + ":" + mPassword;
+            String credentials = mUsername + ':' + mPassword;
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             DownloadManager.Request request = new DownloadManager.Request(url)
                     .setTitle(title)
@@ -1167,7 +1167,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
         @Override
         public void playerPref(@Player.Pref.Name String playerPref, String value) {
-            sendActivePlayerCommand("playerpref " + playerPref + " " + value);
+            sendActivePlayerCommand("playerpref " + playerPref + ' ' + value);
         }
 
         @Override
@@ -1343,7 +1343,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
             }
 
             sendActivePlayerCommand(
-                    "playlistcontrol cmd:" + cmd + " " + playlistItem.getPlaylistParameter() + " play_index:" + index);
+                    "playlistcontrol cmd:" + cmd + ' ' + playlistItem.getPlaylistParameter() + " play_index:" + index);
             return true;
         }
 
@@ -1384,7 +1384,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
             if (!isConnected()) {
                 return false;
             }
-            sendActivePlayerCommand("playlist move " + fromIndex + " " + toIndex);
+            sendActivePlayerCommand("playlist move " + fromIndex + ' ' + toIndex);
             return true;
         }
 

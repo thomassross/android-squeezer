@@ -136,7 +136,7 @@ public class Util {
         if (hostPort == null) {
             return "";
         }
-        int colonPos = hostPort.indexOf(":");
+        int colonPos = hostPort.indexOf(':');
         if (colonPos == -1) {
             return hostPort;
         }
@@ -147,7 +147,7 @@ public class Util {
         if (hostPort == null) {
             return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
         }
-        int colonPos = hostPort.indexOf(":");
+        int colonPos = hostPort.indexOf(':');
         if (colonPos == -1) {
             return Squeezer.getContext().getResources().getInteger(R.integer.DefaultPort);
         }

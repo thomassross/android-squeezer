@@ -201,8 +201,8 @@ public class SongListActivity extends BaseListActivity<Song>
                     genre = extras.getParcelable(key);
                     sortOrder = SongViewDialog.SongsSortOrder.albumtrack;
                 } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
+                    Log.e(getTag(), "Unexpected extra value: " + key + '('
+                            + extras.get(key).getClass().getName() + ')');
                 }
             }
         }

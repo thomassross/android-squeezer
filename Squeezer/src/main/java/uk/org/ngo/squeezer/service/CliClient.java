@@ -443,7 +443,7 @@ class CliClient implements IClient {
      */
     @Override
     public void sendPlayerCommand(final Player player, final String command) {
-        sendCommand(Util.encode(player.getId()) + " " + command);
+        sendCommand(Util.encode(player.getId()) + ' ' + command);
     }
 
     /**
@@ -465,7 +465,7 @@ class CliClient implements IClient {
     public void cancelClientRequests(Object client) {
         for (Map.Entry<Integer, IServiceItemListCallback> entry : pendingRequests.entrySet()) {
             if (entry.getValue().getClient() == client) {
-                Log.i(TAG, "cancel request: [" + entry.getKey() + ";" + entry.getValue() +"]");
+                Log.i(TAG, "cancel request: [" + entry.getKey() + ';' + entry.getValue() + ']');
                 pendingRequests.remove(entry.getKey());
             }
         }
@@ -487,13 +487,13 @@ class CliClient implements IClient {
      */
     private void internalRequestItems(String playerId, String cmd, int start, int pageSize, List<String> parameters, IServiceItemListCallback callback) {
         pendingRequests.put(_correlationid, callback);
-        final StringBuilder sb = new StringBuilder(cmd + " " + start + " " + pageSize);
+        final StringBuilder sb = new StringBuilder(cmd + ' ' + start + ' ' + pageSize);
         if (playerId != null) {
-            sb.insert(0, Util.encode(playerId) + " ");
+            sb.insert(0, Util.encode(playerId) + ' ');
         }
         if (parameters != null) {
             for (String parameter : parameters) {
-                sb.append(" ").append(Util.encode(parameter));
+                sb.append(' ').append(Util.encode(parameter));
             }
         }
         sb.append(" correlationid:");
@@ -632,8 +632,8 @@ class CliClient implements IClient {
 
         final int ofs = mSpaceSplitPattern.split(cmd.cmd).length + (cmd.playerSpecific ? 1 : 0) + (cmd.prefixed ? 1 : 0);
         int actionsCount = 0;
-        final String playerid = (cmd.playerSpecific ? tokens.get(0) + " " : "");
-        final String prefix = (cmd.prefixed ? tokens.get(cmd.playerSpecific ? 1 : 0) + " " : "");
+        final String playerid = (cmd.playerSpecific ? tokens.get(0) + ' ' : "");
+        final String prefix = (cmd.prefixed ? tokens.get(cmd.playerSpecific ? 1 : 0) + ' ' : "");
         final int start = Util.parseDecimalIntOrZero(tokens.get(ofs));
         final int itemsPerResponse = Util.parseDecimalIntOrZero(tokens.get(ofs + 1));
 
@@ -658,7 +658,7 @@ class CliClient implements IClient {
             String token = tokens.get(idx);
             int colonPos = token.indexOf("%3A");
             if (colonPos == -1) {
-                Log.e(TAG, "Expected colon in list token. '" + token + "'");
+                Log.e(TAG, "Expected colon in list token. '" + token + '\'');
                 return;
             }
             String key = Util.decode(token.substring(0, colonPos));
@@ -729,12 +729,12 @@ class CliClient implements IClient {
                 cmdline.append(playerid);
                 cmdline.append(prefix);
                 cmdline.append(cmd.cmd);
-                cmdline.append(" ");
+                cmdline.append(' ');
                 cmdline.append(end);
-                cmdline.append(" ");
+                cmdline.append(' ');
                 cmdline.append(count);
                 for (String parameter : taggedParameters.values()) {
-                    cmdline.append(" ").append(parameter);
+                    cmdline.append(' ').append(parameter);
                 }
                 sendCommandImmediately(cmdline.toString());
             } else
@@ -815,7 +815,7 @@ class CliClient implements IClient {
 
         // If artworkUrl is non-null it must be relative. Canonicalise it and return.
         if (artworkUrl != null) {
-            record.put("artwork_url", mUrlPrefix + "/" + artworkUrl);
+            record.put("artwork_url", mUrlPrefix + '/' + artworkUrl);
             return;
         }
 
@@ -860,7 +860,7 @@ class CliClient implements IClient {
             return;
         }
 
-        record.put(imageTag, mUrlPrefix + (image.startsWith("/") ? image : "/" + image));
+        record.put(imageTag, mUrlPrefix + (image.startsWith("/") ? image : '/' + image));
     }
 
     // Shims around ConnectionState methods.
@@ -1017,7 +1017,7 @@ class CliClient implements IClient {
             @Override
             public void handle(List<String> tokens) {
                 Log.i(TAG, "Version received: " + tokens);
-                mUrlPrefix = "http://" + getCurrentHost() + ":" + getHttpPort();
+                mUrlPrefix = "http://" + getCurrentHost() + ':' + getHttpPort();
                 String version = tokens.get(1);
                 connectionState.setServerVersion(version);
                 Util.crashlyticsSetString("server_version", version);

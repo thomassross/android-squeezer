@@ -89,7 +89,7 @@ public class PlayerView extends BaseItemView<Player> {
 
             viewHolder.text2.setVisibility(playerState.getSleepDuration() > 0 ? View.VISIBLE : View.INVISIBLE);
             viewHolder.text2.setText(activity.getServerString(ServerString.SLEEPING_IN)
-                    + " " + Util.formatElapsedTime(playerState.getSleep()));
+                    + ' ' + Util.formatElapsedTime(playerState.getSleep()));
         }
     }
 
