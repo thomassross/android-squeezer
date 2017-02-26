@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -137,6 +138,7 @@ public class Alarm extends Item {
         dest.writeString(url);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "id=" + getId() + ", tod=" + getName();

@@ -353,7 +353,7 @@ public abstract class ImageWorker {
      *
      * @param imageCache
      */
-    public void setImageCache(ImageCache imageCache) {
+    public void setImageCache(@NonNull ImageCache imageCache) {
         mImageCache = imageCache;
     }
 

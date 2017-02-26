@@ -262,7 +262,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
     }
 
     @Override
-    @NonNull
+    @Nullable
     public Player getPlayer() {
         return mActivePlayer;
     }

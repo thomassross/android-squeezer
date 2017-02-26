@@ -17,6 +17,7 @@
 package uk.org.ngo.squeezer.model;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -83,6 +84,7 @@ public class AlarmPlaylist extends Item {
         dest.writeInt(singleton ? 1 : 0);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "url=" + getId() + ", title=" + title;

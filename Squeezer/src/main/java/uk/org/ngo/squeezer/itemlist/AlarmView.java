@@ -89,7 +89,7 @@ public class AlarmView extends BaseItemView<Alarm> {
     }
 
     @Override
-    public View getAdapterView(View convertView, ViewGroup parent, int position, Alarm item) {
+    public View getAdapterView(View convertView, ViewGroup parent, int position, @NonNull Alarm item) {
         View view = getAdapterView(convertView, parent);
         bindView((AlarmViewHolder) view.getTag(), position, item);
         return view;
@@ -266,7 +266,7 @@ public class AlarmView extends BaseItemView<Alarm> {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View v, @NonNull ContextMenuInfo menuInfo) {
     }
 
     // Require an immutable list so that caller's can't modify it when this method iterates
@@ -357,13 +357,14 @@ public class AlarmView extends BaseItemView<Alarm> {
             return (mAlarmPlaylists.get(position).getId() != null);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
            return Util.getSpinnerItemView(getActivity(), convertView, parent, getItem(position).getName());
         }
 
         @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
             if (!isEnabled(position)) {
                 FrameLayout view = (FrameLayout) getActivity().getLayoutInflater().inflate(R.layout.alarm_playlist_category_dropdown_item, parent, false);
                 CheckedTextView spinnerItemView = (CheckedTextView) view.findViewById(R.id.text);

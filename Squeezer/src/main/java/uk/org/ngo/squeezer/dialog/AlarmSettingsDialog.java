@@ -22,6 +22,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog.Builder;
 import android.view.View;
@@ -46,9 +47,10 @@ public class AlarmSettingsDialog extends DialogFragment {
     /** Activities that host this dialog must implement this interface. */
     public interface HostActivity {
         /**
-         * @return The current player.
+         * @return The current player. Maybe null if the current player disappeared while
+         * the dialog is open.
          */
-        @NonNull
+        @Nullable
         Player getPlayer();
 
         /**
