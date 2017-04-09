@@ -15,101 +15,102 @@
    limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="first_preferencescreen">
 
-    <PreferenceCategory
+    <android.support.v7.preference.PreferenceCategory
         android:title="@string/pref_cat_server">
 
-        <uk.org.ngo.squeezer.dialog.ServerAddressPreference
-            android:key="squeezer.serveraddr"
-            android:dialogLayout="@layout/server_address_dialog"
-            android:title="@string/settings_serveraddr_title"
-            android:summary="@string/settings_serveraddr_summary"
-            android:dialogMessage="@string/settings_serveraddr_summary"
-            android:persistent="false"/>
-    </PreferenceCategory>
+        <!--<uk.org.ngo.squeezer.dialog.ServerAddressPreference-->
+            <!--android:key="squeezer.serveraddr"-->
+            <!--android:dialogLayout="@layout/server_address_dialog"-->
+            <!--android:title="@string/settings_serveraddr_title"-->
+            <!--android:summary="@string/settings_serveraddr_summary"-->
+            <!--android:dialogMessage="@string/settings_serveraddr_summary"-->
+            <!--android:persistent="false"/>-->
+    </android.support.v7.preference.PreferenceCategory>
 
-    <uk.org.ngo.squeezer.IntEditTextPreference
-        android:key="squeezer.fadeInSecs"
-        android:title="@string/settings_fadeinsecs_title"
-        android:dialogMessage="@string/settings_fadeinsecs_summary"
-        android:persistent="true"/>
+    <!--<uk.org.ngo.squeezer.IntEditTextPreference-->
+        <!--android:key="squeezer.fadeInSecs"-->
+        <!--android:title="@string/settings_fadeinsecs_title"-->
+        <!--android:dialogMessage="@string/settings_fadeinsecs_summary"-->
+        <!--android:persistent="true"/>-->
 
-    <CheckBoxPreference
+    <android.support.v7.preference.CheckBoxPreference
         android:key="squeezer.autoconnect"
         android:title="@string/settings_autoconnect_title"
         android:summary="@string/settings_autoconnect_summary"
         android:persistent="true"/>
 
-    <PreferenceCategory
+    <android.support.v7.preference.PreferenceCategory
         android:title="@string/pref_cat_third_party">
 
-        <CheckBoxPreference
+        <android.support.v7.preference.CheckBoxPreference
             android:key="squeezer.scrobble.enabled"
             android:persistent="true"
             android:summaryOff="@string/settings_scrobble_off"
             android:summaryOn="@string/settings_scrobble_on"
             android:title="@string/settings_scrobble_title"/>
 
-        <CheckBoxPreference
+        <android.support.v7.preference.CheckBoxPreference
             android:key="squeezer.squeezeplayer.enabled"
             android:persistent="true"
             android:summary="@string/settings_squeezeplayer_summary"
             android:title="@string/settings_squeezeplayer_title"/>
-    </PreferenceCategory>
+    </android.support.v7.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <android.support.v7.preference.PreferenceCategory
         android:title="@string/settings_category_ui">
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.notification_type"
             android:title="@string/settings_notification_type_title"
             android:entries="@array/notification_type"
             android:entryValues="@array/notification_type_value"/>
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.action.onselect.album"
             android:title="@string/settings_album_selectaction"/>
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.action.onselect.song"
             android:title="@string/settings_song_selectaction"/>
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.theme"
             android:title="@string/settings_theme_title"/>
-    </PreferenceCategory>
+    </android.support.v7.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <android.support.v7.preference.PreferenceCategory
         android:key="squeezer.download.category"
         android:title="@string/settings_category_download">
 
-        <PreferenceScreen
+        <android.support.v7.preference.PreferenceScreen
             android:key="squeezer.download.use_sd_card.screen"
             android:title="@string/settings_download_use_sd_card"
             >
-        <CheckBoxPreference
+        <android.support.v7.preference.CheckBoxPreference
             android:key="squeezer.download.use_sd_card"
             android:summary="@string/settings_download_use_sd_card_desc"
             />
-        </PreferenceScreen>
+        </android.support.v7.preference.PreferenceScreen>
 
-        <CheckBoxPreference
+        <android.support.v7.preference.CheckBoxPreference
             android:key="squeezer.download.use_server_path"
             android:title="@string/settings_download_use_server_path"/>
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.download.path_structure"
             android:title="@string/settings_download_path_structure"/>
 
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:key="squeezer.download.filename_structure"
             android:title="@string/settings_download_filename_structure"/>
 
-    </PreferenceCategory>
+    </android.support.v7.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <android.support.v7.preference.PreferenceCategory
         android:title="@string/pref_cat_error_reports">
 
         <CheckBoxPreference android:key="squeezer.analytics.enabled"
@@ -117,5 +118,5 @@
             android:summaryOn="@string/pref_analytics_enable_enabled"
             android:summaryOff="@string/pref_analytics_enable_disabled"
             android:defaultValue="true"/>
-    </PreferenceCategory>
-</PreferenceScreen>
+    </android.support.v7.preference.PreferenceCategory>
+</android.support.v7.preference.PreferenceScreen>

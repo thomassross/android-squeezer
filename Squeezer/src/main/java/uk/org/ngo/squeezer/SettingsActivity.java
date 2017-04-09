@@ -22,41 +22,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
-import android.text.Html;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.ListPreference;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
-import uk.org.ngo.squeezer.download.DownloadFilenameStructure;
-import uk.org.ngo.squeezer.download.DownloadStorage;
-import uk.org.ngo.squeezer.framework.EnumWithText;
-import uk.org.ngo.squeezer.download.DownloadPathStructure;
-import uk.org.ngo.squeezer.itemlist.action.PlayableItemAction;
 import uk.org.ngo.squeezer.service.ISqueezeService;
-import uk.org.ngo.squeezer.service.SqueezeService;
-import uk.org.ngo.squeezer.util.Scrobble;
 import uk.org.ngo.squeezer.util.ThemeManager;
 
-public class SettingsActivity extends PreferenceActivity implements
-        OnPreferenceChangeListener, OnSharedPreferenceChangeListener {
+public class SettingsActivity extends AppCompatActivity { /*implements
+        OnPreferenceChangeListener, OnSharedPreferenceChangeListener {*/
 
     private final String TAG = "SettingsActivity";
 
@@ -64,7 +45,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
     private ISqueezeService service = null;
 
-    private Preference addressPref;
+    private android.support.v7.preference.Preference addressPref;
 
     private IntEditTextPreference fadeInPref;
 
@@ -83,7 +64,13 @@ public class SettingsActivity extends PreferenceActivity implements
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.settings_activity);
+    }
+/*
+    @Override
+    protected void onCreate2(Bundle savedInstanceState) {
         mThemeManager.onCreate(this);
         super.onCreate(savedInstanceState);
 
@@ -297,7 +284,7 @@ public class SettingsActivity extends PreferenceActivity implements
                     .getQuantityString(R.plurals.seconds, fadeInSeconds));
         }
     }
-
+*/
     /**
      * Explicitly set the preference's summary based on the value for the selected item.
      * <p>
@@ -318,63 +305,63 @@ public class SettingsActivity extends PreferenceActivity implements
     /**
      * A preference has been changed by the user, but has not yet been persisted.
      */
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        final String key = preference.getKey();
-        Log.v(TAG, "preference change for: " + key);
-
-        if (Preferences.KEY_FADE_IN_SECS.equals(key)) {
-            updateFadeInSecondsSummary(Util.parseDecimalIntOrZero(newValue.toString()));
-        }
-
-        if (Preferences.KEY_NOTIFICATION_TYPE.equals(key) ||
-                Preferences.KEY_ON_SELECT_ALBUM_ACTION.equals(key) ||
-                Preferences.KEY_ON_SELECT_SONG_ACTION.equals(key) ||
-                Preferences.KEY_ON_THEME_SELECT_ACTION.equals(key) ||
-                Preferences.KEY_DOWNLOAD_PATH_STRUCTURE.equals(key) ||
-                Preferences.KEY_DOWNLOAD_FILENAME_STRUCTURE.equals(key)) {
-            updateListPreferenceSummary((ListPreference) preference, (String) newValue);
-        }
-
-        // If the user has enabled Scrobbling but we don't think it will work
-        // pop up a dialog with links to Google Play for apps to install.
-        if (Preferences.KEY_SCROBBLE_ENABLED.equals(key)) {
-            if (newValue.equals(true) && !Scrobble.canScrobble()) {
-                showDialog(DIALOG_SCROBBLE_APPS);
-
-                // User hit back, or similar (or maybe went to install an
-                // app). Check again to see if scrobbling will work.
-                if (!Scrobble.canScrobble()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
+//    @Override
+//    public boolean onPreferenceChange(Preference preference, Object newValue) {
+//        final String key = preference.getKey();
+//        Log.v(TAG, "preference change for: " + key);
+//
+//        if (Preferences.KEY_FADE_IN_SECS.equals(key)) {
+//            updateFadeInSecondsSummary(Util.parseDecimalIntOrZero(newValue.toString()));
+//        }
+//
+//        if (Preferences.KEY_NOTIFICATION_TYPE.equals(key) ||
+//                Preferences.KEY_ON_SELECT_ALBUM_ACTION.equals(key) ||
+//                Preferences.KEY_ON_SELECT_SONG_ACTION.equals(key) ||
+//                Preferences.KEY_ON_THEME_SELECT_ACTION.equals(key) ||
+//                Preferences.KEY_DOWNLOAD_PATH_STRUCTURE.equals(key) ||
+//                Preferences.KEY_DOWNLOAD_FILENAME_STRUCTURE.equals(key)) {
+//            updateListPreferenceSummary((ListPreference) preference, (String) newValue);
+//        }
+//
+//        // If the user has enabled Scrobbling but we don't think it will work
+//        // pop up a dialog with links to Google Play for apps to install.
+//        if (Preferences.KEY_SCROBBLE_ENABLED.equals(key)) {
+//            if (newValue.equals(true) && !Scrobble.canScrobble()) {
+//                showDialog(DIALOG_SCROBBLE_APPS);
+//
+//                // User hit back, or similar (or maybe went to install an
+//                // app). Check again to see if scrobbling will work.
+//                if (!Scrobble.canScrobble()) {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        return true;
+//    }
 
     /**
      * A preference has been changed by the user and is going to be persisted.
      */
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.v(TAG, "Preference changed: " + key);
-
-        if (key.startsWith(Preferences.KEY_SERVER_ADDRESS)) {
-            updateAddressSummary(new Preferences(this, sharedPreferences));
-        }
-
-        if (key.startsWith(Preferences.KEY_DOWNLOAD_USE_SERVER_PATH) ||
-                key.startsWith(Preferences.KEY_DOWNLOAD_USE_SD_CARD)) {
-            updateDownloadPreferences(new Preferences(this, sharedPreferences));
-        }
-
-        if (service != null) {
-            service.preferenceChanged(key);
-        } else {
-            Log.v(TAG, "service is null!");
-        }
-    }
+//    @Override
+//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//        Log.v(TAG, "Preference changed: " + key);
+//
+//        if (key.startsWith(Preferences.KEY_SERVER_ADDRESS)) {
+//            updateAddressSummary(new Preferences(this, sharedPreferences));
+//        }
+//
+//        if (key.startsWith(Preferences.KEY_DOWNLOAD_USE_SERVER_PATH) ||
+//                key.startsWith(Preferences.KEY_DOWNLOAD_USE_SD_CARD)) {
+//            updateDownloadPreferences(new Preferences(this, sharedPreferences));
+//        }
+//
+//        if (service != null) {
+//            service.preferenceChanged(key);
+//        } else {
+//            Log.v(TAG, "service is null!");
+//        }
+//    }
 
     @Override
     @Deprecated

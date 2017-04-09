@@ -283,4 +283,8 @@
         <item name="android:textColor">#fff</item>
         <item name="android:text">@string/undo</item>
     </style>
+
+    <style name="SettingsTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
 </resources>
