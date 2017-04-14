@@ -16,9 +16,12 @@
 
 package uk.org.ngo.squeezer.dialog;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
@@ -45,6 +48,8 @@ import uk.org.ngo.squeezer.util.ScanNetworkTask;
  * A new network scan can be initiated manually if desired.
  */
 public class ServerAddressView extends LinearLayout implements ScanNetworkTask.ScanNetworkCallback {
+    private static final String TAG = ServerAddressView.class.getSimpleName();
+
     private Preferences mPreferences;
     private String mBssId;
 
@@ -53,8 +58,10 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     private Spinner mServersSpinner;
     private EditText mUserNameEditText;
     private EditText mPasswordEditText;
+    private Button mScanButton;
     private View mScanResults;
     private View mScanProgress;
+    private TextView mScanDisabledMessage;
 
     private ScanNetworkTask mScanNetworkTask;
 
@@ -62,6 +69,30 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     private TreeMap<String, String> mDiscoveredServers;
 
     private ArrayAdapter<String> mServersAdapter;
+
+    // This doesn't work (yet).  This needs to be in the activity that inflates the layout that
+    // contains this view.  The activity will need a reference to this view, so it can do
+    // something like:
+    //
+    //    serverAddressView.toggleScanningUi(...)
+    //
+    // in the receiver. It will also need to un/register the receiver, with something like
+    //
+    //    onPause() { unregisterReceiver(broadcastReceiver); }
+    //    onResume() { registerReceiver(broadcastReceiver, new IntentFilter(
+    //                    ConnectivityManager.CONNECTIVITY_ACTION));
+    //
+    // DisconnectedActivity and SettingsActivity host this.
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connMgr = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            toggleScanningUi(networkInfo.isConnected());
+        }
+    };
+
 
     public ServerAddressView(final Context context) {
         super(context);
@@ -73,13 +104,12 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
         initialize(context);
     }
 
-    private void initialize(final Context context) {
+    private void initialize(@NonNull final Context context) {
         inflate(context, R.layout.server_address_view, this);
         if (!isInEditMode()) {
             mPreferences = new Preferences(context);
             Preferences.ServerAddress serverAddress = mPreferences.getServerAddress();
             mBssId = serverAddress.bssId;
-
 
             mServerAddressEditText = (EditText) findViewById(R.id.server_address);
             mUserNameEditText = (EditText) findViewById(R.id.username);
@@ -94,28 +124,41 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
             mServersSpinner.setAdapter(mServersAdapter);
             mServersSpinner.setOnItemSelectedListener(new MyOnItemSelectedListener());
 
+            // Set up the scanning UI.
+            mScanButton = (Button) findViewById(R.id.scan_button);
+            mScanButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    startNetworkScan(context);
+                }
+            });
             mScanResults = findViewById(R.id.scan_results);
             mScanProgress = findViewById(R.id.scan_progress);
             mScanProgress.setVisibility(GONE);
-            TextView scanDisabledMessage = (TextView) findViewById(R.id.scan_disabled_msg);
+            mScanDisabledMessage = (TextView) findViewById(R.id.scan_disabled_msg);
 
             // Only support network scanning on WiFi.
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
             boolean isWifi = ni != null && ni.getType() == ConnectivityManager.TYPE_WIFI;
+            toggleScanningUi(isWifi);
             if (isWifi) {
-                scanDisabledMessage.setVisibility(GONE);
                 startNetworkScan(context);
-                Button scanButton = (Button) findViewById(R.id.scan_button);
-                scanButton.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        startNetworkScan(context);
-                    }
-                });
-            } else {
-                mScanResults.setVisibility(GONE);
             }
         }
+    }
+
+    // Enable / disable showing the buttons / results of network scanning.
+    private void toggleScanningUi(boolean showScanningUi) {
+        if (mScanDisabledMessage == null) {
+            return;
+        }
+
+        // Enable these if scanning is disabled.
+        mScanDisabledMessage.setVisibility(showScanningUi ? GONE : VISIBLE);
+
+        // Enable these if scanning is enabled.
+        mScanButton.setVisibility(showScanningUi ? VISIBLE : GONE);
+        mScanResults.setVisibility(showScanningUi ? VISIBLE : GONE);
     }
 
     public void savePreferences() {
