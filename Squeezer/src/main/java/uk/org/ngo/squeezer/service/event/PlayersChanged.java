@@ -16,6 +16,8 @@
 
 package uk.org.ngo.squeezer.service.event;
 
+import com.google.auto.value.AutoValue;
+
 import java.util.Map;
 
 import uk.org.ngo.squeezer.model.Player;
@@ -23,16 +25,12 @@ import uk.org.ngo.squeezer.model.Player;
 /**
  * Event sent when the list of players connected to the server has changed.
  */
-public class PlayersChanged {
+@AutoValue
+public abstract class PlayersChanged {
     /** The players connected to the Squeezeserver. May be empty. */
-    public final Map<String, Player> players;
+    public abstract Map<String, Player> players();
 
-    public PlayersChanged(Map<String, Player> players) {
-        this.players = players;
-    }
-
-    @Override
-    public String toString() {
-        return "{players: " + players + "}";
+    public static PlayersChanged create(Map<String, Player> players) {
+        return new AutoValue_PlayersChanged(players);
     }
 }

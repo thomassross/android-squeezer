@@ -18,22 +18,23 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 
 /** Event sent when the power status of the player has changed. */
-public class PowerStatusChanged {
+@AutoValue
+public abstract class PowerStatusChanged {
     /** The player with changed state. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** Whether the active player supports being powered on by the server. */
-    public final boolean canPowerOn;
+    public abstract boolean canPowerOn();
 
     /** Whether the active player supports being turned off by the server. */
-    public final boolean canPowerOff;
+    public abstract boolean canPowerOff();
 
-    public PowerStatusChanged(@NonNull Player player, boolean canPowerOn, boolean canPowerOff) {
-        this.player = player;
-        this.canPowerOn = canPowerOn;
-        this.canPowerOff = canPowerOff;
+    public static PowerStatusChanged create(@NonNull Player player, boolean canPowerOn, boolean canPowerOff) {
+        return new AutoValue_PowerStatusChanged(player, canPowerOn, canPowerOff);
     }
 }

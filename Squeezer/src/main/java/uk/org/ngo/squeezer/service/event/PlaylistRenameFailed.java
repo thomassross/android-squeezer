@@ -18,12 +18,15 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
-/** Event sent if renaming a playlist failed. */
-public class PlaylistRenameFailed {
-    @NonNull
-    final public String failureMessage;
+import com.google.auto.value.AutoValue;
 
-    public PlaylistRenameFailed(@NonNull String failureMessage) {
-        this.failureMessage = failureMessage;
+/** Event sent if renaming a playlist failed. */
+@AutoValue
+public abstract class PlaylistRenameFailed {
+    @NonNull
+    public abstract String failureMessage();
+
+    public static PlaylistRenameFailed create(@NonNull String failureMessage) {
+        return new AutoValue_PlaylistRenameFailed(failureMessage);
     }
 }

@@ -18,12 +18,15 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
-/** Event sent if creating a playlist failed. */
-public class PlaylistCreateFailed {
-    @NonNull
-    final public String failureMessage;
+import com.google.auto.value.AutoValue;
 
-    public PlaylistCreateFailed(@NonNull String failureMessage) {
-        this.failureMessage = failureMessage;
+/** Event sent if creating a playlist failed. */
+@AutoValue
+public abstract class PlaylistCreateFailed {
+    @NonNull
+    public abstract String failureMessage();
+
+    public static PlaylistCreateFailed create(@NonNull String failureMessage) {
+        return new AutoValue_PlaylistCreateFailed(failureMessage);
     }
 }

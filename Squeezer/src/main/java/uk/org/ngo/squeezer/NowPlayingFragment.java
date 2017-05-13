@@ -1059,19 +1059,19 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
         // Handle any of the reasons for disconnection, clear the dialog and show the
         // DisconnectedActivity.
-        if (event.connectionState == ConnectionState.DISCONNECTED) {
+        if (event.connectionState() == ConnectionState.DISCONNECTED) {
             dismissConnectingDialog();
             DisconnectedActivity.show(mActivity);
             return;
         }
 
-        if (event.connectionState == ConnectionState.CONNECTION_FAILED) {
+        if (event.connectionState() == ConnectionState.CONNECTION_FAILED) {
             dismissConnectingDialog();
             DisconnectedActivity.showConnectionFailed(mActivity);
             return;
         }
 
-        if (event.connectionState == ConnectionState.LOGIN_FAILED) {
+        if (event.connectionState() == ConnectionState.LOGIN_FAILED) {
             dismissConnectingDialog();
             DisconnectedActivity.showLoginFailed(mActivity);
             return;
@@ -1145,35 +1145,35 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     @MainThread
     public void onEventMainThread(MusicChanged event) {
-        if (event.player.equals(mService.getActivePlayer())) {
-            updateSongInfo(event.playerState);
+        if (event.player().equals(mService.getActivePlayer())) {
+            updateSongInfo(event.playerState());
         }
     }
 
     @MainThread
     public void onEventMainThread(PlayersChanged event) {
-        updatePlayerDropDown(event.players.values(), mService.getActivePlayer());
+        updatePlayerDropDown(event.players().values(), mService.getActivePlayer());
         updateUiFromPlayerState(mService.getActivePlayerState());
     }
 
     @MainThread
     public void onEventMainThread(PlayStatusChanged event) {
-        updatePlayPauseIcon(event.playStatus);
+        updatePlayPauseIcon(event.playStatus());
     }
 
     @MainThread
     public void onEventMainThread(PowerStatusChanged event) {
-        if (event.player.equals(mService.getActivePlayer())) {
-            updatePowerMenuItems(event.canPowerOn, event.canPowerOff);
+        if (event.player().equals(mService.getActivePlayer())) {
+            updatePowerMenuItems(event.canPowerOn(), event.canPowerOff());
         }
     }
 
     @MainThread
     public void onEventMainThread(RepeatStatusChanged event) {
-        if (event.player.equals(mService.getActivePlayer())) {
-            updateRepeatStatus(event.repeatStatus);
-            if (!event.initial) {
-                Toast.makeText(mActivity, mActivity.getServerString(event.repeatStatus.getText()),
+        if (event.player().equals(mService.getActivePlayer())) {
+            updateRepeatStatus(event.repeatStatus());
+            if (!event.initial()) {
+                Toast.makeText(mActivity, mActivity.getServerString(event.repeatStatus().getText()),
                         Toast.LENGTH_SHORT).show();
             }
         }
@@ -1181,11 +1181,11 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     @MainThread
     public void onEventMainThread(ShuffleStatusChanged event) {
-        if (event.player.equals(mService.getActivePlayer())) {
-            updateShuffleStatus(event.shuffleStatus);
-            if (!event.initial) {
+        if (event.player().equals(mService.getActivePlayer())) {
+            updateShuffleStatus(event.shuffleStatus());
+            if (!event.initial()) {
                 Toast.makeText(mActivity,
-                        mActivity.getServerString(event.shuffleStatus.getText()),
+                        mActivity.getServerString(event.shuffleStatus().getText()),
                         Toast.LENGTH_SHORT).show();
             }
         }
@@ -1193,8 +1193,8 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
     @MainThread
     public void onEventMainThread(SongTimeChanged event) {
-        if (event.player.equals(mService.getActivePlayer())) {
-            updateTimeDisplayTo(event.currentPosition, event.duration);
+        if (event.player().equals(mService.getActivePlayer())) {
+            updateTimeDisplayTo(event.currentPosition(), event.duration());
         }
     }
 }

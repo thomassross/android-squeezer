@@ -18,24 +18,25 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 
 /** Event sent when the shuffle status of the player has changed. */
-public class ShuffleStatusChanged {
+@AutoValue
+public abstract class ShuffleStatusChanged {
     /** The player with changed state. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** True if the previous shuffle status was unknown. */
-    public final boolean initial;
+    public abstract boolean initial();
 
     /** The new shuffle status. */
     @NonNull
-    public final PlayerState.ShuffleStatus shuffleStatus;
+    public abstract PlayerState.ShuffleStatus shuffleStatus();
 
-    public ShuffleStatusChanged(@NonNull Player player, boolean initial, @NonNull PlayerState.ShuffleStatus shuffleStatus) {
-        this.player = player;
-        this.initial = initial;
-        this.shuffleStatus = shuffleStatus;
+    public static ShuffleStatusChanged create(@NonNull Player player, boolean initial, @NonNull PlayerState.ShuffleStatus shuffleStatus) {
+        return new AutoValue_ShuffleStatusChanged(player, initial, shuffleStatus);
     }
 }

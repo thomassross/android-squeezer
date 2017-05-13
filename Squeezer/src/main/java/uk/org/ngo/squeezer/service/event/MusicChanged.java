@@ -18,20 +18,22 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 
 /** Event sent when the track the player is playing changes. */
-public class MusicChanged {
+@AutoValue
+public abstract class MusicChanged {
     /** The player with changed state. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** The active player's new state. */
     @NonNull
-    public final PlayerState playerState;
+    public abstract PlayerState playerState();
 
-    public MusicChanged(@NonNull Player player, @NonNull PlayerState playerState) {
-        this.player = player;
-        this.playerState = playerState;
+    public static MusicChanged create(@NonNull Player player, @NonNull PlayerState playerState) {
+        return new AutoValue_MusicChanged(player, playerState);
     }
 }

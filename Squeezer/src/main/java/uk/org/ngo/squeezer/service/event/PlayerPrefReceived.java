@@ -18,22 +18,23 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 
 /** Event sent when a player preference value is received. */
-public class PlayerPrefReceived {
+@AutoValue
+public abstract class PlayerPrefReceived {
     /** The player that owns the preference. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** The name of the preference that was received. */
-    @NonNull public final @Player.Pref.Name String pref;
+    @NonNull public abstract @Player.Pref.Name String pref();
 
     /** The value of the preference. */
-    @NonNull public final String value;
+    @NonNull public abstract String value();
 
-    public PlayerPrefReceived(@NonNull Player player, @NonNull @Player.Pref.Name String pref, @NonNull String value) {
-        this.player = player;
-        this.pref = pref;
-        this.value = value;
+    public static PlayerPrefReceived create(@NonNull Player player, @NonNull @Player.Pref.Name String pref, @NonNull String value) {
+        return new AutoValue_PlayerPrefReceived(player, pref, value);
     }
 }

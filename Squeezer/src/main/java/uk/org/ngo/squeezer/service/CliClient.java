@@ -367,7 +367,7 @@ class CliClient implements IClient {
     }
 
     void initialize() {
-        mEventBus.postSticky(new ConnectionChanged(ConnectionState.DISCONNECTED));
+        mEventBus.postSticky(ConnectionChanged.create(ConnectionState.DISCONNECTED));
     }
 
     // Call through to connectionState implementation for the moment.
@@ -915,14 +915,14 @@ class CliClient implements IClient {
                 } else if ("new".equals(tokens.get(1))) {
                     HashMap<String, String> tokenMap = parseTokens(tokens);
                     if (tokenMap.get("overwritten_playlist_id") != null) {
-                        mEventBus.post(new PlaylistCreateFailed(Squeezer.getContext().getString(R.string.PLAYLIST_EXISTS_MESSAGE,
+                        mEventBus.post(PlaylistCreateFailed.create(Squeezer.getContext().getString(R.string.PLAYLIST_EXISTS_MESSAGE,
                                 tokenMap.get("name"))));
                     }
                 } else if ("rename".equals(tokens.get(1))) {
                     HashMap<String, String> tokenMap = parseTokens(tokens);
                     if (tokenMap.get("dry_run") != null) {
                         if (tokenMap.get("overwritten_playlist_id") != null) {
-                            mEventBus.post(new PlaylistRenameFailed(Squeezer.getContext().getString(R.string.PLAYLIST_EXISTS_MESSAGE,
+                            mEventBus.post(PlaylistRenameFailed.create(Squeezer.getContext().getString(R.string.PLAYLIST_EXISTS_MESSAGE,
                                     tokenMap.get("newname"))));
                         } else {
                             sendCommandImmediately(
@@ -1024,7 +1024,7 @@ class CliClient implements IClient {
                 connectionState.setServerVersion(version);
                 Util.crashlyticsSetString("server_version", version);
 
-                mEventBus.postSticky(new HandshakeComplete(
+                mEventBus.postSticky(HandshakeComplete.create(
                         connectionState.canFavorites(), connectionState.canMusicfolder(),
                         connectionState.canMusicfolder(), connectionState.canRandomplay(),
                         version));
@@ -1114,7 +1114,7 @@ class CliClient implements IClient {
 
                     String pref = Util.decode(tokens.get(2));
                     if (Player.Pref.VALID_PLAYER_PREFS.contains(pref)) {
-                        mEventBus.post(new PlayerPrefReceived(player, pref,
+                        mEventBus.post(PlayerPrefReceived.create(player, pref,
                                 Util.decode(tokens.get(3))));
                     }
                 }
@@ -1203,7 +1203,7 @@ class CliClient implements IClient {
                     // calls to the callbacks below.
                     //updatePlayStatus(player.id(), tokenMap.get("mode"));
                     if (changedPlayStatus) {
-                        mEventBus.post(new PlayStatusChanged(newPlayerState.playStatus(), player));
+                        mEventBus.post(PlayStatusChanged.create(newPlayerState.playStatus(), player));
                     }
 
                     // XXX: Handled by onEvent(PlayStatusChanged) in the service.
@@ -1224,36 +1224,36 @@ class CliClient implements IClient {
 
                     if (changedPower || changedSleep || changedSleepDuration || changedVolume
                             || changedSong || changedSyncMaster || changedSyncSlaves) {
-                        mEventBus.post(new PlayerStateChanged(player, newPlayerState));
+                        mEventBus.post(PlayerStateChanged.create(player, newPlayerState));
                     }
 
                     // Power status
                     if (changedPower) {
-                        mEventBus.post(new PowerStatusChanged(
+                        mEventBus.post(PowerStatusChanged.create(
                                 player, !newPlayerState.poweredOn(), !newPlayerState.poweredOn()));
                     }
 
                     // Current song
                     if (changedSong) {
-                        mEventBus.postSticky(new MusicChanged(player, newPlayerState));
+                        mEventBus.postSticky(MusicChanged.create(player, newPlayerState));
                     }
 
                     // Shuffle status.
                     if (changedShuffleStatus) {
-                        mEventBus.post(new ShuffleStatusChanged(player,
+                        mEventBus.post(ShuffleStatusChanged.create(player,
                                 unknownShuffleStatus, newPlayerState.shuffleStatus()));
                     }
 
                     // Repeat status.
                     if (changedRepeatStatus) {
-                        mEventBus.post(new RepeatStatusChanged(player,
+                        mEventBus.post(RepeatStatusChanged.create(player,
                                 unknownRepeatStatus, newPlayerState.repeatStatus()));
                     }
 
                     // Position in song
                     if (changedSongDuration || changedSongTime) {
                         Log.d(TAG, "Posting new SongTimeChanged");
-                        mEventBus.post(new SongTimeChanged(player,
+                        mEventBus.post(SongTimeChanged.create(player,
                                 newPlayerState.currentTimeSecond(),
                                 newPlayerState.currentSongDuration()));
                     }
@@ -1282,7 +1282,7 @@ class CliClient implements IClient {
 
                     @Player.Pref.Name String pref = tokens.get(3);
                     if (Player.Pref.VALID_PLAYER_PREFS.contains(pref)) {
-                        mEventBus.post(new PlayerPrefReceived(player, pref, Util.decode(tokens.get(4))));
+                        mEventBus.post(PlayerPrefReceived.create(player, pref, Util.decode(tokens.get(4))));
                     }
                 }
             }
@@ -1437,7 +1437,7 @@ class CliClient implements IClient {
 
         player = player.withPlayerState(player.playerState().withCurrentVolume(newVolume));
         mPlayers.put(playerId, player);
-        mEventBus.post(new PlayerVolume(newVolume, player));
+        mEventBus.post(PlayerVolume.create(newVolume, player));
         return player;
     }
 
@@ -1463,7 +1463,7 @@ class CliClient implements IClient {
 
         player = player.withPlayerState(playerState.withPlayStatus(playStatus));
         mPlayers.put(playerId, player);
-        mEventBus.post(new PlayStatusChanged(playStatus, player));
+        mEventBus.post(PlayStatusChanged.create(playStatus, player));
     }
 
     /**
@@ -1521,7 +1521,7 @@ class CliClient implements IClient {
                     mPlayers.putAll(players);
 
                     // XXX: postSticky?
-                    mEventBus.postSticky(new PlayersChanged(mPlayers));
+                    mEventBus.postSticky(PlayersChanged.create(mPlayers));
                 }
             }
 

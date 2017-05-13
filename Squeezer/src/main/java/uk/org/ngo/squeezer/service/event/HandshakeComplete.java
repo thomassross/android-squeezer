@@ -16,31 +16,32 @@
 
 package uk.org.ngo.squeezer.service.event;
 
+import com.google.auto.value.AutoValue;
+
 /**
  * Event sent after handshaking with the server is complete.
  */
-public class HandshakeComplete {
+@AutoValue
+public abstract class HandshakeComplete {
     /** Does the server support the {@code favorites items} command? */
-    public final boolean canFavourites;
+    public abstract boolean canFavourites();
 
     /** Does the server support the {@code musicfolders} command? */
-    public final boolean canMusicFolders;
+    public abstract boolean canMusicFolders();
 
     /** Does the server support the {@code myapps items} command? */
-    public final boolean canMyApps;
+    public abstract boolean canMyApps();
 
     /** Does the server support the {@code randomplay} command? */
-    public final boolean canRandomPlay;
+    public abstract boolean canRandomPlay();
 
     /** Server version */
-    public final String version;
+    public abstract String version();
 
-    public HandshakeComplete(boolean canFavourites, boolean canMusicFolders,
+    public static HandshakeComplete create(boolean canFavourites, boolean canMusicFolders,
                              boolean canMyApps, boolean canRandomPlay, String version) {
-        this.canFavourites = canFavourites;
-        this.canMusicFolders = canMusicFolders;
-        this.canMyApps = canMyApps;
-        this.canRandomPlay = canRandomPlay;
-        this.version = version;
+        return new AutoValue_HandshakeComplete(
+                canFavourites, canMusicFolders, canMyApps, canRandomPlay, version
+        );
     }
 }

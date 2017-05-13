@@ -241,12 +241,12 @@ public class PlaylistSongsActivity extends BaseListActivity<Song> {
     }
 
     public void onEvent(PlaylistCreateFailed event) {
-        showServiceMessage(event.failureMessage);
+        showServiceMessage(event.failureMessage());
     }
 
     public void onEvent(PlaylistRenameFailed event) {
         playlist = playlist.withName(oldName);
         getIntent().putExtra("playlist", playlist);
-        showServiceMessage(event.failureMessage);
+        showServiceMessage(event.failureMessage());
     }
 }

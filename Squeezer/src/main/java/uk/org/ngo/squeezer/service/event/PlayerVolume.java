@@ -18,19 +18,25 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 
 /** Event sent when a player's volume has changed. */
-public class PlayerVolume {
+@AutoValue
+public abstract class PlayerVolume {
     /** The player's new volume. */
-    public final int volume;
+    public abstract int volume();
 
     /** The player that was affected. */
     @NonNull
-    public final Player player;
+    public abstract Player player();
 
-    public PlayerVolume(int volume, @NonNull Player player) {
-        this.volume = volume;
-        this.player = player;
+//    public PlayerVolume(int volume, @NonNull Player player) {
+//        this.volume = volume;
+//        this.player = player;
+//    }
+    public static PlayerVolume create(int volume, @NonNull Player player) {
+        return new AutoValue_PlayerVolume(volume, player);
     }
 }

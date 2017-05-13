@@ -402,8 +402,8 @@ public abstract class BaseActivity extends ActionBarActivity implements HasUiThr
     }
 
     public void onEvent(PlayerVolume event) {
-        if (!mIgnoreVolumeChange && mVolumePanel != null && event.player.equals(mService.getActivePlayer())) {
-            mVolumePanel.postVolumeChanged(event.volume, event.player.name());
+        if (!mIgnoreVolumeChange && mVolumePanel != null && event.player().equals(mService.getActivePlayer())) {
+            mVolumePanel.postVolumeChanged(event.volume(), event.player().name());
         }
     }
 

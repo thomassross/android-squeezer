@@ -402,8 +402,8 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * @param event
      */
     public void onEvent(PlayerStateChanged event) {
-        mPlayers.put(event.player.id(), event.player);
-        updatePlayerSubscription(event.player, calculateSubscriptionTypeFor(event.player));
+        mPlayers.put(event.player().id(), event.player());
+        updatePlayerSubscription(event.player(), calculateSubscriptionTypeFor(event.player()));
     }
 
     /**
@@ -412,13 +412,13 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
      * Updates the Wi-Fi lock and ongoing status notification as necessary.
      */
     public void onEvent(PlayStatusChanged event) {
-        if (event.player.equals(getActivePlayer())) {
-            updateWifiLock(event.player.playerState().isPlaying());
+        if (event.player().equals(getActivePlayer())) {
+            updateWifiLock(event.player().playerState().isPlaying());
             updateOngoingNotification();
         }
 
-        mPlayers.put(event.player.id(), event.player);
-        updatePlayerSubscription(event.player, calculateSubscriptionTypeFor(event.player));
+        mPlayers.put(event.player().id(), event.player());
+        updatePlayerSubscription(event.player(), calculateSubscriptionTypeFor(event.player()));
     }
 
     /**
@@ -737,7 +737,7 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     }
 
     public void onEvent(ConnectionChanged event) {
-        if (event.connectionState == ConnectionState.DISCONNECTED) {
+        if (event.connectionState() == ConnectionState.DISCONNECTED) {
             mPlayers.clear();
             mEventBus.removeAllStickyEvents();
             activePlayerId.set(null);
@@ -752,14 +752,14 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
     }
 
     public void onEvent(MusicChanged event) {
-        if (event.player.equals(getActivePlayer())) {
+        if (event.player().equals(getActivePlayer())) {
             updateOngoingNotification();
         }
     }
 
     public void onEvent(PlayersChanged event) {
         mPlayers.clear();
-        mPlayers.putAll(event.players);
+        mPlayers.putAll(event.players());
 
         // Figure out the new active player, let everyone know.
         changeActivePlayer(getPreferredPlayer());

@@ -141,7 +141,7 @@ public class ConnectionState {
             @ConnectionStates int connectionState) {
         Log.d(TAG, "Setting connection state to: " + connectionState);
         mConnectionState = connectionState;
-        eventBus.postSticky(new ConnectionChanged(mConnectionState));
+        eventBus.postSticky(ConnectionChanged.create(mConnectionState));
     }
 
     PrintWriter getSocketWriter() {

@@ -19,19 +19,21 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 
 /** Event sent when a player's state has changed. */
-public class PlayerStateChanged {
+@AutoValue
+public abstract class PlayerStateChanged {
     /** The player with changed state. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** The player's new state. */
-    @NonNull public final PlayerState playerState;
+    @NonNull public abstract PlayerState playerState();
 
-    public PlayerStateChanged(@NonNull Player player, @NonNull PlayerState playerState) {
-        this.player = player;
-        this.playerState = playerState;
+    public static PlayerStateChanged create(@NonNull Player player, @NonNull PlayerState playerState) {
+        return new AutoValue_PlayerStateChanged(player, playerState);
     }
 }

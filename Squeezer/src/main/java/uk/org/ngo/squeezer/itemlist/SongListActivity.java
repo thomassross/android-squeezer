@@ -229,7 +229,7 @@ public class SongListActivity extends BaseListActivity<Song>
      */
     @Override
     public void onEventMainThread(HandshakeComplete event) {
-        if (!sortOrder.can(event.version)) {
+        if (!sortOrder.can(event.version())) {
             sortOrder = SongViewDialog.SongsSortOrder.title;
         }
         super.onEventMainThread(event);

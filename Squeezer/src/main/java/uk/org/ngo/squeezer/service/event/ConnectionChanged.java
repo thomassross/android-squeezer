@@ -16,22 +16,20 @@
 
 package uk.org.ngo.squeezer.service.event;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.service.ConnectionState;
 
 /**
  * Event posted whenever the connection state to the server changes.
  */
-public class ConnectionChanged {
+@AutoValue
+public abstract class ConnectionChanged {
     /** The new connection state. */
     @ConnectionState.ConnectionStates
-    public int connectionState;
+    public abstract int connectionState();
 
-    public ConnectionChanged(@ConnectionState.ConnectionStates int connectionState) {
-        this.connectionState = connectionState;
-    }
-
-    @Override
-    public String toString() {
-        return "ConnectionChanged{" + connectionState + '}';
+    public static ConnectionChanged create(@ConnectionState.ConnectionStates int connectionState) {
+        return new AutoValue_ConnectionChanged(connectionState);
     }
 }

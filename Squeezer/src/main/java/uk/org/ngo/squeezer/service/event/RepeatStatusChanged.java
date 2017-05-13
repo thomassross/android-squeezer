@@ -18,24 +18,25 @@ package uk.org.ngo.squeezer.service.event;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
+
 import uk.org.ngo.squeezer.model.Player;
 import uk.org.ngo.squeezer.model.PlayerState;
 
 /** Event sent when the repeat status of the player has changed. */
-public class RepeatStatusChanged {
+@AutoValue
+public abstract class RepeatStatusChanged {
     /** The player with changed state. */
-    @NonNull public final Player player;
+    @NonNull public abstract Player player();
 
     /** True if the previous repeat status was unknown. */
-    public final boolean initial;
+    public abstract boolean initial();
 
     /** The new repeat status. */
     @NonNull
-    public final PlayerState.RepeatStatus repeatStatus;
+    public abstract PlayerState.RepeatStatus repeatStatus();
 
-    public RepeatStatusChanged(@NonNull Player player, boolean initial, @NonNull PlayerState.RepeatStatus repeatStatus) {
-        this.player = player;
-        this.initial = initial;
-        this.repeatStatus = repeatStatus;
+    public static RepeatStatusChanged create(@NonNull Player player, boolean initial, @NonNull PlayerState.RepeatStatus repeatStatus) {
+        return new AutoValue_RepeatStatusChanged(player, initial, repeatStatus);
     }
 }

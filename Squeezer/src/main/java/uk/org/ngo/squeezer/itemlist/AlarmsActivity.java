@@ -205,14 +205,14 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
     };
 
     public void onEventMainThread(PlayerPrefReceived event) {
-        if (!event.player.equals(getService().getActivePlayer())) {
+        if (!event.player().equals(getService().getActivePlayer())) {
             return;
         }
 
-        mPlayerPrefs.put(event.pref, event.value);
+        mPlayerPrefs.put(event.pref(), event.value());
 
-        if (Player.Pref.ALARMS_ENABLED.equals(event.pref)) {
-            boolean checked = Integer.valueOf(event.value) > 0;
+        if (Player.Pref.ALARMS_ENABLED.equals(event.pref())) {
+            boolean checked = Integer.valueOf(event.value()) > 0;
             mAlarmsEnabledButton.setEnabled(true);
             mAlarmsEnabledButton.setChecked(checked);
             mAllAlarmsHintView.setText(checked ? R.string.all_alarms_on_hint : R.string.all_alarms_off_hint);
@@ -233,7 +233,7 @@ public class AlarmsActivity extends BaseListActivity<Alarm> implements AlarmSett
     public void onEventMainThread(PlayersChanged event) {
         // Only include players that are connected to the server.
         ArrayList<Player> connectedPlayers = new ArrayList<>();
-        for (Player player : event.players.values()) {
+        for (Player player : event.players().values()) {
             if (player.connected()) {
                 connectedPlayers.add(player);
             }

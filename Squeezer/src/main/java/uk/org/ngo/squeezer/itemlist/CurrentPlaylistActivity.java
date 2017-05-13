@@ -264,9 +264,9 @@ public class CurrentPlaylistActivity extends BaseListActivity<Song> {
     }
 
     public void onEventMainThread(MusicChanged event) {
-        if (event.player.equals(getService().getActivePlayer())) {
-            Log.d(getTag(), "onMusicChanged " + event.playerState.currentSong());
-            currentPlaylistIndex = event.playerState.currentPlaylistIndex();
+        if (event.player().equals(getService().getActivePlayer())) {
+            Log.d(getTag(), "onMusicChanged " + event.playerState().currentSong());
+            currentPlaylistIndex = event.playerState().currentPlaylistIndex();
             getItemAdapter().notifyDataSetChanged();
         }
     }
