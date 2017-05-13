@@ -100,9 +100,4 @@ public class AlbumTest {
         Album album = Album.fromMap(filterKey(albumMap, "artwork_track_id"));
         assertEquals("", album.artworkTrackId());
     }
-
-    @Test public void testIntentExtraKey() {
-        Album album = Album.fromMap(albumMap);
-        assertEquals(Album.class.getName(), album.intentExtraKey());
-    }
 }

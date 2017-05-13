@@ -42,7 +42,8 @@ public class PluginTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Test public void testCreate() {
+    @Test
+    public void testCreate() {
         Plugin plugin = Plugin.create("myapps", 1);
         assertEquals("myapps", plugin.id());
         assertEquals("", plugin.name());
@@ -52,7 +53,8 @@ public class PluginTest {
         assertEquals("", plugin.type());
     }
 
-    @Test public void fromMap_Complete() {
+    @Test
+    public void fromMap_Complete() {
         Plugin plugin = Plugin.fromMap(pluginMap);
         assertEquals("myapps", plugin.id());
         assertEquals("Plugin name", plugin.name());
@@ -62,39 +64,42 @@ public class PluginTest {
         assertEquals("xmlbrowser_search", plugin.type());
     }
 
-    @Test public void fromMap_NoId_Throws() {
+    @Test
+    public void fromMap_NoId_Throws() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Missing required properties: id");
         assertNull(Plugin.fromMap(filterKey(pluginMap, "cmd")));
     }
 
-    @Test public void fromMap_NoName_Throws() {
+    @Test
+    public void fromMap_NoName_Throws() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Missing required properties: name");
         assertNull(Plugin.fromMap(filterKey(pluginMap, "name")));
     }
 
-    @Test public void fromMap_NoIcon_IsNull() {
+    @Test
+    public void fromMap_NoIcon_IsNull() {
         assertNull(Plugin.fromMap(filterKey(pluginMap, "icon")).icon());
     }
 
-    @Test public void fromMap_NoWeight_Is0() {
+    @Test
+    public void fromMap_NoWeight_Is0() {
         assertEquals(0, Plugin.fromMap(filterKey(pluginMap, "weight")).weight());
     }
 
-    @Test public void fromMap_NoType_IsEmpty() {
+    @Test
+    public void fromMap_NoType_IsEmpty() {
         assertEquals("", Plugin.fromMap(filterKey(pluginMap, "type")).type());
     }
 
-    @Test public void fromMap_TypeXmlBrowserSearch_IsSearchable() {
+    @Test
+    public void fromMap_TypeXmlBrowserSearch_IsSearchable() {
         assertTrue(Plugin.fromMap(pluginMap).isSearchable());
     }
 
-    @Test public void fromMap_TypeOther_IsNotSearchable() {
+    @Test
+    public void fromMap_TypeOther_IsNotSearchable() {
         assertFalse(Plugin.fromMap(filterKey(pluginMap, "type")).isSearchable());
-    }
-
-    @Test public void testIntentExtraKey() {
-        assertEquals(Plugin.class.getName(), Plugin.fromMap(pluginMap).intentExtraKey());
     }
 }

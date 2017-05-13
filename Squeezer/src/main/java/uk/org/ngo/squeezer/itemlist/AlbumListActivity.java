@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer.itemlist;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -88,6 +89,8 @@ public class AlbumListActivity extends BaseListActivity<Album>
 
     private Year year;
 
+    private static final String FILTER_ITEMS = AlbumListActivity.class.getName();
+
     @Override
     public Year getYear() {
         return year;
@@ -124,24 +127,25 @@ public class AlbumListActivity extends BaseListActivity<Album>
         BaseMenuFragment.add(this, FilterMenuFragment.class);
         BaseMenuFragment.add(this, ViewMenuItemFragment.class);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            for (String key : extras.keySet()) {
-                if (Artist.class.getName().equals(key)) {
-                    artist = extras.getParcelable(key);
-                } else if (Year.class.getName().equals(key)) {
-                    year = extras.getParcelable(key);
-                } else if (Genre.class.getName().equals(key)) {
-                    genre = extras.getParcelable(key);
-                } else if (Song.class.getName().equals(key)) {
-                    song = extras.getParcelable(key);
-                } else if (AlbumViewDialog.AlbumsSortOrder.class.getName().equals(key)) {
-                    sortOrder = AlbumViewDialog.AlbumsSortOrder.valueOf(extras.getString(key));
-                } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
-                }
+        Intent intent = getIntent();
+        Parcelable[] items = intent.getParcelableArrayExtra(FILTER_ITEMS);
+        for(Parcelable item: items) {
+            if (item instanceof Artist) {
+                artist = (Artist) item;
+            } else if (item instanceof Year) {
+                year = (Year) item;
+            } else if (item instanceof Genre) {
+                genre = (Genre) item;
+            } else if (item instanceof Song) {
+                song = (Song) item;
+            } else {
+                Log.e(getTag(), "Unexpected class as filter key: " + item.getClass());
             }
+        }
+
+        String sortOrderString = intent.getStringExtra(AlbumViewDialog.AlbumsSortOrder.class.getName());
+        if (sortOrderString != null) {
+            sortOrder = AlbumViewDialog.AlbumsSortOrder.valueOf(sortOrderString);
         }
 
         TextView header = (TextView) findViewById(R.id.header);
@@ -251,10 +255,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
         if (sortOrder != null) {
             intent.putExtra(AlbumViewDialog.AlbumsSortOrder.class.getName(), sortOrder.name());
         }
-        for (Item item : items) {
-            intent.putExtra(item.intentExtraKey(), item);
-        }
+        intent.putExtra(FILTER_ITEMS, items);
         context.startActivity(intent);
     }
-
 }

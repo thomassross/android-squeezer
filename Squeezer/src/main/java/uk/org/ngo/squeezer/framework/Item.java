@@ -40,19 +40,6 @@ public abstract class Item implements Parcelable {
 
     }
 
-    /**
-     * The key that should be used when objects of this type are placed in an intent using
-     * {@code putExtra}.
-     * <p>
-     * {@code getClass().getName()} can't be used for AutoValue classes, as the result is the
-     * {@code AutoValue_...} class name.
-     *
-     * @return The key to use for this item. Must include the package prefix.
-     */
-    public String intentExtraKey() {
-        throw new UnsupportedOperationException("Subclass did not implement intentExtraKey: " + getClass());
-    }
-
     @Override
     public int hashCode() {
         return (id() != null ? id().hashCode() : 0);

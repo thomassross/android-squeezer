@@ -81,9 +81,4 @@ public abstract class MusicFolderItem extends PlaylistItem implements Parcelable
                 Uri.parse(Strings.nullToEmpty(record.get("url"))),
                 Uri.parse(Strings.nullToEmpty(record.get("download_url"))));
     }
-
-    @Override
-    public String intentExtraKey() {
-        return MusicFolderItem.class.getName();
-    }
 }

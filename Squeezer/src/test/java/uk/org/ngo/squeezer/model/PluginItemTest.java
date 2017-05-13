@@ -92,8 +92,4 @@ public class PluginItemTest {
     @Test public void fromMap_NoIsAudio_IsFalse() {
         assertFalse(PluginItem.fromMap(filterKey(pluginItemMap, "isaudio")).isAudio());
     }
-
-    @Test public void testIntentExtraKey() {
-        assertEquals(PluginItem.class.getName(), PluginItem.fromMap(pluginItemMap).intentExtraKey());
-    }
 }

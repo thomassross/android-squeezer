@@ -42,7 +42,7 @@ public class FavoriteListActivity extends PluginItemListActivity {
 
     public static void show(Activity activity, Plugin plugin) {
         final Intent intent = new Intent(activity, FavoriteListActivity.class);
-        intent.putExtra(plugin.intentExtraKey(), plugin);
+        intent.putExtra(PLUGIN_KEY, plugin);
         activity.startActivity(intent);
     }
 }

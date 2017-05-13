@@ -43,9 +43,4 @@ public abstract class Year extends PlaylistItem implements Parcelable {
     public static Year fromMap(@NonNull Map<String, String> record) {
         return new AutoValue_Year(record.get("year"), record.get("year"));
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Year.class.getName();
-    }
 }

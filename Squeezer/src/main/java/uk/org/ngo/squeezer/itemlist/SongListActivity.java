@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -95,6 +96,8 @@ public class SongListActivity extends BaseListActivity<Song>
     }
 
     private Year year;
+
+    private static final String FILTER_KEY = SongListActivity.class.getName();
 
     @Override
     public Year getYear() {
@@ -176,25 +179,21 @@ public class SongListActivity extends BaseListActivity<Song>
 
     @Override
     protected int getContentView() {
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            for (String key : extras.keySet()) {
-                if (Album.class.getName().equals(key)) {
-                    album = extras.getParcelable(key);
-                    sortOrder = SongViewDialog.SongsSortOrder.tracknum;
-                } else if (Artist.class.getName().equals(key)) {
-                    artist = extras.getParcelable(key);
-                    sortOrder = SongViewDialog.SongsSortOrder.albumtrack;
-                } else if (Year.class.getName().equals(key)) {
-                    year = extras.getParcelable(key);
-                    sortOrder = SongViewDialog.SongsSortOrder.albumtrack;
-                } else if (Genre.class.getName().equals(key)) {
-                    genre = extras.getParcelable(key);
-                    sortOrder = SongViewDialog.SongsSortOrder.albumtrack;
-                } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
-                }
+        Intent intent = getIntent();
+        Parcelable[] items = intent.getParcelableArrayExtra(FILTER_KEY);
+        sortOrder = SongViewDialog.SongsSortOrder.albumtrack;
+        for (Parcelable item : items) {
+            if (item instanceof Album) {
+                album = (Album)item;
+                sortOrder = SongViewDialog.SongsSortOrder.tracknum;
+            } else if (item instanceof Artist) {
+                artist = (Artist)item;
+            } else if (item instanceof Year) {
+                year = (Year)item;
+            } else if (item instanceof Genre) {
+                genre = (Genre)item;
+            } else {
+                Log.e(getTag(), "Unexpected class as filter key: " + item.getClass());
             }
         }
 
@@ -238,9 +237,7 @@ public class SongListActivity extends BaseListActivity<Song>
 
     public static void show(Context context, Item... items) {
         final Intent intent = new Intent(context, SongListActivity.class);
-        for (Item item : items) {
-            intent.putExtra(item.intentExtraKey(), item);
-        }
+        intent.putExtra(FILTER_KEY, items);
         context.startActivity(intent);
     }
 

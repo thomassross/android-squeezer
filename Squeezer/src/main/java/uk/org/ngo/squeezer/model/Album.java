@@ -84,9 +84,4 @@ public abstract class Album extends ArtworkItem implements Parcelable {
                 .artworkTrackId(Strings.nullToEmpty(record.get("artwork_track_id")))
                 .build();
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Album.class.getName();
-    }
 }

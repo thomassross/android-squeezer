@@ -72,9 +72,4 @@ public class ArtistTest {
         thrown.expectMessage("Null name");
         assertNull(Artist.fromMap(filterKey(filterKey(artistMap, "contributor"), "artist")));
     }
-
-    @Test public void intentExtraKey() {
-        Artist artist = Artist.fromMap(artistMap);
-        assertEquals(Artist.class.getName(), artist.intentExtraKey());
-    }
 }

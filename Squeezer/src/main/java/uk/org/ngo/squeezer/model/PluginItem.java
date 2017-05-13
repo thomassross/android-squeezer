@@ -85,10 +85,5 @@ public abstract class PluginItem extends Item {
                 .isAudio(Util.parseDecimalIntOrZero(record.get("isaudio")) != 0)
                 .build();
     }
-
-    @Override
-    public String intentExtraKey() {
-        return PluginItem.class.getName();
-    }
 }
 

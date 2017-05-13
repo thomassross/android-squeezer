@@ -103,9 +103,4 @@ public class MusicFolderItemTest {
                 filterKey(musicFolderItemMap, "download_url"));
         assertEquals(Uri.EMPTY, musicFolderItem.downloadUrl());
     }
-
-    @Test public void intentExtraKey() {
-        MusicFolderItem musicFolderItem = MusicFolderItem.fromMap(musicFolderItemMap);
-        assertEquals(MusicFolderItem.class.getName(), musicFolderItem.intentExtraKey());
-    }
 }

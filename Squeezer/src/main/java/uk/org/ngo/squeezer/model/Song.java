@@ -217,9 +217,4 @@ public abstract class Song extends ArtworkItem implements Parcelable {
     public int hashCode() {
         return Objects.hashCode(id(), name(), albumName(), artist(), artworkUrl());
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Song.class.getName();
-    }
 }

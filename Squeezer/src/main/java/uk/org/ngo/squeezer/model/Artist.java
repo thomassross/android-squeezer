@@ -55,9 +55,4 @@ public abstract class Artist extends PlaylistItem implements Parcelable {
                         : record.get("id"),
                 record.containsKey("contributor") ? record.get("contributor") : record.get("artist"));
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Artist.class.getName();
-    }
 }

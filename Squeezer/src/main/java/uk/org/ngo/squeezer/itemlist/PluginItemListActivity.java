@@ -59,6 +59,10 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
     private String search;
 
+    protected static final String PLUGIN_KEY = Plugin.class.getName();
+
+    protected static final String PLUGIN_ITEM_KEY = PluginItem.class.getName();
+
     @Override
     public ItemView<PluginItem> createItemView() {
         return new PluginItemView(this);
@@ -70,7 +74,7 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            plugin = extras.getParcelable(Plugin.class.getName());
+            plugin = extras.getParcelable(PLUGIN_KEY);
             parent = extras.getParcelable(PluginItem.class.getName());
             findViewById(R.id.search_view).setVisibility(isSearchable() ? View.VISIBLE : View.GONE);
 
@@ -135,15 +139,15 @@ public class PluginItemListActivity extends BaseListActivity<PluginItem>
 
     public void show(PluginItem pluginItem) {
         final Intent intent = new Intent(this, PluginItemListActivity.class);
-        intent.putExtra(plugin.intentExtraKey(), plugin);
-        intent.putExtra(pluginItem.intentExtraKey(), pluginItem);
+        intent.putExtra(PLUGIN_KEY, plugin);
+        intent.putExtra(PLUGIN_ITEM_KEY, pluginItem);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     public static void show(Activity activity, Plugin plugin) {
         final Intent intent = new Intent(activity, PluginItemListActivity.class);
-        intent.putExtra(plugin.intentExtraKey(), plugin);
+        intent.putExtra(PLUGIN_KEY, plugin);
         activity.startActivity(intent);
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }

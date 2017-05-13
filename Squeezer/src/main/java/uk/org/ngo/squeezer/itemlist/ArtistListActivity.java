@@ -19,6 +19,7 @@ package uk.org.ngo.squeezer.itemlist;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -60,6 +61,8 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
 
     private Genre genre;
 
+    private static final String FILTER_ITEMS = ArtistListActivity.class.getName();
+
     @Override
     public Genre getGenre() {
         return genre;
@@ -81,17 +84,15 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
 
         BaseMenuFragment.add(this, FilterMenuFragment.class);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            for (String key : extras.keySet()) {
-                if (Album.class.getName().equals(key)) {
-                    album = extras.getParcelable(key);
-                } else if (Genre.class.getName().equals(key)) {
-                    genre = extras.getParcelable(key);
-                } else {
-                    Log.e(getTag(), "Unexpected extra value: " + key + "("
-                            + extras.get(key).getClass().getName() + ")");
-                }
+        Intent intent = getIntent();
+        Parcelable[] items = intent.getParcelableArrayExtra(FILTER_ITEMS);
+        for (Parcelable item : items) {
+            if (item instanceof Album) {
+                album = (Album) item;
+            } else if (item instanceof Genre) {
+                genre = (Genre) item;
+            } else {
+                Log.e(getTag(), "Unexpected class as filter key: " + item.getClass());
             }
         }
     }
@@ -114,10 +115,7 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
 
     public static void show(Context context, Item... items) {
         final Intent intent = new Intent(context, ArtistListActivity.class);
-        for (Item item : items) {
-            intent.putExtra(item.intentExtraKey(), item);
-        }
+        intent.putExtra(FILTER_ITEMS, items);
         context.startActivity(intent);
     }
-
 }

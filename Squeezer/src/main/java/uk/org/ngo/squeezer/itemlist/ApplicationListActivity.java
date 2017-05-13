@@ -22,6 +22,8 @@ import android.content.Intent;
 import uk.org.ngo.squeezer.framework.ItemView;
 import uk.org.ngo.squeezer.model.Plugin;
 
+import static uk.org.ngo.squeezer.itemlist.PluginItemListActivity.PLUGIN_KEY;
+
 public class ApplicationListActivity extends PluginListActivity {
 
     @Override
@@ -35,7 +37,7 @@ public class ApplicationListActivity extends PluginListActivity {
 
     public static void show(Activity activity, Plugin plugin) {
         final Intent intent = new Intent(activity, ApplicationListActivity.class);
-        intent.putExtra(plugin.intentExtraKey(), plugin);
+        intent.putExtra(PLUGIN_KEY, plugin);
         activity.startActivity(intent);
     }
 }

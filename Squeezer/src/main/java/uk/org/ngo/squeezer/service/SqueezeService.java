@@ -357,6 +357,9 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
 
     @Nullable
     private Player getActivePlayer() {
+        if (activePlayerId.get() == null) {
+            return null;
+        }
         return mPlayers.get(activePlayerId.get());
     }
 
@@ -1427,6 +1430,9 @@ public class SqueezeService extends Service implements ServiceCallbackList.Servi
         @Override
         @Nullable
         public Player getActivePlayer() {
+            if (activePlayerId.get() == null) {
+                return null;
+            }
             return mPlayers.get(activePlayerId.get());
         }
 

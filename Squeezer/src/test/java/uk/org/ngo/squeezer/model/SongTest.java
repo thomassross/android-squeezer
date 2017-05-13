@@ -148,8 +148,4 @@ public class SongTest {
     @Test public void fromMap_NoButtons_IsEmpty() {
         assertEquals("", Song.fromMap(filterKey(songMap, "buttons")).buttons());
     }
-
-    @Test public void intentExtraKey() {
-        assertEquals(Song.class.getName(), Song.fromMap(songMap).intentExtraKey());
-    }
 }

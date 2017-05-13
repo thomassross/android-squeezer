@@ -43,9 +43,4 @@ public abstract class Genre extends PlaylistItem implements Parcelable {
         return new AutoValue_Genre(record.containsKey("genre_id") ? record.get("genre_id") : record.get("id"),
                 record.get("genre"));
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Genre.class.getName();
-    }
 }

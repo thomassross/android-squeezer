@@ -99,9 +99,4 @@ public abstract class Plugin extends Item {
                 .type(Strings.nullToEmpty(record.get("type")))
                 .build();
     }
-
-    @Override
-    public String intentExtraKey() {
-        return Plugin.class.getName();
-    }
 }
