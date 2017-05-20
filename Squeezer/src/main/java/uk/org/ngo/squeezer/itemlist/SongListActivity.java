@@ -97,6 +97,7 @@ public class SongListActivity extends BaseListActivity<Song>
 
     private Year year;
 
+    /** Name to use for intent data for filtering the view. */
     private static final String FILTER_KEY = SongListActivity.class.getName();
 
     @Override

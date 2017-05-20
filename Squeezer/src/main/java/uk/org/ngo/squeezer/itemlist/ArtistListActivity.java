@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import uk.org.ngo.squeezer.framework.BaseListActivity;
@@ -61,7 +62,8 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
 
     private Genre genre;
 
-    private static final String FILTER_ITEMS = ArtistListActivity.class.getName();
+    /** Name to use for intent data for filtering the view. */
+    private static final String FILTER_KEY = ArtistListActivity.class.getName();
 
     @Override
     public Genre getGenre() {
@@ -85,8 +87,8 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
         BaseMenuFragment.add(this, FilterMenuFragment.class);
 
         Intent intent = getIntent();
-        Parcelable[] items = intent.getParcelableArrayExtra(FILTER_ITEMS);
-        for (Parcelable item : items) {
+        Parcelable item = intent.getParcelableExtra(FILTER_KEY);
+        if (item != null) {
             if (item instanceof Album) {
                 album = (Album) item;
             } else if (item instanceof Genre) {
@@ -99,7 +101,7 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
 
     @Override
     protected void orderPage(@NonNull ISqueezeService service, int start) {
-        service.artists(this, start, getSearchString(), album, genre);
+        service.artists(this, start, searchString, album, genre);
     }
 
     @Override
@@ -113,9 +115,29 @@ public class ArtistListActivity extends BaseListActivity<Artist> implements
         new ArtistFilterDialog().show(getSupportFragmentManager(), "ArtistFilterDialog");
     }
 
-    public static void show(Context context, Item... items) {
+    /**
+     * Start the activity to show all artists.
+     *
+     * @param context the context to use to start the activity.
+     */
+    public static void show(Context context) {
+        show(context, null);
+    }
+
+    /**
+     * Start the activity to show all artists that match the given item.
+     * @param context the context to use to start the activity.
+     * @param item the item to filter by. If it's an {@link Album} then only artists with songs
+     * on that album are shown. If it's a {@link Genre} then only artists with songs in that
+     * genre are shown.
+     */
+    public static void show(Context context, @Nullable Item item) {
         final Intent intent = new Intent(context, ArtistListActivity.class);
-        intent.putExtra(FILTER_ITEMS, items);
+
+        if (item != null) {
+            intent.putExtra(FILTER_KEY, item);
+        }
+
         context.startActivity(intent);
     }
 }

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -89,7 +90,11 @@ public class AlbumListActivity extends BaseListActivity<Album>
 
     private Year year;
 
-    private static final String FILTER_ITEMS = AlbumListActivity.class.getName();
+    /** Name to use for intent data for the item sort order. */
+    private static final String SORT_ORDER_KEY = AlbumViewDialog.AlbumsSortOrder.class.getName();
+
+    /** Name to use for intent data for filtering the view. */
+    private static final String FILTER_KEY = AlbumListActivity.class.getName();
 
     @Override
     public Year getYear() {
@@ -128,8 +133,8 @@ public class AlbumListActivity extends BaseListActivity<Album>
         BaseMenuFragment.add(this, ViewMenuItemFragment.class);
 
         Intent intent = getIntent();
-        Parcelable[] items = intent.getParcelableArrayExtra(FILTER_ITEMS);
-        for(Parcelable item: items) {
+        Parcelable item = intent.getParcelableExtra(FILTER_KEY);
+        if (item != null) {
             if (item instanceof Artist) {
                 artist = (Artist) item;
             } else if (item instanceof Year) {
@@ -143,7 +148,7 @@ public class AlbumListActivity extends BaseListActivity<Album>
             }
         }
 
-        String sortOrderString = intent.getStringExtra(AlbumViewDialog.AlbumsSortOrder.class.getName());
+        String sortOrderString = intent.getStringExtra(SORT_ORDER_KEY);
         if (sortOrderString != null) {
             sortOrder = AlbumViewDialog.AlbumsSortOrder.valueOf(sortOrderString);
         }
@@ -186,8 +191,8 @@ public class AlbumListActivity extends BaseListActivity<Album>
             }
         }
 
-        service.albums(this, start, sortOrder.name().replace("__", ""), getSearchString(),
-                artist, getYear(), getGenre(), song);
+        service.albums(this, start, sortOrder.name().replace("__", ""), searchString,
+                artist, year, genre, song);
     }
 
     @Override
@@ -246,16 +251,50 @@ public class AlbumListActivity extends BaseListActivity<Album>
         new AlbumViewDialog().show(getSupportFragmentManager(), "AlbumOrderDialog");
     }
 
-    public static void show(Context context, Item... items) {
-        show(context, null, items);
+    /**
+     * Start the activity to show all albums, using the default sort order.
+     *
+     * @param context the context to use to start the activity.
+     */
+    public static void show(Context context) {
+        show(context, null, null);
     }
 
-    public static void show(Context context, AlbumViewDialog.AlbumsSortOrder sortOrder, Item... items) {
+    /**
+     * Start the activity to show all albums, using the given sort order.
+     *
+     * @param context the context to use to start the activity.
+     * @param sortOrder ordering for items.
+     */
+    public static void show(Context context, AlbumViewDialog.AlbumsSortOrder sortOrder) {
+        show(context, sortOrder, null);
+    }
+
+    /**
+     * Start the activity to show all albums that match the given item.
+     *
+     * @param context the context to use to start the activity.
+     * @param item the item to filter by. If it's an {@link Artist} then albums with songs by
+     * by that artist are shown. If it's a {@link Year} then albums from that year are shown. If
+     * it's a {@link Genre} then albums with that genre are shown. If it's a {@link Song} then
+     * albums that contain that song are shown.
+     */
+    public static void show(Context context, Item item) {
+        show(context, null, item);
+    }
+
+    public static void show(Context context, @Nullable AlbumViewDialog.AlbumsSortOrder sortOrder,
+                            @Nullable Item item) {
         final Intent intent = new Intent(context, AlbumListActivity.class);
+
         if (sortOrder != null) {
-            intent.putExtra(AlbumViewDialog.AlbumsSortOrder.class.getName(), sortOrder.name());
+            intent.putExtra(SORT_ORDER_KEY, sortOrder.name());
         }
-        intent.putExtra(FILTER_ITEMS, items);
+
+        if (item != null) {
+            intent.putExtra(FILTER_KEY, item);
+        }
+
         context.startActivity(intent);
     }
 }
