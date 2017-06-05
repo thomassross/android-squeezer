@@ -1,0 +1,11 @@
+<vector android:height="48dp" android:viewportHeight="24.0"
+    android:viewportWidth="24.0" android:width="48dp" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shuffle icon -->
+    <path android:fillColor="?attr/button_color_dim" android:pathData="M10.59,9.17L5.41,4 4,5.41l5.17,5.17 1.42,-1.41zM14.5,4l2.04,2.04L4,18.59 5.41,20 17.96,7.46 20,9.5L20,4h-5.5zM14.83,13.41l-1.41,1.41 3.13,3.13L14.5,20L20,20v-5.5l-2.04,2.04 -3.13,-3.13z"/>
+
+    <!-- Album icon, scaled by 66%, moved 8px down, 4px right. -->
+    <path
+      android:fillColor="?attr/button_color_active"
+    android:pathData="m 16,9.4 c -3.6432,0 -6.6,2.9568 -6.6,6.6 0,3.6432 2.9568,6.6 6.6,6.6 3.6432,0 6.6,-2.9568 6.6,-6.6 0,-3.6432 -2.9568,-6.6 -6.6,-6.6 z m 0,9.57 c -1.6434,0 -2.97,-1.3266 -2.97,-2.97 0,-1.6434 1.3266,-2.97 2.97,-2.97 1.6434,0 2.97,1.3266 2.97,2.97 0,1.6434 -1.3266,2.97 -2.97,2.97 z m 0,-3.63 c -0.363,0 -0.66,0.297 -0.66,0.66 0,0.363 0.297,0.66 0.66,0.66 0.363,0 0.66,-0.297 0.66,-0.66 0,-0.363 -0.297,-0.66 -0.66,-0.66 z"/>
+</vector>

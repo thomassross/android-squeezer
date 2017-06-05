@@ -19,6 +19,7 @@
 <RelativeLayout
     android:id="@+id/layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="128dp">
@@ -81,7 +82,7 @@
         android:background="@drawable/notification_button"
         android:maxWidth="72dp"
         android:minWidth="72dp"
-        android:src="@drawable/ic_action_previous"/>
+        app:srcCompat="@drawable/ic_action_previous"/>
 
     <ImageButton
         android:id="@+id/pause"
@@ -105,5 +106,5 @@
         android:background="@drawable/notification_button"
         android:maxWidth="72dp"
         android:minWidth="72dp"
-        android:src="@drawable/ic_action_next"/>
+        app:srcCompat="@drawable/ic_action_next"/>
 </RelativeLayout>

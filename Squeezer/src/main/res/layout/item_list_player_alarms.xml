@@ -19,6 +19,7 @@
 <!-- Show all the songs on a given album. -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -98,8 +99,8 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_centerHorizontal="true"
-                android:background="?main_button_background"
-                android:src="@drawable/ic_add" />
+                android:background="?item_background"
+                app:srcCompat="@drawable/ic_add_alarm" />
 
             <ImageButton
                 android:id="@+id/settings"
@@ -109,7 +110,8 @@
                 android:layout_centerVertical="true"
                 android:background="?item_background"
                 android:visibility="invisible"
-                android:src="?ic_alarm_settings" />
+                tools:visibility="visible"
+                app:srcCompat="?ic_alarm_settings" />
         </RelativeLayout>
     </LinearLayout>
 

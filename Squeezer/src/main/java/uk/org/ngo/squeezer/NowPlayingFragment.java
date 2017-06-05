@@ -281,7 +281,6 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             seekBar = (SeekBar) v.findViewById(R.id.seekbar);
 
             btnFavorite = (FavoriteButton) v.findViewById(R.id.favorite);
-            btnFavorite.setThemeId(mActivity.getThemeId());
             btnFavorite.setFavoriteListener(new FavoriteButton.FavoriteListener() {
                 @Override
                 public void addFavorite() {

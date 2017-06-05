@@ -16,7 +16,9 @@
  limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -90,7 +92,7 @@
         android:layout_alignParentRight="true"
         android:background="?item_background"
         android:padding="8dp"
-        android:src="?ic_delete" />
+        app:srcCompat="?ic_delete" />
 
     <LinearLayout
         android:id="@+id/dow"

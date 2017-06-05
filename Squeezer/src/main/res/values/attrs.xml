@@ -22,6 +22,15 @@
     </declare-styleable>
 
     <declare-styleable name="ic_action">
+        <!-- Normal color for a button -->
+        <attr name="button_color" format="color"/>
+        <!-- Normal color for a button if it's active -->
+        <attr name="button_color_active" format="color"/>
+        <!-- Normal color for a button if it's dimmed -->
+        <attr name="button_color_dim" format="color"/>
+        <!-- Normal color for a button on the action bar -->
+        <attr name="button_color_action_bar" format="color"/>
+
         <attr name="ic_action_av_connect" format="reference"/>
         <attr name="ic_action_av_next" format="reference"/>
         <attr name="ic_action_av_pause" format="reference"/>

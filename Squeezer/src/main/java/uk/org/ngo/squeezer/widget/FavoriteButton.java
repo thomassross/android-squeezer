@@ -1,7 +1,6 @@
 package uk.org.ngo.squeezer.widget;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
@@ -16,8 +15,6 @@ import android.widget.RelativeLayout;
 import java.lang.annotation.Retention;
 
 import uk.org.ngo.squeezer.R;
-import uk.org.ngo.squeezer.framework.BaseActivity;
-import uk.org.ngo.squeezer.util.ThemeManager;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -26,9 +23,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * the state is unknown then shows an indeterminate progress bar instead.
  * <p>
  * To use, instantiate the view as normal. Once you have called {@link #findViewById(int)} to
- * find it, you should call {@link #setThemeId(int)} to set the current theme, and
- * {@link #setFavoriteListener(FavoriteListener)} to provide callbacks that will be called when
- * the user requests that the item be added or removed from favorites.
+ * find it, you should call {@link #setFavoriteListener(FavoriteListener)} to provide callbacks
+ * that will be called when the user requests that the item be added or removed from favorites.
  * <p>
  * It is the hosting activity/fragment's responsibility to actually do this, typically by
  * using {@link uk.org.ngo.squeezer.service.ISqueezeService#favoritesAdd(Uri, String)} and
@@ -74,9 +70,6 @@ public class FavoriteButton extends RelativeLayout {
     /** Indeterminate progress shown while waiting for the server to respond with favorite state. */
     private ProgressBar progressBar;
 
-    /** Application's theme ID. */
-    private int themeId;
-
     /** Listener for callbacks. */
     private FavoriteListener favoriteListener;
 
@@ -95,15 +88,6 @@ public class FavoriteButton extends RelativeLayout {
         });
 
         progressBar = (ProgressBar) view.findViewById(R.id.progressFavorite);
-    }
-
-    /**
-     * Record the current theme ID. See {@link BaseActivity#getThemeId()}
-     *
-     * @param themeId ID to record.
-     */
-    public void setThemeId(int themeId) {
-        this.themeId = themeId;
     }
 
     public void setFavoriteListener(FavoriteListener favoriteListener) {
@@ -162,13 +146,6 @@ public class FavoriteButton extends RelativeLayout {
         imageButton.setImageResource(state == FAVORITE_TRUE ?
                 R.drawable.ic_action_favorites_remove :
                 R.drawable.ic_action_favorites_add);
-
-        if (themeId == ThemeManager.Theme.DARK.mThemeId) {
-            imageButton.setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
-            imageButton.setAlpha(204);
-        } else {
-            imageButton.setAlpha(121);
-        }
 
         imageButton.setVisibility(VISIBLE);
         progressBar.setVisibility(GONE);

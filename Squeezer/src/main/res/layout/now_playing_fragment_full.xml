@@ -86,7 +86,7 @@
         android:background="@drawable/list_selector_holo_dark"
         android:contentDescription="@string/app_name"
         android:minWidth="48dp"
-        android:src="@drawable/dropdown_ic_arrow_normal_holo_dark"/>
+        app:srcCompat="@drawable/ic_more_vert"/>
 
     <TextView
         android:id="@+id/currenttime"
