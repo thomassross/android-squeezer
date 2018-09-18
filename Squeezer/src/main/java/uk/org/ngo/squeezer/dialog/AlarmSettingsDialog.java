@@ -161,6 +161,8 @@ public class AlarmSettingsDialog extends DialogFragment {
 
         Builder builder = new Builder(getActivity());
         builder.setView(view);
+        // XXX: NPE in mHostActivity.getPlayer().getName(), where getPlayer() returns null. Triggered
+        // after device rotation -- presumably the re-created activity hasn't received the event yet.
         builder.setTitle(getResources().getString(R.string.alarms_settings_dialog_title, mHostActivity.getPlayer().getName()));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
