@@ -680,7 +680,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
 
         Song song = playerState.getCurrentSong();
 
-        if (song != null) {
+        if (song != null && song.getId() != null) {
             trackText.setText(song.getName());
 
             // If remote and number of tracks in playlist is not 1, it's spotify
@@ -734,7 +734,7 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
             }
         }
 
-        if (song == null || !song.hasArtwork()) {
+        if (song == null || song.getId() == null || !song.hasArtwork()) {
             if (mFullHeightLayout) {
                 albumArt.setImageResource(song != null && song.isRemote()
                         ? R.drawable.icon_iradio_noart_fullscreen
