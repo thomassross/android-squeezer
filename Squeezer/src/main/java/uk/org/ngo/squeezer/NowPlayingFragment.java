@@ -706,6 +706,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 // Query to find out if this song is a favourite.
                 clearFavoriteInfo();
                 if (serverCanFavorite) {
+                    if (btnFavorite != null) {
+                        btnFavorite.setVisibility(View.VISIBLE);
+                    }
                     mService.favoritesExists(song.getUrl());
                 }
 
@@ -723,6 +726,9 @@ public class NowPlayingFragment extends Fragment implements View.OnCreateContext
                 artistText.setText("");
                 albumText.setText("");
                 btnContextMenu.setVisibility(View.GONE);
+                if (btnFavorite != null) {
+                    btnFavorite.setVisibility(View.GONE);
+                }
             } else {
                 artistAlbumText.setText("");
             }

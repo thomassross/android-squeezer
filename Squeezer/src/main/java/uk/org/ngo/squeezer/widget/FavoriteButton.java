@@ -150,4 +150,15 @@ public class FavoriteButton extends RelativeLayout {
         imageButton.setVisibility(VISIBLE);
         progressBar.setVisibility(GONE);
     }
+
+    @Override
+    public void setVisibility(final int visibility) {
+        if (visibility == View.VISIBLE) {
+            updateFavoriteIcon();
+            return;
+        }
+
+        imageButton.setVisibility(visibility);
+        progressBar.setVisibility(visibility);
+    }
 }

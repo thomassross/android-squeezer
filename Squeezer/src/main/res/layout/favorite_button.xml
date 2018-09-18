@@ -9,9 +9,11 @@
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/buttonFavorite"
         style="@style/SqueezerWidget.MediaButton.Favorite"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_action_favorites_add"/>
 
     <ProgressBar
         android:id="@+id/progressFavorite"
+        android:visibility="gone"
         style="@style/SqueezerWidget.MediaButton.Favorite"/>
 </RelativeLayout>
