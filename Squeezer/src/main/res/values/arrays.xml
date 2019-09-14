@@ -31,6 +31,7 @@
         <item>@string/home_item_radios</item>
         <item>@string/home_item_favorites</item>
         <item>@string/home_item_my_apps</item>
+        <item>@string/home_item_remote_libraries</item>
     </string-array>
 
     <string-array name="randomplay_items">

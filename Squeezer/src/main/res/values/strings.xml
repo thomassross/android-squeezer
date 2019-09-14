@@ -435,6 +435,7 @@ of your accepting any such warranty or additional liability.&lt;/p&gt;</string>
     <string name="home_item_radios">Internet Radio</string>
     <string name="home_item_favorites">Favorites</string>
     <string name="home_item_my_apps">My Apps</string>
+    <string name="home_item_remote_libraries">Remote Libraries</string>
 
     <string name="randomplay_item_song_mix">Song mix</string>
     <string name="randomplay_item_album_mix">Album mix</string>
